@@ -59,10 +59,13 @@ public:
     MobileObject(SDL_Renderer* renderer, Point& center, ModelCollection& model_collection, Matter matter, ObjectMap& object_map);
     
     void new_horizontal_acceleration(Direction direction);
-    void new_horizontal_reduced_acceleration(Direction Direction);
     void new_velocity();
+
+    int get_faced_side_as_int();
     
     virtual void run_scheduled();
+
+    ~MobileObject() = default;
 
 };
 

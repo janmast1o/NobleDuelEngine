@@ -3,24 +3,24 @@
 #ifndef SPRITE_CPP
 #define SPRITE_CPP
 
-Sprite::Sprite(SDL_Renderer* renderer, Point& center, ModelCollection& model_collection, Matter matter, ObjectMap& object_map, int health) :
-    Creature(renderer, center, model_collection, matter, object_map, health) {}
+Sprite::Sprite(SDL_Renderer* renderer, Point& center, ModelCollection& model_collection, Matter matter, ObjectMap& object_map, int health, ItemManager& item_manager) :
+    Creature(renderer, center, model_collection, matter, object_map, health, item_manager) {}
 
 
-Sprite::Sprite(SDL_Renderer* renderer, Point& center, ModelCollection& model_collection, Matter matter, ObjectMap& object_map, int health, std::vector<Uint8> bufferables) :
-    Creature(renderer, center, model_collection, matter, object_map, health) {
+Sprite::Sprite(SDL_Renderer* renderer, Point& center, ModelCollection& model_collection, Matter matter, ObjectMap& object_map, int health, ItemManager& item_manager, std::vector<Uint8> bufferables) :
+    Creature(renderer, center, model_collection, matter, object_map, health, item_manager) {
         for (Uint8 bufferable : bufferables) {
             buffered_inputs_[bufferable] = 0;
         }
     }
 
 
-Sprite::Sprite(SDL_Renderer* renderer, Point& center, ModelCollection& model_collection, Matter matter, ObjectMap& object_map, int health, float jumping_v) :
-    Creature(renderer, center, model_collection, matter, object_map, health, jumping_v) {}
+Sprite::Sprite(SDL_Renderer* renderer, Point& center, ModelCollection& model_collection, Matter matter, ObjectMap& object_map, int health, float jumping_v, ItemManager& item_manager) :
+    Creature(renderer, center, model_collection, matter, object_map, health, jumping_v, item_manager) {}
 
 
-Sprite::Sprite(SDL_Renderer* renderer, Point& center, ModelCollection& model_collection, Matter matter, ObjectMap& object_map, int health, float jumping_v, std::vector<Uint8> bufferables) :
-    Creature(renderer, center, model_collection, matter, object_map, health, jumping_v) {
+Sprite::Sprite(SDL_Renderer* renderer, Point& center, ModelCollection& model_collection, Matter matter, ObjectMap& object_map, int health, float jumping_v, ItemManager& item_manager, std::vector<Uint8> bufferables) :
+    Creature(renderer, center, model_collection, matter, object_map, health, jumping_v, item_manager) {
         for (Uint8 bufferable : bufferables) {
             buffered_inputs_[bufferable] = 0;
         }

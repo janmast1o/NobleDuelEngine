@@ -14,6 +14,7 @@ constexpr float MAXIMUM_GENTLE_SLOPE_COEFFICIENT = 0.8;
 constexpr int MAX_BUFFER_TIME = 10;
 
 constexpr int ITEM_LOADOUT_SIZE = 3;
+constexpr float MAX_ITEM_GRAB_RANGE = 25.0;
 
 constexpr int FPS = 60;
 

@@ -459,6 +459,8 @@ void mainLoop(SDL_Renderer* renderer) {
     // object_map.add_to_map(eighth_hl);
     // all_objects.push_back(&eighth_hl);
 
+    ItemManager item_manager;
+
     Point windowCenter = Point(WINDOW_WIDTH/2, 0); // sprite
     SDL_Texture* texture = IMG_LoadTexture(renderer, "resources/first_sprite_tbg_2.png");
     int sprite_width_, sprite_height_;
@@ -475,18 +477,20 @@ void mainLoop(SDL_Renderer* renderer) {
     ModelCycle testModelCycle(modelList); 
     std::unordered_map<State, ModelCycle&> cycleMap = {{IDLE, testModelCycle}};
     ModelCollection testModelCollection(cycleMap);
-    Sprite testPlayer(renderer, windowCenter, testModelCollection, SOLID, object_map, {SDL_SCANCODE_SPACE});
+    Sprite testPlayer(renderer, windowCenter, testModelCollection, SOLID, object_map, {SDL_SCANCODE_SPACE}, 100, item_manager);
     object_map.add_to_map(testPlayer);
     all_objects.push_back(&testPlayer);
 
     SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 255);
     
     std::thread framerate_cap_thread;
+    int mouse_x, mouse_y;
     bool running = true;
     SDL_Event event;
 
     while (running) {
         framerate_cap_thread = std::thread([](){std::this_thread::sleep_for(std::chrono::milliseconds((int) 1000.0/FPS));});
+        SDL_GetMouseState(&mouse_x, &mouse_y);
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
                 running = false;
@@ -508,7 +512,8 @@ void mainLoop(SDL_Renderer* renderer) {
             }
         }
         SDL_RenderClear(renderer);
-        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);     
+        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);  
+        testPlayer.update_targeted_point(Point((float) mouse_x, (float) -mouse_y));   
         testPlayer.read_inputs();   
         testPlayer.run_scheduled();      
         for (Object* o : all_objects) {

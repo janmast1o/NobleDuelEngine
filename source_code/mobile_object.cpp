@@ -13,6 +13,11 @@ MobileObject::MobileObject(SDL_Renderer* renderer, Point& center, ModelCollectio
     }
 
 
+int MobileObject::get_faced_side_as_int() {
+    return 1; // temporary
+}    
+
+
 void MobileObject::zero_velocity() {
     velocity_.v_up = 0.0;
     velocity_.v_down = 0.0;
@@ -452,4 +457,6 @@ ScheduledInstruction MobileObject::get_previosuly_scheduled() {
     return previously_scheduled_;
 }
 
+
 #endif
+

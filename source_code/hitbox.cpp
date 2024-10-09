@@ -6,7 +6,7 @@
 
 
 Hitbox::Hitbox(Point& center, std::vector<Point>& relative_hull) : 
-    center_(center), relative_hull_(relative_hull) {
+    center_(center), relative_hull_(relative_hull), active_(false) {
         float leftmost_x = relative_hull_[support(relative_hull_, Point(-1,0))].x;
         float rightmost_x = relative_hull_[support(relative_hull_, Point(1,0))].x;
         float upmost_y = relative_hull_[support(relative_hull_, Point(0,1))].y;
@@ -20,6 +20,16 @@ Hitbox::Hitbox(Point& center, std::vector<Point>& relative_hull) :
         relative_right_top_ = find_right_top(relative_hull_);
         relative_bottom_ = find_bottom(relative_hull_);
     }
+
+
+void Hitbox::make_active() {
+    active_ = true;
+}
+
+
+void Hitbox::make_inactive() {
+    active_ = false;
+}
 
 
 bool Hitbox::collides_with(const Hitbox& other_hitbox) const {

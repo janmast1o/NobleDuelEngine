@@ -26,6 +26,11 @@ Object::Object(SDL_Renderer* renderer, Point& center, ModelCollection& model_col
     }
 
 
+bool Object::is_alive() {
+    return (health_ > 0);
+}
+
+
 int Object::get_health() {
     return health_;
 }
@@ -34,6 +39,14 @@ int Object::get_health() {
 void Object::set_health(int new_health) {
     if (new_health >= 0) {
         health_ = new_health;
+    }
+}
+
+
+void Object::reduce_health(int reduce_amount) {
+    health_ -= reduce_amount;
+    if (health_ < 0) {
+        health_ = 0;
     }
 }
 
@@ -80,6 +93,11 @@ State Object::get_state() {
 
 Matter Object::get_matter() {
     return matter_;
+}
+
+
+void Object::set_matter(Matter matter) {
+    matter_ = matter;
 }
 
 

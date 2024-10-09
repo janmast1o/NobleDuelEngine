@@ -1,30 +1,50 @@
-#ifndef CREATURE_CPP
-#define CREATURE_CPP
+#ifndef CREATURE_AND_ITEM_CPP
+#define CREATURE_AND_ITEM_CPP
 
-#include "creature.h"
-#include "item.cpp"
+#include "creature_and_item.h"
 
-Creature::Creature(SDL_Renderer* renderer, Point& center, ModelCollection& model_collection, Matter matter, ObjectMap& object_map, int health, ItemManager& item_manager) :
-    MobileObject(renderer, center, model_collection, matter, object_map), item_manager_(item_manager) {
-        item_loadout_.reserve(ITEM_LOADOUT_SIZE);
-        for (int i=0; i<ITEM_LOADOUT_SIZE; i++) {
-            item_loadout_[i] = nullptr;
-        }
-        item_loadout_index_ = 0;
-        jumping_v_ = 345.0;
-        set_health(health);
-        regular_horizontal_acc_ = 215.0;
-        sprint_horizontal_acc_ = 285.0;
-        slow_walk_horizontal_acc_ = 40.0;
-        regular_max_horizontal_v_ = 225.0;
-        sprint_max_horizontal_v_ = 275.0;
-        slow_walk_max_horizontal_v_ = 45.0;
-        item_manager_ = item_manager;
+Item::Item(SDL_Renderer* renderer, Point& center, ModelCollection& model_collection, Matter matter, ObjectMap& object_map, int uses, int cooldown) : 
+    MobileObject(renderer, center, model_collection, matter, object_map), uses_(uses), cooldown_(cooldown) {
+        set_matter(LIGHT_PHANTOM);
+        owner_ = nullptr;
+        dependency_state_ = INDEPENDENT;
+        last_use_= {0, 0};
     }
 
 
-Creature::Creature(SDL_Renderer* renderer, Point& center, ModelCollection& model_collection, Matter matter, ObjectMap& object_map, int health, float jumping_v, ItemManager& item_manager) :
-    MobileObject(renderer, center, model_collection, matter, object_map), item_manager_(item_manager) {
+Item::Item(SDL_Renderer* renderer, Point& center, ModelCollection& model_collection, Matter matter, ObjectMap& object_map, DependencyState dependency_state, GameElement::Creature* owner, int uses, int cooldown) : 
+    MobileObject(renderer, center, model_collection, matter, object_map), dependency_state_(dependency_state), owner_(owner), uses_(uses), cooldown_(cooldown) {
+        set_matter(LIGHT_PHANTOM);
+        last_use_ = {0, 0};
+    }
+
+
+void Item::change_owner(GameElement::Creature* new_owner) {
+    owner_ = new_owner;
+    dependency_state_ = DEPENDENT;
+    set_matter(PHANTOM);
+}        
+
+
+void Item::discard_owner() {
+    owner_ = nullptr;
+    dependency_state_ = INDEPENDENT;
+    set_matter(LIGHT_PHANTOM);
+}
+
+
+bool Item::available_for_use() {
+    return ((current_session_global_game_clock.cycles-last_use_.first)*FPS + (current_session_global_game_clock.frames_in_cycle-last_use_.second) >= cooldown_);
+}
+
+
+void Item::update_last_use() {
+    last_use_.first = current_session_global_game_clock.cycles;
+    last_use_.second = current_session_global_game_clock.frames_in_cycle;
+}
+
+Creature::Creature(SDL_Renderer* renderer, Point& center, ModelCollection& model_collection, Matter matter, ObjectMap& object_map, int health) :
+    MobileObject(renderer, center, model_collection, matter, object_map) {
         item_loadout_.reserve(ITEM_LOADOUT_SIZE);
         for (int i=0; i<ITEM_LOADOUT_SIZE; i++) {
             item_loadout_[i] = nullptr;
@@ -38,7 +58,24 @@ Creature::Creature(SDL_Renderer* renderer, Point& center, ModelCollection& model
         regular_max_horizontal_v_ = 225.0;
         sprint_max_horizontal_v_ = 275.0;
         slow_walk_max_horizontal_v_ = 45.0;
-        item_manager_ = item_manager;
+    }
+
+
+Creature::Creature(SDL_Renderer* renderer, Point& center, ModelCollection& model_collection, Matter matter, ObjectMap& object_map, int health, float jumping_v) :
+    MobileObject(renderer, center, model_collection, matter, object_map) {
+        item_loadout_.reserve(ITEM_LOADOUT_SIZE);
+        for (int i=0; i<ITEM_LOADOUT_SIZE; i++) {
+            item_loadout_[i] = nullptr;
+        }
+        item_loadout_index_ = 0;
+        jumping_v_ = jumping_v;
+        set_health(health);
+        regular_horizontal_acc_ = 215.0;
+        sprint_horizontal_acc_ = 285.0;
+        slow_walk_horizontal_acc_ = 40.0;
+        regular_max_horizontal_v_ = 225.0;
+        sprint_max_horizontal_v_ = 275.0;
+        slow_walk_max_horizontal_v_ = 45.0;
     }
 
 
@@ -60,11 +97,6 @@ void Creature::adjust_acc_and_max_v_for_slow_walk() {
 }
 
 
-void Creature::update_targeted_point(Point new_targeted_point) {
-    targeted_point_ = new_targeted_point;
-}
-
-
 void Creature::handle_jump() {
     previously_scheduled_ = HANDLE_JUMP;
     velocity_.v_up = jumping_v_;
@@ -76,20 +108,6 @@ void Creature::handle_drop_item() {
     if (item_loadout_[item_loadout_index_] != nullptr) {
         item_loadout_[item_loadout_index_]->discard_owner();
         item_loadout_[item_loadout_index_] = nullptr;
-    }
-}
-
-
-void Creature::handle_pick_up_item() {
-    std::vector<Item*> items_nearby = item_manager_.get_nearby_items(get_center());
-    for (Item* p : items_nearby) {
-        if (std::sqrt(std::pow(p->get_center().x-get_center().x, 2)+std::pow(p->get_center().y-get_center().y, 2)) <= MAX_ITEM_GRAB_RANGE) {
-            if (item_loadout_[item_loadout_index_] != nullptr) {
-                item_loadout_[item_loadout_index_]->discard_owner();
-                p->change_owner(this);
-                break;
-            }
-        }
     }
 }
 
@@ -151,5 +169,6 @@ void Creature::run_scheduled() {
         }
     }
 }
+
 
 #endif

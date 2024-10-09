@@ -17,6 +17,7 @@ class Hitbox {
 private:
 
     Point& center_;
+    bool active_;
     std::vector<Point> relative_hull_;
     Rectangle relative_rectangle_;
     std::vector<Point> relative_gentle_slope_top_;
@@ -28,6 +29,8 @@ private:
 public:
 
     Hitbox(Point& center, std::vector<Point>& relative_hull);
+    void make_active();
+    void make_inactive();
     Point& get_center();
     std::vector<Point> get_current_hull();
     bool collides_with(const Hitbox& other_hitbox) const ;

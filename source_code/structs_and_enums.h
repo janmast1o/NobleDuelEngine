@@ -98,7 +98,8 @@ enum DamageRecState {
 
 enum Matter {
     SOLID,
-    PHANTOM
+    PHANTOM,
+    LIGHT_PHANTOM
 };
 
 #endif
@@ -184,7 +185,10 @@ enum ScheduledInstruction {
     HANDLE_AIRBORNE,
     HANDLE_FREEFALL,
     HANDLE_SLIDE_DOWN,
-    HANDLE_JUMP
+    HANDLE_JUMP,
+    HANDLE_ATTACK,
+    HANDLE_CHARGE_ATTACK,
+    HANDLE_REVERT_TO_DEFAULT
 };
 
 #endif
