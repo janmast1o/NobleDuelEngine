@@ -11,7 +11,14 @@ void ItemManager::add_item(Item& item) {
 }
 
 
-std::vector<Item*> ItemManager::get_nearby_items(Point& point) {
+void ItemManager::manage_scheduled_running() {
+    for (Item* i : item_set_) {
+        i->run_scheduled();
+    }
+}
+
+
+std::vector<Item*> ItemManager::get_nearby_items(Point& point) { // change it
     return item_set_;
 } 
 

@@ -63,6 +63,12 @@ void ThrustingWeapon::handle_attack() {
         hit_registry_.clear();
         set_scheduled(HANDLE_REVERT_TO_DEFAULT);
     }
+    if (int_faced_side_during_start_up_ == -1) {
+        set_new_state(IN_USE_LEFT);
+    }
+    else {
+        set_new_state(IN_USE_RIGHT);
+    }
 }
 
 
@@ -74,10 +80,16 @@ void ThrustingWeapon::handle_revert_to_default() {
         clear_scheduled();
     }
     else {
-        Point s_vector((int_faced_side_during_start_up_)*(extend_range_ /(float) attack_frame_duration_), 0);
+        Point s_vector(-(int_faced_side_during_start_up_)*(extend_range_ /(float) attack_frame_duration_), 0);
         translate_object_by_vector(s_vector);
         current_frame_counter_--;
         set_scheduled(HANDLE_REVERT_TO_DEFAULT);
+    }
+    if (int_faced_side_during_start_up_ == -1) {
+        set_new_state(OWNED_LEFT);
+    }
+    else {
+        set_new_state(OWNED_RIGHT);
     }
 
 }
@@ -106,12 +118,18 @@ void ThrustingWeapon::handle_charge_attack() {
             set_scheduled(HANDLE_REVERT_TO_DEFAULT);
         }
         else {
-            set_scheduled(HANDLE_ATTACK);
+            set_scheduled(HANDLE_CHARGE_ATTACK);
         }
     }
     else {
         hit_registry_.clear();
         set_scheduled(HANDLE_REVERT_TO_DEFAULT);
+    }
+    if (int_faced_side_during_start_up_ == -1) {
+        set_new_state(IN_CHARGED_USE_LEFT);
+    }
+    else {
+        set_new_state(IN_CHARGED_USE_RIGHT);
     }
 }
 

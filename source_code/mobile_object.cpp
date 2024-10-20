@@ -14,7 +14,12 @@ MobileObject::MobileObject(SDL_Renderer* renderer, Point& center, ModelCollectio
 
 
 int MobileObject::get_faced_side_as_int() {
-    return 1; // temporary
+    if (is_left_facing(get_state())) {
+        return -1;
+    }
+    else {
+        return 1;
+    }
 }    
 
 
@@ -124,7 +129,7 @@ void MobileObject::handle_moving_horizontally() {
     bool ground_underneath_found = false;
     float alpha = -INFINITY;
     for (Object* p : potentially_colliding_objects) {
-        if (p != this) {
+        if (p != this && collideable_with(*p)) {
             if (collides_with_after_vector_translation(*p,s_vector)) {
                 if (is_directly_above_after_vector_translation(*p,s_vector)) {
                     ground_underneath_found = true;
@@ -185,7 +190,12 @@ void MobileObject::handle_moving_horizontally() {
     else {
         clear_scheduled();
     }
-    
+    if (s_vector.x < 0) {
+        set_new_state(MOVING_LEFT);
+    }
+    else if (s_vector.x > 0) {
+        set_new_state(MOVING_RIGHT);
+    } 
 }
 
 
@@ -201,7 +211,7 @@ void MobileObject::handle_slide_down() {
     bool collision_detected = false;
     bool ground_underneath_found = false;
     for (Object* p : potentially_colliding_objects) {
-        if (p != this) {    
+        if (p != this && collideable_with(*p)) {    
             if (collides_with_after_vector_translation(*p,s_vector)) {
                 if (is_directly_above_after_vector_translation(*p,s_vector)) {
                     ground_underneath_found = true;
@@ -245,6 +255,12 @@ void MobileObject::handle_slide_down() {
         slope_incline_directly_underneath_ = 0.0;
         clear_scheduled();
     }
+    if (s_vector.x < 0) {
+        set_new_state(SLIDE_DOWN_LEFT);
+    }
+    else if (s_vector.x > 0) {
+        set_new_state(SLIDE_DOWN_RIGHT);
+    }
 }
 
 
@@ -263,7 +279,7 @@ void MobileObject::handle_airborne() {
     bool ground_underneath_found = false;
     float alpha = -INFINITY;
     for (Object* p : potentially_colliding_objects) {
-        if (p != this) {
+        if (p != this && collideable_with(*p)) {
             if (collides_with_after_vector_translation(*p,s_vector)) {
                 collision_detected = true;
                 if (!ground_underneath_found && collides_with_top(*p,s_vector)) {
@@ -318,6 +334,12 @@ void MobileObject::handle_airborne() {
             set_scheduled(HANDLE_FREEFALL);
         }
     }
+    if (s_vector.x < 0) {
+        set_new_state(AIRBORNE_LEFT);
+    }
+    else if (s_vector.x > 0) {
+        set_new_state(AIRBORNE_RIGHT);
+    }
 }
 
 
@@ -334,7 +356,7 @@ void MobileObject::handle_freefall() {
     bool ground_underneath_found = false;
     float alpha = -INFINITY;
     for (Object* p : objects_potentially_underneath) {
-        if (p != this) {
+        if (p != this && collideable_with(*p)) {
             if (collides_with_top(*p,s_vector)) {
                 ground_underneath_found = true;
                 alpha = find_slope_coefficient_directly_below(*p,s_vector);
@@ -374,6 +396,7 @@ void MobileObject::handle_freefall() {
         translate_object_by_vector(s_vector);
         set_scheduled(HANDLE_FREEFALL);
     }
+    determine_new_state_for_freefall();
 }
 
 
@@ -434,6 +457,16 @@ void MobileObject::run_scheduled() {
         else if (scheduled_ == HANDLE_SLIDE_DOWN) {
             handle_slide_down();
         }
+    }
+}
+
+
+void MobileObject::determine_new_state_for_freefall() {
+    if (is_left_facing(get_previous_state())) {
+        set_new_state(FREEFALL_LEFT);
+    }
+    else {
+        set_new_state(FREEFALL_RIGHT);
     }
 }
 

@@ -33,13 +33,12 @@ protected:
     void handle_airborne();
     void handle_freefall();
     void handle_stop();
-    void handle_moving_horizontally();
+    virtual void handle_moving_horizontally();
     void handle_slide_down();
 
     void remove_ground_reaction_acceleration();
     void add_ground_reaction_acceleration();
 
-    bool is_anything_scheduled();
     ScheduledInstruction get_previosuly_scheduled();
     void set_scheduled(ScheduledInstruction new_scheduled);
     void clear_scheduled();
@@ -52,7 +51,9 @@ protected:
     bool collides_with_top(Object& other_object, const Point& translation_vector);
     float is_collision_after_vector_translation_caused_by_gentle_slope(Object& other_object, const Point& translation_vector); 
     float find_slope_coefficient_directly_below(Object& other_object, const Point& translation_vector);
-    void translate_object_by_vector(const Point& translation_vector);
+    virtual void translate_object_by_vector(const Point& translation_vector);
+
+    void determine_new_state_for_freefall();
 
 public:
 
@@ -63,6 +64,7 @@ public:
 
     int get_faced_side_as_int();
     
+    bool is_anything_scheduled();
     virtual void run_scheduled();
 
     ~MobileObject() = default;

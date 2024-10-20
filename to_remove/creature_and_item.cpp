@@ -112,7 +112,7 @@ void Creature::handle_drop_item() {
 }
 
 
-void Creature::handle_equip_next_item() {
+void Creature::handle_switch_to_next_item() {
     item_loadout_index_ = (item_loadout_index_+1)%ITEM_LOADOUT_SIZE;
 }
 

@@ -294,3 +294,41 @@ bool GJK(std::vector<Point>& S, std::vector<Point>& R) {
 
 #endif
 
+#ifndef IS_LEFT_FACING
+#define IS_LEFT_FACING
+
+bool is_left_facing(State state) {
+    if (state == IDLE_LEFT || 
+        state == MOVING_LEFT ||
+        state == AIRBORNE_LEFT ||
+        state == FREEFALL_LEFT || 
+        state == QUICKLY_M_LEFT ||
+        state == QUICKLY_M_LEFT) {
+            return true;
+        }
+    else {
+        return false;
+    }    
+}
+
+#endif
+
+#ifndef IS_RIGHT_FACING
+#define IS_RIGHT_FACING
+
+bool is_right_facing(State state) {
+    if (state == IDLE_RIGHT || 
+        state == MOVING_RIGHT ||
+        state == AIRBORNE_RIGHT ||
+        state == FREEFALL_RIGHT || 
+        state == QUICKLY_M_RIGHT ||
+        state == QUICKLY_M_RIGHT) {
+            return true;
+        }
+    else {
+        return false;
+    }    
+}
+
+#endif
+

@@ -11,7 +11,8 @@ constexpr float SLIGHT_RAISE = 2.5;
 constexpr float SLIGHT_HORIZONTAL_PUSH = 2.5;
 constexpr float MAXIMUM_GENTLE_SLOPE_COEFFICIENT = 0.8; 
 
-constexpr int MAX_BUFFER_TIME = 10;
+constexpr int MAX_BUFFER_TIME = 40;
+constexpr int UNIVERSAL_CHARGE_UP_TIME = 75;
 
 constexpr int ITEM_LOADOUT_SIZE = 3;
 constexpr float MAX_ITEM_GRAB_RANGE = 25.0;

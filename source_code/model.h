@@ -12,6 +12,7 @@ class Model {
 
 private:
 
+    // Object& owner_; 
     Point& center_;
     SDL_Texture* texture_;
     Hitbox& hitbox_;

@@ -12,11 +12,9 @@ Model& ModelCycle::get_current_model() {
 }
 
 void ModelCycle::move_to_next_model() {
+    it_++;
     if (it_ == model_list_.end()) {
         it_ = model_list_.begin();
-    }
-    else {
-        it_++;
     }
 }
 

@@ -53,7 +53,7 @@ protected:
     void handle_jump();
     void handle_pick_up_item();
     void handle_drop_item();
-    void handle_equip_next_item();
+    void handle_switch_to_next_item();
     void adjust_acc_and_max_v_for_regular();
     void adjust_acc_and_max_v_for_sprint();
     void adjust_acc_and_max_v_for_slow_walk();

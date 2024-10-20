@@ -5,6 +5,7 @@
 #include <thread>
 #include <chrono>
 #include "source_code/sprite.cpp"
+#include "source_code/thrusting_weapon.cpp"
 
 void mainLoop(SDL_Renderer* renderer);
 
@@ -40,6 +41,7 @@ int runGame() {
 
 void mainLoop(SDL_Renderer* renderer) {
     ObjectMap object_map;
+    ItemManager item_manager;
     std::vector<Object*> all_objects;
 
     SDL_Texture* base_ground_texture = IMG_LoadTexture(renderer, "resources/base_ground_.png");
@@ -263,203 +265,78 @@ void mainLoop(SDL_Renderer* renderer) {
     object_map.add_to_map(lower_central_floating);
     all_objects.push_back(&lower_central_floating);
 
+    Point rapier_starting_point(WINDOW_WIDTH/2, 0);
+    SDL_Texture* golden_icon_texture = IMG_LoadTexture(renderer, "resources/golden_icon.png");
+    SDL_Texture* left_facing_rapier_texture = IMG_LoadTexture(renderer, "resources/nobles_rapier_left.png");
+    SDL_Texture* right_facing_rapier_texture = IMG_LoadTexture(renderer, "resources/nobles_rapier_right.png");
+    SDL_Texture* charged_left_facing_rapier_texture = IMG_LoadTexture(renderer, "resources/charge_nobles_rapier_left.png");
+    SDL_Texture* charged_right_facing_rapier_texture = IMG_LoadTexture(renderer, "resources/charge_nobles_rapier_right.png");
 
-    // SDL_Texture* right_small_floating_texture = IMG_LoadTexture(renderer, "resources/short_and_very_short_ground_.png");
-    // int right_small_floating_width_int, right_small_floating_height_int;
-    // SDL_QueryTexture(right_small_floating_texture, NULL, NULL, &right_small_floating_width_int, &right_small_floating_height_int);
-    // float right_small_floating_width = (float) right_small_floating_width_int;
-    // float right_small_floating_height = (float) right_small_floating_height_int;
-    // Point right_small_floating_center(1100, -310);
-    // std::vector<Point> right_small_floating_relative_hull = {Point(-right_small_floating_width/2, -right_small_floating_height/2), Point(right_small_floating_width/2, -right_small_floating_height/2), Point(right_small_floating_width/2, right_small_floating_height/2), Point(-right_small_floating_width/2, right_small_floating_height/2)};
-    // Hitbox right_small_floating_hitbox(right_small_floating_center, right_small_floating_relative_hull);
-    // Model right_small_floating_model(right_small_floating_center, right_small_floating_texture, right_small_floating_hitbox, right_small_floating_width, right_small_floating_height);
-    // std::list<Model> right_small_floating_model_cycle_list = {right_small_floating_model};
-    // ModelCycle right_small_floating_model_cycle(right_small_floating_model_cycle_list);
-    // std::unordered_map<State, ModelCycle&> right_small_floating_hashmap = {{IDLE, right_small_floating_model_cycle}};
-    // ModelCollection right_small_floating_model_collection(right_small_floating_hashmap);
-    // Object right_small_floating(renderer, right_small_floating_center, right_small_floating_model_collection, SOLID);
-    // object_map.add_to_map(right_small_floating);
-    // all_objects.push_back(&right_small_floating);
+    int golden_icon_width_, golden_icon_height_;
+    SDL_QueryTexture(golden_icon_texture, NULL, NULL, &golden_icon_width_, &golden_icon_height_);
+    float golden_icon_width = (float) golden_icon_width_;
+    float golden_icon_height = (float) golden_icon_height_;
+    std::vector<Point> golden_icon_relative_hull = {Point(-golden_icon_width/2, -golden_icon_height/2), 
+                                                        Point(golden_icon_width/2, -golden_icon_height/2), 
+                                                        Point(golden_icon_width/2, golden_icon_height/2),
+                                                        Point(-golden_icon_width/2, golden_icon_height/2)};
+    Hitbox golden_icon_hitbox(rapier_starting_point, golden_icon_relative_hull);
+    Model golden_icon_model(rapier_starting_point, golden_icon_texture, golden_icon_hitbox, golden_icon_width, golden_icon_height); 
+    std::list<Model> golden_icon_model_list = {golden_icon_model};
+    ModelCycle golden_icon_model_cycle(golden_icon_model_list);
 
-    // SDL_Texture* minature_left_floating_texture = IMG_LoadTexture(renderer, "resources/short_and_very_short_ground_.png");
-    // int minature_left_floating_width_int, minature_left_floating_height_int;
-    // SDL_QueryTexture(minature_left_floating_texture, NULL, NULL, &minature_left_floating_width_int, &minature_left_floating_height_int);
-    // float minature_left_floating_width = (float) minature_left_floating_width_int;
-    // float minature_left_floating_height = (float) minature_left_floating_height_int;
-    // Point minature_left_floating_center(175, -520);
-    // std::vector<Point> minature_left_floating_relative_hull = {Point(-minature_left_floating_width/2, -minature_left_floating_height/2), Point(minature_left_floating_width/2, -minature_left_floating_height/2), Point(minature_left_floating_width/2, minature_left_floating_height/2), Point(-minature_left_floating_width/2, minature_left_floating_height/2)};
-    // Hitbox minature_left_floating_hitbox(minature_left_floating_center, minature_left_floating_relative_hull);
-    // Model minature_left_floating_model(minature_left_floating_center, minature_left_floating_texture, minature_left_floating_hitbox, minature_left_floating_width, minature_left_floating_height);
-    // std::list<Model> minature_left_floating_model_cycle_list = {minature_left_floating_model};
-    // ModelCycle minature_left_floating_model_cycle(minature_left_floating_model_cycle_list);
-    // std::unordered_map<State, ModelCycle&> minature_left_floating_hashmap = {{IDLE, minature_left_floating_model_cycle}};
-    // ModelCollection minature_left_floating_model_collection(minature_left_floating_hashmap);
-    // Object minature_left_floating(renderer, minature_left_floating_center, minature_left_floating_model_collection, SOLID);
-    // object_map.add_to_map(minature_left_floating);
-    // all_objects.push_back(&minature_left_floating);
+    int left_facing_rapier_width_, left_facing_rapier_height_;
+    SDL_QueryTexture(left_facing_rapier_texture, NULL, NULL, &left_facing_rapier_width_, &left_facing_rapier_height_);
+    float left_facing_rapier_width = (float) left_facing_rapier_width_;
+    float left_facing_rapier_height = (float) left_facing_rapier_height_;
+    std::vector<Point> left_facing_rapier_relative_hull = {Point(-52,-2), Point(-49,-5), Point(-43,-5), Point(-43,1), Point(-49,1)};
+    Hitbox left_facing_rapier_hitbox(rapier_starting_point, left_facing_rapier_relative_hull);
+    Model left_facing_rapier_model(rapier_starting_point, left_facing_rapier_texture, left_facing_rapier_hitbox, left_facing_rapier_width, left_facing_rapier_height, Point(-63,17));
+    std::list<Model> left_facing_rapier_model_list = {left_facing_rapier_model};
+    ModelCycle left_facing_rapier_model_cycle(left_facing_rapier_model_list);
 
-    // SDL_Texture* minature_right_floating_texture = IMG_LoadTexture(renderer, "resources/short_and_very_short_ground_.png");
-    // int minature_right_floating_width_int, minature_right_floating_height_int;
-    // SDL_QueryTexture(minature_right_floating_texture, NULL, NULL, &minature_right_floating_width_int, &minature_right_floating_height_int);
-    // float minature_right_floating_width = (float) minature_right_floating_width_int;
-    // float minature_right_floating_height = (float) minature_right_floating_height_int;
-    // Point minature_right_floating_center(1250, -520);
-    // std::vector<Point> minature_right_floating_relative_hull = {Point(-minature_right_floating_width/2, -minature_right_floating_height/2), Point(minature_right_floating_width/2, -minature_right_floating_height/2), Point(minature_right_floating_width/2, minature_right_floating_height/2), Point(-minature_right_floating_width/2, minature_right_floating_height/2)};
-    // Hitbox minature_right_floating_hitbox(minature_right_floating_center, minature_right_floating_relative_hull);
-    // Model minature_right_floating_model(minature_right_floating_center, minature_right_floating_texture, minature_right_floating_hitbox, minature_right_floating_width, minature_right_floating_height);
-    // std::list<Model> minature_right_floating_model_cycle_list = {minature_right_floating_model};
-    // ModelCycle minature_right_floating_model_cycle(minature_right_floating_model_cycle_list);
-    // std::unordered_map<State, ModelCycle&> minature_right_floating_hashmap = {{IDLE, minature_right_floating_model_cycle}};
-    // ModelCollection minature_right_floating_model_collection(minature_right_floating_hashmap);
-    // Object minature_right_floating(renderer, minature_right_floating_center, minature_right_floating_model_collection, SOLID);
-    // object_map.add_to_map(minature_right_floating);
-    // all_objects.push_back(&minature_right_floating);
+    int right_facing_rapier_width_, right_facing_rapier_height_;
+    SDL_QueryTexture(right_facing_rapier_texture, NULL, NULL, &right_facing_rapier_width_, &right_facing_rapier_height_);
+    float right_facing_rapier_width = (float) right_facing_rapier_width_;
+    float right_facing_rapier_height = (float) right_facing_rapier_height_;
+    std::vector<Point> right_facing_rapier_relative_hull = {Point(49,1), Point(43,1), Point(43,-5), Point(49,-5), Point(52,-2)};
+    Hitbox right_facing_rapier_hitbox(rapier_starting_point, right_facing_rapier_relative_hull);
+    Model right_facing_rapier_model(rapier_starting_point, right_facing_rapier_texture, right_facing_rapier_hitbox, right_facing_rapier_width, right_facing_rapier_height, Point(-17,17));
+    std::list<Model> right_facing_rapier_model_list = {right_facing_rapier_model};
+    ModelCycle right_facing_rapier_model_cycle(right_facing_rapier_model_list);
 
-    // SDL_Texture* first_hl_texture = IMG_LoadTexture(renderer, "resources/vertical_long_block.png"); // first vertical long
-    // int first_hl_width_, first_hl_height_;
-    // SDL_QueryTexture(first_hl_texture, NULL, NULL, &first_hl_width_, &first_hl_height_);
-    // float first_hl_width = (float) first_hl_width_;
-    // float first_hl_height = (float) first_hl_height_;
-    // Point first_hl_center(first_hl_width*(0.6), -first_hl_height*(0.6));
-    // std::vector<Point> first_hl_hitbox_relative_hull = {Point(-first_hl_width/2,-first_hl_height/2), Point(first_hl_width/2,-first_hl_height/2), Point(first_hl_width/2,first_hl_height/2), Point(-first_hl_width/2,first_hl_height/2)};
-    // Hitbox first_hl_hitbox(first_hl_center, first_hl_hitbox_relative_hull);
-    // Model first_hl_model(first_hl_center, first_hl_texture, first_hl_hitbox, first_hl_width, first_hl_height);
-    // std::list<Model> first_hl_list;
-    // first_hl_list.push_back(first_hl_model);
-    // ModelCycle first_hl_model_cycle(first_hl_list);
-    // std::unordered_map<State, ModelCycle&> first_hl_map = {{IDLE, first_hl_model_cycle}};
-    // ModelCollection first_hl_model_collection(first_hl_map);
-    // Object first_hl(renderer, first_hl_center, first_hl_model_collection, SOLID);
-    // object_map.add_to_map(first_hl);
-    // all_objects.push_back(&first_hl);
+    int charged_left_facing_rapier_width_, charged_left_facing_rapier_height_;
+    SDL_QueryTexture(charged_left_facing_rapier_texture, NULL, NULL, &charged_left_facing_rapier_width_, &charged_left_facing_rapier_height_);
+    float charged_left_facing_rapier_width = (float) charged_left_facing_rapier_width_;
+    float charged_left_facing_rapier_height = (float) charged_left_facing_rapier_height_;
+    std::vector<Point> charged_left_facing_rapier_relative_hull = {Point(-52,-2), Point(-49,-5), Point(-43,-5), Point(-43,1), Point(-49,1)};
+    Hitbox charged_left_facing_rapier_hitbox(rapier_starting_point, charged_left_facing_rapier_relative_hull);
+    Model charged_left_facing_rapier_model(rapier_starting_point, charged_left_facing_rapier_texture, charged_left_facing_rapier_hitbox, charged_left_facing_rapier_width, charged_left_facing_rapier_height, Point(-63,17));
+    std::list<Model> charged_left_facing_rapier_model_list = {charged_left_facing_rapier_model};
+    ModelCycle charged_left_facing_rapier_model_cycle(charged_left_facing_rapier_model_list);
 
-    // SDL_Texture* second_hl_texture = IMG_LoadTexture(renderer, "resources/horizontal_short_block.png"); // second horizontal short 
-    // int second_hl_width_, second_hl_height_;
-    // SDL_QueryTexture(second_hl_texture, NULL, NULL, &second_hl_width_, &second_hl_height_);
-    // float second_hl_width = (float) second_hl_width_;
-    // float second_hl_height = (float) second_hl_height_;
-    // Point second_hl_center(300, -200);
-    // std::vector<Point> second_hl_hitbox_relative_hull = {Point(-second_hl_width/2,-second_hl_height/2), Point(second_hl_width/2,-second_hl_height/2), Point(second_hl_width/2,second_hl_height/2), Point(-second_hl_width/2,second_hl_height/2)};
-    // Hitbox second_hl_hitbox(second_hl_center, second_hl_hitbox_relative_hull);
-    // Model second_hl_model(second_hl_center, second_hl_texture, second_hl_hitbox, second_hl_width, second_hl_height);
-    // std::list<Model> second_hl_list;
-    // second_hl_list.push_back(second_hl_model);
-    // ModelCycle second_hl_model_cycle(second_hl_list);
-    // std::unordered_map<State, ModelCycle&> second_hl_map = {{IDLE, second_hl_model_cycle}};
-    // ModelCollection second_hl_model_collection(second_hl_map);
-    // Object second_hl(renderer, second_hl_center, second_hl_model_collection, SOLID);
-    // object_map.add_to_map(second_hl);
-    // all_objects.push_back(&second_hl);
+    int charged_right_facing_rapier_width_, charged_right_facing_rapier_height_;
+    SDL_QueryTexture(charged_right_facing_rapier_texture, NULL, NULL, &charged_right_facing_rapier_width_, &charged_right_facing_rapier_height_);
+    float charged_right_facing_rapier_width = (float) charged_right_facing_rapier_width_;
+    float charged_right_facing_rapier_height = (float) charged_right_facing_rapier_height_;
+    std::vector<Point> charged_right_facing_rapier_relative_hull = {Point(49,1), Point(43,1), Point(43,-5), Point(49,-5), Point(52,-2)};
+    Hitbox charged_right_facing_rapier_hitbox(rapier_starting_point, charged_right_facing_rapier_relative_hull);
+    Model charged_right_facing_rapier_model(rapier_starting_point, charged_right_facing_rapier_texture, charged_right_facing_rapier_hitbox, charged_right_facing_rapier_width, charged_right_facing_rapier_height, Point(-17,17));
+    std::list<Model> charged_right_facing_rapier_model_list = {charged_right_facing_rapier_model};
+    ModelCycle charged_right_facing_rapier_model_cycle(charged_right_facing_rapier_model_list);
 
-    // SDL_Texture* third_hl_texture = IMG_LoadTexture(renderer, "resources/horizontal_long_block.png"); // third horizontal long 
-    // int third_hl_width_, third_hl_height_;
-    // SDL_QueryTexture(third_hl_texture, NULL, NULL, &third_hl_width_, &third_hl_height_);
-    // float third_hl_width = (float) third_hl_width_;
-    // float third_hl_height = (float) third_hl_height_;
-    // Point third_hl_center(460, -680);
-    // std::vector<Point> third_hl_hitbox_relative_hull = {Point(-third_hl_width/2,-third_hl_height/2), Point(third_hl_width/2,-third_hl_height/2), Point(third_hl_width/2,third_hl_height/2), Point(-third_hl_width/2,third_hl_height/2)};
-    // Hitbox third_hl_hitbox(third_hl_center, third_hl_hitbox_relative_hull);
-    // Model third_hl_model(third_hl_center, third_hl_texture, third_hl_hitbox, third_hl_width, third_hl_height);
-    // std::list<Model> third_hl_list;
-    // third_hl_list.push_back(third_hl_model);
-    // ModelCycle third_hl_model_cycle(third_hl_list);
-    // std::unordered_map<State, ModelCycle&> third_hl_map = {{IDLE, third_hl_model_cycle}};
-    // ModelCollection third_hl_model_collection(third_hl_map);
-    // Object third_hl(renderer, third_hl_center, third_hl_model_collection, SOLID);
-    // object_map.add_to_map(third_hl);
-    // all_objects.push_back(&third_hl);
-
-    // SDL_Texture* fourth_hl_texture = IMG_LoadTexture(renderer, "resources/horizontal_long_block.png"); // fourth horizontal long 
-    // int fourth_hl_width_, fourth_hl_height_;
-    // SDL_QueryTexture(fourth_hl_texture, NULL, NULL, &fourth_hl_width_, &fourth_hl_height_);
-    // float fourth_hl_width = (float) fourth_hl_width_;
-    // float fourth_hl_height = (float) fourth_hl_height_;
-    // Point fourth_hl_center(560, -680);
-    // std::vector<Point> fourth_hl_hitbox_relative_hull = {Point(-fourth_hl_width/2,-fourth_hl_height/2), Point(fourth_hl_width/2,-fourth_hl_height/2), Point(fourth_hl_width/2,fourth_hl_height/2), Point(-fourth_hl_width/2,fourth_hl_height/2)};
-    // Hitbox fourth_hl_hitbox(fourth_hl_center, fourth_hl_hitbox_relative_hull);
-    // Model fourth_hl_model(fourth_hl_center, fourth_hl_texture, fourth_hl_hitbox, fourth_hl_width, fourth_hl_height);
-    // std::list<Model> fourth_hl_list;
-    // fourth_hl_list.push_back(fourth_hl_model);
-    // ModelCycle fourth_hl_model_cycle(fourth_hl_list);
-    // std::unordered_map<State, ModelCycle&> fourth_hl_map = {{IDLE, fourth_hl_model_cycle}};
-    // ModelCollection fourth_hl_model_collection(fourth_hl_map);
-    // Object fourth_hl(renderer, fourth_hl_center, fourth_hl_model_collection, SOLID);
-    // object_map.add_to_map(fourth_hl);
-    // all_objects.push_back(&fourth_hl);
-
-    // SDL_Texture* fifth_hl_texture = IMG_LoadTexture(renderer, "resources/horizontal_long_block.png"); // fifth horizontal long 
-    // int fifth_hl_width_, fifth_hl_height_;
-    // SDL_QueryTexture(fifth_hl_texture, NULL, NULL, &fifth_hl_width_, &fifth_hl_height_);
-    // float fifth_hl_width = (float) fifth_hl_width_;
-    // float fifth_hl_height = (float) fifth_hl_height_;
-    // Point fifth_hl_center(680, -680);
-    // std::vector<Point> fifth_hl_hitbox_relative_hull = {Point(-fifth_hl_width/2,-fifth_hl_height/2), Point(fifth_hl_width/2,-fifth_hl_height/2), Point(fifth_hl_width/2,fifth_hl_height/2), Point(-fifth_hl_width/2,fifth_hl_height/2)};
-    // Hitbox fifth_hl_hitbox(fifth_hl_center, fifth_hl_hitbox_relative_hull);
-    // Model fifth_hl_model(fifth_hl_center, fifth_hl_texture, fifth_hl_hitbox, fifth_hl_width, fifth_hl_height);
-    // std::list<Model> fifth_hl_list;
-    // fifth_hl_list.push_back(fifth_hl_model);
-    // ModelCycle fifth_hl_model_cycle(fifth_hl_list);
-    // std::unordered_map<State, ModelCycle&> fifth_hl_map = {{IDLE, fifth_hl_model_cycle}};
-    // ModelCollection fifth_hl_model_collection(fifth_hl_map);
-    // Object fifth_hl(renderer, fifth_hl_center, fifth_hl_model_collection, SOLID);
-    // object_map.add_to_map(fifth_hl);
-    // all_objects.push_back(&fifth_hl);
-
-    // SDL_Texture* sixth_hl_texture = IMG_LoadTexture(renderer, "resources/horizontal_long_block.png"); // sixth horizontal long 
-    // int sixth_hl_width_, sixth_hl_height_;
-    // SDL_QueryTexture(sixth_hl_texture, NULL, NULL, &sixth_hl_width_, &sixth_hl_height_);
-    // float sixth_hl_width = (float) sixth_hl_width_;
-    // float sixth_hl_height = (float) sixth_hl_height_;
-    // Point sixth_hl_center(760, -680);
-    // std::vector<Point> sixth_hl_hitbox_relative_hull = {Point(-sixth_hl_width/2,-sixth_hl_height/2), Point(sixth_hl_width/2,-sixth_hl_height/2), Point(sixth_hl_width/2,sixth_hl_height/2), Point(-sixth_hl_width/2,sixth_hl_height/2)};
-    // Hitbox sixth_hl_hitbox(sixth_hl_center, sixth_hl_hitbox_relative_hull);
-    // Model sixth_hl_model(sixth_hl_center, sixth_hl_texture, sixth_hl_hitbox, sixth_hl_width, sixth_hl_height);
-    // std::list<Model> sixth_hl_list;
-    // sixth_hl_list.push_back(sixth_hl_model);
-    // ModelCycle sixth_hl_model_cycle(sixth_hl_list);
-    // std::unordered_map<State, ModelCycle&> sixth_hl_map = {{IDLE, sixth_hl_model_cycle}};
-    // ModelCollection sixth_hl_model_collection(sixth_hl_map);
-    // Object sixth_hl(renderer, sixth_hl_center, sixth_hl_model_collection, SOLID);
-    // object_map.add_to_map(sixth_hl);
-    // all_objects.push_back(&sixth_hl);
-
-    // SDL_Texture* seventh_hl_texture = IMG_LoadTexture(renderer, "resources/vertical_short_block.png"); // seventh horizontal long 
-    // int seventh_hl_width_, seventh_hl_height_;
-    // SDL_QueryTexture(seventh_hl_texture, NULL, NULL, &seventh_hl_width_, &seventh_hl_height_);
-    // float seventh_hl_width = (float) seventh_hl_width_;
-    // float seventh_hl_height = (float) seventh_hl_height_;
-    // Point seventh_hl_center(880, -680);
-    // std::vector<Point> seventh_hl_hitbox_relative_hull = {Point(-seventh_hl_width/2,-seventh_hl_height/2), Point(seventh_hl_width/2,-seventh_hl_height/2), Point(seventh_hl_width/2,seventh_hl_height/2), Point(-seventh_hl_width/2,seventh_hl_height/2)};
-    // Hitbox seventh_hl_hitbox(seventh_hl_center, seventh_hl_hitbox_relative_hull);
-    // Model seventh_hl_model(seventh_hl_center, seventh_hl_texture, seventh_hl_hitbox, seventh_hl_width, seventh_hl_height);
-    // std::list<Model> seventh_hl_list;
-    // seventh_hl_list.push_back(seventh_hl_model);
-    // ModelCycle seventh_hl_model_cycle(seventh_hl_list);
-    // std::unordered_map<State, ModelCycle&> seventh_hl_map = {{IDLE, seventh_hl_model_cycle}};
-    // ModelCollection seventh_hl_model_collection(seventh_hl_map);
-    // Object seventh_hl(renderer, seventh_hl_center, seventh_hl_model_collection, SOLID);
-    // object_map.add_to_map(seventh_hl);
-    // all_objects.push_back(&seventh_hl);
-
-    // SDL_Texture* eighth_hl_texture = IMG_LoadTexture(renderer, "resources/horizontal_short_block.png"); // eighth horizontal long 
-    // int eighth_hl_width_, eighth_hl_height_;
-    // SDL_QueryTexture(eighth_hl_texture, NULL, NULL, &eighth_hl_width_, &eighth_hl_height_);
-    // float eighth_hl_width = (float) eighth_hl_width_;
-    // float eighth_hl_height = (float) eighth_hl_height_;
-    // Point eighth_hl_center(260, -740);
-    // std::vector<Point> eighth_hl_hitbox_relative_hull = {Point(-eighth_hl_width/2,-eighth_hl_height/2), Point(eighth_hl_width/2,-eighth_hl_height/2), Point(eighth_hl_width/2,eighth_hl_height/2), Point(-eighth_hl_width/2,eighth_hl_height/2)};
-    // Hitbox eighth_hl_hitbox(eighth_hl_center, eighth_hl_hitbox_relative_hull);
-    // Model eighth_hl_model(eighth_hl_center, eighth_hl_texture, eighth_hl_hitbox, eighth_hl_width, eighth_hl_height);
-    // std::list<Model> eighth_hl_list;
-    // eighth_hl_list.push_back(eighth_hl_model);
-    // ModelCycle eighth_hl_model_cycle(eighth_hl_list);
-    // std::unordered_map<State, ModelCycle&> eighth_hl_map = {{IDLE, eighth_hl_model_cycle}};
-    // ModelCollection eighth_hl_model_collection(eighth_hl_map);
-    // Object eighth_hl(renderer, eighth_hl_center, eighth_hl_model_collection, SOLID);
-    // object_map.add_to_map(eighth_hl);
-    // all_objects.push_back(&eighth_hl);
-
-    ItemManager item_manager;
+    std::unordered_map<State, ModelCycle&> rapier_model_map = {{IDLE, golden_icon_model_cycle},
+                                                                   {OWNED_LEFT, left_facing_rapier_model_cycle},
+                                                                   {IN_USE_LEFT, left_facing_rapier_model_cycle},
+                                                                   {IN_CHARGED_USE_LEFT, charged_left_facing_rapier_model_cycle},
+                                                                   {OWNED_RIGHT, right_facing_rapier_model_cycle},
+                                                                   {IN_USE_RIGHT, right_facing_rapier_model_cycle},
+                                                                   {IN_CHARGED_USE_RIGHT, charged_right_facing_rapier_model_cycle}};
+    ModelCollection rapier_model_collection(rapier_model_map);
+    ThrustingWeapon rapier(renderer, rapier_starting_point, rapier_model_collection, LIGHT_PHANTOM, object_map, 1000, 1.5, 25, 35, 20, 10, 10);
+    object_map.add_to_map(rapier);
+    all_objects.push_back(&rapier);   
+    item_manager.add_item(rapier);                                                        
 
     Point windowCenter = Point(WINDOW_WIDTH/2, 0); // sprite
     SDL_Texture* texture = IMG_LoadTexture(renderer, "resources/first_sprite_tbg_2.png");
@@ -495,42 +372,41 @@ void mainLoop(SDL_Renderer* renderer) {
             if (event.type == SDL_QUIT) {
                 running = false;
             }
-            if (event.type == SDL_MOUSEBUTTONDOWN) {
-                if (event.button.button == SDL_BUTTON_LEFT) {
-                    std::cout << "Mouse at: " << event.button.x << ", " << event.button.y << std::endl;
-                }
-                else if (event.button.button == SDL_BUTTON_RIGHT) {
-                    for (int i=0; i<all_objects.size(); i++) {
-                        std::vector<Point> current_hull = all_objects[i]->get_current_hitbox().get_current_hull();
-                        std::cout << "Object number " << i << " hull:" << std::endl;
-                        for (int j=0; j<current_hull.size(); j++) {
-                            std::cout << current_hull[j] << ", ";
-                        }
-                        std::cout << std::endl;
-                    }
-                }
-            }
         }
         SDL_RenderClear(renderer);
         SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);  
         testPlayer.update_targeted_point(Point((float) mouse_x, (float) -mouse_y));   
+        item_manager.manage_scheduled_running();
         testPlayer.read_inputs();   
-        testPlayer.run_scheduled();      
+        testPlayer.run_scheduled();   
         for (Object* o : all_objects) {
             (*o).redraw_object();
         }
         SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 255);
         framerate_cap_thread.join();
+        current_session_global_game_clock.increment();
         SDL_RenderPresent(renderer);
     }
 
-    // SDL_DestroyTexture(texture);
-    // SDL_DestroyTexture(first_hl_texture);
-    // SDL_DestroyTexture(second_hl_texture);
-    // SDL_DestroyTexture(third_hl_texture);
-    // SDL_DestroyTexture(fourth_hl_texture);
-    // SDL_DestroyTexture(fifth_hl_texture);
-    // SDL_DestroyTexture(sixth_hl_texture);
+    
+    SDL_DestroyTexture(base_ground_texture);
+    SDL_DestroyTexture(upper_central_floating_texture);
+    SDL_DestroyTexture(lower_central_floating_texture);
+    SDL_DestroyTexture(left_medium_floating_texture);
+    SDL_DestroyTexture(right_medium_floating_texture);
+    SDL_DestroyTexture(left_small_floating_texture);
+    SDL_DestroyTexture(right_small_floating_texture);
+    SDL_DestroyTexture(left_branch_texture);
+    SDL_DestroyTexture(right_branch_texture);
+    SDL_DestroyTexture(left_triangular_stone_texture);
+    SDL_DestroyTexture(right_triangular_stone_texture);
+    SDL_DestroyTexture(left_stone_texture);
+    SDL_DestroyTexture(right_stone_texture);
+    SDL_DestroyTexture(golden_icon_texture);
+    SDL_DestroyTexture(left_facing_rapier_texture);
+    SDL_DestroyTexture(right_facing_rapier_texture);
+    SDL_DestroyTexture(charged_left_facing_rapier_texture);
+    SDL_DestroyTexture(charged_right_facing_rapier_texture);
     SDL_DestroyRenderer(renderer);
     SDL_Quit();
 }

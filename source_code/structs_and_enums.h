@@ -62,23 +62,29 @@ enum Direction {
 
 enum State {
     DEAD,
-    IDLE,
-    IDLE_FLEFT,
-    IDLE_FRIGHT,
-    W_LEFT,
-    W_RIGHT, // standing on ground
-    DASH_LEFT,
-    DASH_RIGHT, // dashing
-    IDLE_C_FLEFT,
-    IDLE_C_FRIGHT,
-    CW_LEFT,
-    CW_RIGHT, // crouching on ground
-    AIRBORNE, // airborne
-    FLOATING_FLEFT, 
-    FLOATING_FRIGHT,
-    SWIM_LEFT,
-    SWIM_RIGHT, // swimming
-    CLIMBING_LADDER // ladder climbing
+    IDLE, 
+    IDLE_LEFT,
+    IDLE_RIGHT,
+    MOVING_LEFT,
+    MOVING_RIGHT,
+    QUICKLY_M_LEFT,
+    QUICKLY_M_RIGHT,
+    SLOWLY_M_LEFT,
+    SLOWLY_M_RIGHT,
+    AIRBORNE_LEFT,
+    AIRBORNE_RIGHT,
+    FREEFALL_LEFT,
+    FREEFALL_RIGHT,
+    SLIDE_DOWN_LEFT,
+    SLIDE_DOWN_RIGHT, // for cretures
+
+    OWNED,
+    OWNED_LEFT,
+    OWNED_RIGHT,
+    IN_USE_LEFT,
+    IN_USE_RIGHT,
+    IN_CHARGED_USE_LEFT,
+    IN_CHARGED_USE_RIGHT // for items
 };
 
 #endif
@@ -186,6 +192,9 @@ enum ScheduledInstruction {
     HANDLE_FREEFALL,
     HANDLE_SLIDE_DOWN,
     HANDLE_JUMP,
+    HANDLE_PICK_UP_ITEM,
+    HANDLE_DROP_ITEM,
+    HANDLE_SWITCH_TO_NEXT_ITEM,
     HANDLE_ATTACK,
     HANDLE_CHARGE_ATTACK,
     HANDLE_REVERT_TO_DEFAULT
