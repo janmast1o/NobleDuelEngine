@@ -1,60 +1,51 @@
 #include "model_collection.h"
+#include "model_cycle.h"
 
-#ifndef MODEL_COLLECTION_CPP
-#define MODEL_COLLECTION_CPP
-
-ModelCollection::ModelCollection(std::unordered_map<State, ModelCycle&>& cycles_for_states) :
-    cycles_for_states_(cycles_for_states) {}
+ModelCollection::ModelCollection() {;}
 
 
-Model* ModelCollection::get_current_model_for_state (State state) {
-    auto x = cycles_for_states_.find(state);
-    if (x != cycles_for_states_.end()) {
-        return &(x->second.get_current_model());
-    }
-    else {
-        x = cycles_for_states_.find(IDLE);
-        if (x != cycles_for_states_.end()) {
-            return &(x->second.get_current_model());
-        }
-        else {
+Model* ModelCollection::getCurrentModelPtrForState(State state) {
+    auto x = cyclesForStates_.find(state);
+    if (x != cyclesForStates_.end()) {
+        return &(x->second.getCurrentModel());
+    } else {
+        x = cyclesForStates_.find(IDLE);
+        if (x != cyclesForStates_.end()) {
+            return &(x->second.getCurrentModel());
+        } else {
             return nullptr;
         }
     }
 }
 
-Model* ModelCollection::get_new_model_for_state (State state) {
-    auto x = cycles_for_states_.find(state);
-    if (x != cycles_for_states_.end()) {
-        return &(x->second.move_and_get_model());
-    }
-    else {
-        x = cycles_for_states_.find(IDLE);
-        if (x != cycles_for_states_.end()) {
-            return &(x->second.move_and_get_model());
-        }
-        else {
+
+Model* ModelCollection::getNewModelPtrForState(State state) {
+    auto x = cyclesForStates_.find(state);
+    if (x != cyclesForStates_.end()) {
+        return &(x->second.moveAndGetModel());
+    } else {
+        x = cyclesForStates_.find(IDLE);
+        if (x != cyclesForStates_.end()) {
+            return &(x->second.moveAndGetModel());
+        } else {
             return nullptr;
         }
     }
 }
 
-Model* ModelCollection::get_first_model_for_state (State state) {
-    auto x = cycles_for_states_.find(state);
-    if (x != cycles_for_states_.end()) {
-        x->second.reset_model_cycle();
-        return get_current_model_for_state(state);
-    }
-    else {
-        x = cycles_for_states_.find(IDLE);
-        if (x != cycles_for_states_.end()) {
-            x->second.reset_model_cycle();
-            return get_first_model_for_state(IDLE);
-        }
-        else {
+
+Model* ModelCollection::getFirstModelPtrForState(State state) {
+    auto x = cyclesForStates_.find(state);
+    if (x != cyclesForStates_.end()) {
+        x->second.reset();
+        return getCurrentModelPtrForState(state);
+    } else {
+        x = cyclesForStates_.find(IDLE);
+        if (x != cyclesForStates_.end()) {
+            x->second.reset();
+            return getCurrentModelPtrForState(state);
+        } else {
             return nullptr;
         }
     }
 }
-
-#endif

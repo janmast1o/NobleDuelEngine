@@ -1,13 +1,27 @@
-#include "structs_and_enums.h"
-#include "compilation_time_constants.h"
+#include <SDL2/SDL.h>
 #include <vector>
-#include <cmath>
+#include "structs_and_enums.cpp"
+#include "constants.h"
 
-#ifndef DOT
-#define DOT
+#ifndef DRAW_POINT
+#define DRAW_POINT
 
-float dot (const Point& a, const Point& b) {
-    return a.x*b.x + a.y*b.y;
+void drawPoint(SDL_Renderer* renderer, float x, float y, float pointSize) {
+    SDL_FRect pointRect;
+    pointRect.x = x - pointSize/2;
+    pointRect.y = y - pointSize/2;
+    pointRect.w = pointSize;
+    pointRect.h = pointSize;
+    SDL_RenderFillRectF(renderer, &pointRect);
+}
+
+#endif
+
+#ifndef DOT_PRODUCT
+#define DOT_PRODUCT
+
+float dotProduct(const Point& A, const Point& B) {
+    return A.x*B.x + A.y*B.y;
 }
 
 #endif
@@ -15,9 +29,9 @@ float dot (const Point& a, const Point& b) {
 #ifndef TRIPLE_PROD
 #define TRIPLE_PROD
 
-Point triple_prod (const Point& a, const Point&b, const Point& c) {
-    float alpha = a.x*b.y - a.y*b.x;
-    return Point(-alpha*c.y, alpha*c.x);
+Point tripleProduct(const Point& A, const Point& B, const Point& C) {
+    float alpha = A.x*B.y - A.y*B.x;
+    return Point(-alpha*C.y, alpha*C.x);
 }
 
 #endif
@@ -25,19 +39,22 @@ Point triple_prod (const Point& a, const Point&b, const Point& c) {
 #ifndef SUPPORT
 #define SUPPORT
 
-int support(const std::vector<Point>& S, const Point& vector_d) {
+int support(const std::vector<Point>& S, const Point& d) {
     int sought = 0;
-    float sought_dot_product = dot(S[0],vector_d);
+    float soughtDotProduct = dotProduct(S[0], d);
     Point v;
-    float dot_product;
-    for (int i=1; i<S.size(); i++) {
+    float currentDotProduct;
+    int n = S.size();
+
+    for (int i=1; i<n; i++) {
         v = S[i];
-        dot_product = v.x*vector_d.x + v.y*vector_d.y;
-        if (dot_product > sought_dot_product) {
+        currentDotProduct = dotProduct(v, d);
+        if (currentDotProduct > soughtDotProduct) {
             sought = i;
-            sought_dot_product = dot_product;
+            soughtDotProduct = currentDotProduct;
         }
     }
+
     return sought;
 }
 
@@ -46,11 +63,10 @@ int support(const std::vector<Point>& S, const Point& vector_d) {
 #ifndef FIND_SLOPE_COEFFICIENT
 #define FIND_SLOPE_COEFFICIENT
 
-float find_slope_coefficient(const Point& A, const Point& B) {
-    if (std::abs(A.x - B.x) < ERROR_EPS) {
+float findSlopeCoefficient(const Point& A, const Point& B) {
+    if (std::abs(A.x-B.x) < ERROR_EPS) {
         return INFINITY;
-    }
-    else {
+    } else {
         return (A.y-B.y) / (A.x-B.x);
     }
 }
@@ -60,90 +76,85 @@ float find_slope_coefficient(const Point& A, const Point& B) {
 #ifndef FIND_GENTLE_SLOPE_TOP
 #define FIND_GENTLE_SLOPE_TOP
 
-std::vector<Point> find_gentle_slope_top(const std::vector<Point>& polygon) {
-    float max_gentle_slope_coefficient = MAXIMUM_GENTLE_SLOPE_COEFFICIENT;
+std::vector<Point> findGentleSlopeTop(const std::vector<Point>& polygon) {
+    float maxSlopeCoefficient = MAXIMUM_GENTLE_SLOPE_COEFFICIENT;
     int n = polygon.size();
-    int leftmost_index, rightmost_index;
-    leftmost_index = support(polygon, Point(-1,0));
-    rightmost_index = support(polygon, Point(1,0));
-    int i = rightmost_index+1;
+    int leftmostIndex = support(polygon, Point(-1, 0));
+    int rightmostIndex = support(polygon, Point(1, 0));
+    int i = rightmostIndex+1;
     int start, end;
+
     while (true) {
-        if (std::abs(find_slope_coefficient(polygon[i%n], polygon[(i-1)%n])) <= max_gentle_slope_coefficient) {
+        if (std::abs(findSlopeCoefficient(polygon[i%n], polygon[(i-1)%n])) <= maxSlopeCoefficient) {
             break;
-        }
-        else if (i%n == leftmost_index) {
+        } else if (i%n == leftmostIndex) {
             i++;
             break;
-        }
-        else {
+        } else {
             i++;
         }
     }
     start = (i-1)%n;
+
     while (true) {
-        if (std::abs(find_slope_coefficient(polygon[i%n], polygon[(i-1)%n])) > max_gentle_slope_coefficient) {
+        if (std::abs(findSlopeCoefficient(polygon[i%n], polygon[(i-1)%n])) > maxSlopeCoefficient) {
             break;
-        }
-        else if (i%n == leftmost_index) {
+        } else if (i%n == leftmostIndex) {
             i++;
             break;
-        }
-        else {
+        } else {
             i++;
         }
     }
     end = (i-1)%n;
+
     if (start == end) {
-        return std::vector<Point>(); // maybe should be removed
-    } 
-    else {
-        std::vector<Point> gentle_slope_top;
+        return std::vector<Point>();
+    } else {
+        std::vector<Point> gentleSlopeTop;
         i = start;
         while (true) {
-            gentle_slope_top.push_back(polygon[i%n]);
+            gentleSlopeTop.push_back(polygon[i%n]);
             if (i%n == end) {
                 break;
-            }
-            else {
+            } else {
                 i++;
             }
         }
-        return gentle_slope_top;
+        return gentleSlopeTop;
     }
-} 
+}
 
 #endif
 
 #ifndef FIND_TOP
 #define FIND_TOP
 
-std::vector<Point> find_top(const std::vector<Point>& polygon) {
+std::vector<Point> findTop(const std::vector<Point>& polygon) {
     int n = polygon.size();
-    int leftmost_index = 0;
-    int rightmost_index = 0;
+    int leftmostIndex = 0;
+    int rightmostIndex = 0;
+
     for (int i=1; i<n; i++) {
-        if (polygon[i].x < polygon[leftmost_index].x) {
-            leftmost_index = i;
+        if (polygon[i].x < polygon[leftmostIndex].x) {
+            leftmostIndex = i;
+        } else if (polygon[i].x == polygon[leftmostIndex].x && polygon[i].y > polygon[leftmostIndex].y) {
+            leftmostIndex = i;
         }
-        else if (polygon[i].x == polygon[leftmost_index].x && polygon[i].y > polygon[leftmost_index].y) {
-            leftmost_index = i;
-        }
-        if (polygon[i].x > polygon[rightmost_index].x) {
-            rightmost_index = i;
-        }
-        else if (polygon[i].x == polygon[rightmost_index].x && polygon[i].y > polygon[rightmost_index].y) {
-            rightmost_index = i;
+        if (polygon[i].x > polygon[rightmostIndex].x) {
+            rightmostIndex = i;
+        } else if (polygon[i].x == polygon[rightmostIndex].x && polygon[i].y > polygon[rightmostIndex].y) {
+            rightmostIndex = i;
         }
     }
+
     std::vector<Point> top;
-    int i = rightmost_index;
+    int i = rightmostIndex;
     while (true) {
         top.push_back(polygon[i%n]);
-        if (i%n == leftmost_index) {
+        if (i % n == leftmostIndex) {
             break;
-        }
-        else {
+        } else {
             i++;
         }
     }
@@ -155,23 +166,22 @@ std::vector<Point> find_top(const std::vector<Point>& polygon) {
 #ifndef FIND_LEFT_TOP
 #define FIND_LEFT_TOP
 
-std::vector<Point> find_left_top(const std::vector<Point>& polygon) {
+std::vector<Point> findLeftTop(const std::vector<Point>& polygon) {
     int n = polygon.size();
-    int topmost_index, leftmost_index;
-    topmost_index = support(polygon, Point(0,1));
-    leftmost_index = support(polygon, Point(-1,0));
-    std::vector<Point> left_top;
-    int i = topmost_index;
+    int topmostIndex = support(polygon, Point(0, 1));
+    int leftmostIndex = support(polygon, Point(-1, 0));
+    std::vector<Point> leftTop;
+    int i = topmostIndex;
+
     while (true) {
-        left_top.push_back(polygon[i%n]);
-        if (i%n == leftmost_index) {
+        leftTop.push_back(polygon[i%n]);
+        if (i%n == leftmostIndex) {
             break;
-        }
-        else {
+        } else {
             i++;
         }
     }
-    return left_top;
+    return leftTop;
 }
 
 #endif
@@ -179,23 +189,22 @@ std::vector<Point> find_left_top(const std::vector<Point>& polygon) {
 #ifndef FIND_RIGHT_TOP
 #define FIND_RIGHT_TOP
 
-std::vector<Point> find_right_top(const std::vector<Point>& polygon) {
+std::vector<Point> findRightTop(const std::vector<Point>& polygon) {
     int n = polygon.size();
-    int topmost_index, rightmost_index;
-    topmost_index = support(polygon, Point(0,1));
-    rightmost_index = support(polygon, Point(1,0));
-    std::vector<Point> right_top;
-    int i = rightmost_index;
+    int topmostIndex = support(polygon, Point(0, 1));
+    int rightmostIndex = support(polygon, Point(1, 0));
+    std::vector<Point> rightTop;
+    int i = rightmostIndex;
+
     while (true) {
-        right_top.push_back(polygon[i%n]);
-        if (i%n == topmost_index) {
+        rightTop.push_back(polygon[i%n]);
+        if (i%n == topmostIndex) {
             break;
-        }
-        else {
+        } else {
             i++;
         }
     }
-    return right_top;
+    return rightTop;
 }
 
 #endif
@@ -203,30 +212,26 @@ std::vector<Point> find_right_top(const std::vector<Point>& polygon) {
 #ifndef FIND_BOTTOM
 #define FIND_BOTTOM
 
-std::vector<Point> find_bottom(const std::vector<Point>& polygon) {
+std::vector<Point> findBottom(const std::vector<Point>& polygon) {
     int n = polygon.size();
-    int lowest = support(polygon, Point(0,-1));
-    float lowest_y = polygon[lowest].y;
+    int lowest = support(polygon, Point(0, -1));
+    float lowestY = polygon[lowest].y;
     std::vector<Point> bottom;
+
     if (lowest == 0) {
-        if (polygon[n-1].y == lowest_y) {
+        if (polygon[n-1].y == lowestY) {
             bottom = {polygon[lowest], polygon[n-1]};
-        }
-        else if (polygon[(lowest+1)%n].y == lowest_y) {
+        } else if (polygon[(lowest+1)%n].y == lowestY) {
             bottom = {polygon[lowest], polygon[(lowest+1)%n]};
-        }
-        else {
+        } else {
             bottom = {polygon[lowest]};
         }
-    }
-    else {
-        if (polygon[lowest-1].y == lowest_y) {
+    } else {
+        if (polygon[lowest-1].y == lowestY) {
             bottom = {polygon[lowest], polygon[lowest-1]};
-        }
-        else if (polygon[(lowest+1)%n].y == lowest_y) {
+        } else if (polygon[(lowest+1)%n].y == lowestY) {
             bottom = {polygon[lowest], polygon[(lowest+1)%n]};
-        }
-        else {
+        } else {
             bottom = {polygon[lowest]};
         }
     }
@@ -238,53 +243,49 @@ std::vector<Point> find_bottom(const std::vector<Point>& polygon) {
 
 #endif
 
-#ifndef GJK_ALGORITHM
-#define GJK_ALGORITHM
+#ifndef GJK
+#define GJK
 
-bool GJK(std::vector<Point>& S, std::vector<Point>& R) {
+bool gjk(const std::vector<Point>& S, const std::vector<Point>& R) {
     if (S.size() == 0 || R.size() == 0) {
         return false;
     }
-    Point vector_d(1.0,0.0);
-    Point origin(0.0,0.0);
-    Point A, B, C, AB, AC, AO, AB_perpendicular, AC_perpendicular;
-    A = S[support(S,vector_d)] - R[support(R,-vector_d)];
-    vector_d = origin - A;
+    Point d(1, 0);
+    Point origin(0, 0);
+    Point A, B, C, AB, AC, AO, ABPerpendicular, ACPerpendicular;
+    A = S[support(S, d)] - R[support(R, -d)];
+    d = origin - A;
     std::vector<Point> simplex = {A};
 
     while (true) {
-        A = S[support(S,vector_d)] - R[support(R,-vector_d)];
-        if (dot(A,vector_d) < ERROR_EPS) {
+        A = S[support(S, d)] - R[support(R, -d)];
+        if (dotProduct(A, d) < ERROR_EPS) {
             return false;
-        }
-        else {
+        } else {
             simplex.push_back(A);
             if (simplex.size() == 2) {
                 B = simplex[0];
                 A = simplex[1];
                 AB = B-A;
                 AO = origin-A;
-                AB_perpendicular = triple_prod(AB,AO,AB);
-                vector_d = AB_perpendicular;
-            }
-            else {
+                ABPerpendicular = tripleProduct(AB, AO, AB);
+                d = ABPerpendicular;
+            } else {
                 C = simplex[0];
                 B = simplex[1];
                 A = simplex[2];
                 AO = origin-A;
                 AB = B-A;
                 AC = C-A;
-                AB_perpendicular = triple_prod(AC,AB,AB);
-                AC_perpendicular = triple_prod(AB,AC,AC);
-                if (dot(AB_perpendicular,AO) > ERROR_EPS) {
+                ABPerpendicular = tripleProduct(AC, AB, AB);
+                ACPerpendicular = tripleProduct(AB, AC, AC);
+                if (dotProduct(ABPerpendicular, AO) > ERROR_EPS) {
                     simplex.erase(simplex.begin());
-                    vector_d = AB_perpendicular;
-                }
-                else if (dot(AC_perpendicular,AO) > ERROR_EPS) {
-                    simplex.erase(simplex.begin()+1);
-                    vector_d = AC_perpendicular;
-                }
-                else {
+                    d = ABPerpendicular;
+                } else if (dotProduct(ACPerpendicular, AO) > ERROR_EPS) {
+                    simplex.erase(simplex.begin() + 1);
+                    d = ACPerpendicular;
+                } else {
                     return true;
                 }
             }
@@ -297,18 +298,12 @@ bool GJK(std::vector<Point>& S, std::vector<Point>& R) {
 #ifndef IS_LEFT_FACING
 #define IS_LEFT_FACING
 
-bool is_left_facing(State state) {
-    if (state == IDLE_LEFT || 
-        state == MOVING_LEFT ||
-        state == AIRBORNE_LEFT ||
-        state == FREEFALL_LEFT || 
-        state == QUICKLY_M_LEFT ||
-        state == QUICKLY_M_LEFT) {
-            return true;
-        }
-    else {
-        return false;
-    }    
+bool isLeftFacing(State state) {
+    return state == IDLE_LEFT || 
+           state == MOVING_LEFT ||
+           state == AIRBORNE_LEFT ||
+           state == FREEFALL_LEFT || 
+           state == QUICKLY_M_LEFT;
 }
 
 #endif
@@ -316,19 +311,12 @@ bool is_left_facing(State state) {
 #ifndef IS_RIGHT_FACING
 #define IS_RIGHT_FACING
 
-bool is_right_facing(State state) {
-    if (state == IDLE_RIGHT || 
-        state == MOVING_RIGHT ||
-        state == AIRBORNE_RIGHT ||
-        state == FREEFALL_RIGHT || 
-        state == QUICKLY_M_RIGHT ||
-        state == QUICKLY_M_RIGHT) {
-            return true;
-        }
-    else {
-        return false;
-    }    
+bool isRightFacing(State state) {
+    return state == IDLE_RIGHT || 
+           state == MOVING_RIGHT ||
+           state == AIRBORNE_RIGHT ||
+           state == FREEFALL_RIGHT || 
+           state == QUICKLY_M_RIGHT;
 }
 
 #endif
-

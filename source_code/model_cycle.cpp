@@ -1,31 +1,41 @@
 #include "model_cycle.h"
 
-#ifndef MODEL_CYCLE_CPP
-#define MODEL_CYCLE_CPP
-
-ModelCycle::ModelCycle(std::list<Model>& model_list) : model_list_(model_list) {
-    it_ = model_list_.begin();
+ModelCycle::ModelCycle() {
+    modelCollectionContainer_ = nullptr;
+    it_ = modelList_.begin();
 }
 
-Model& ModelCycle::get_current_model() {
-    return *it_;
+
+void ModelCycle::addModelAndResetIterator(Model model, int lingerOn) {
+    modelList_.push_back(ModelAndLingerPair(model, lingerOn));
+    it_ = modelList_.begin();
 }
 
-void ModelCycle::move_to_next_model() {
-    it_++;
-    if (it_ == model_list_.end()) {
-        it_ = model_list_.begin();
+
+Model& ModelCycle::getCurrentModel() {
+    return (*it_).model;
+}
+
+
+void ModelCycle::moveToNextModel() {
+    (*it_).currentLingerCounter++;
+    if ((*it_).currentLingerCounter == (*it_).lingerOn) {
+        (*it_).currentLingerCounter = 0;
+        it_++;
+        if (it_ == modelList_.end()) {
+            it_ = modelList_.begin();
+        }
     }
 }
 
-Model& ModelCycle::move_and_get_model() {
-    move_to_next_model();
-    return get_current_model();
+
+Model& ModelCycle::moveAndGetModel() {
+    moveToNextModel();
+    return getCurrentModel();
 }
 
 
-void ModelCycle::reset_model_cycle() {
-    it_ = model_list_.begin();
+void ModelCycle::reset() {
+    (*it_).currentLingerCounter = 0;
+    it_ = modelList_.begin();
 }
-
-#endif

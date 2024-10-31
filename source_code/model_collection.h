@@ -1,27 +1,27 @@
-#include "model_cycle.cpp"
-#include <unordered_map>
-
 #ifndef MODEL_COLLECTION_H
 #define MODEL_COLLECTION_H
 
-namespace GameSystem {
-    class ModelCollection;
-}
+#include <unordered_map>
+#include "structs_and_enums.cpp"
+
+class Model;
+class ModelCycle;
+class Object;
 
 class ModelCollection {
 
 private:
 
-    std::unordered_map<State, ModelCycle&>& cycles_for_states_;
+    std::unordered_map<State, ModelCycle> cyclesForStates_;
 
 public:
 
-    ModelCollection(std::unordered_map<State, ModelCycle&>& cycles_for_states);
-    Model* get_current_model_for_state(State state);
-    Model* get_new_model_for_state(State state);
-    Model* get_first_model_for_state(State state);
+    ModelCollection();
+
+    Model* getCurrentModelPtrForState(State state);
+    Model* getNewModelPtrForState(State state);
+    Model* getFirstModelPtrForState(State state);
 
 };
-
 
 #endif

@@ -1,27 +1,37 @@
-#include "model.cpp"
-#include <list>
-
 #ifndef MODEL_CYCLE_H
 #define MODEL_CYCLE_H
 
-namespace GameSystem {
-    class ModelCycle;
-}
+#include <list>
+#include "model.h"
+
+class ModelCollection;
 
 class ModelCycle {
 
 private:
 
-    std::list<Model>& model_list_;
-    std::list<Model>::iterator it_;
+    struct ModelAndLingerPair {
+        Model model;
+        int lingerOn;
+        int currentLingerCounter;
+
+        ModelAndLingerPair(Model model, int lingerOn) : model(model), lingerOn(lingerOn), currentLingerCounter(0) {}
+    };
+
+    ModelCollection* modelCollectionContainer_;
+    std::list<ModelAndLingerPair> modelList_;
+    std::list<ModelAndLingerPair>::iterator it_;
 
 public:
 
-    ModelCycle(std::list<Model>& model_list);
-    Model& get_current_model();
-    void move_to_next_model();
-    Model& move_and_get_model();
-    void reset_model_cycle();
+    ModelCycle();
+
+    void addModelAndResetIterator(Model model, int lingerOn);
+
+    Model& getCurrentModel();
+    void moveToNextModel();
+    Model& moveAndGetModel();
+    void reset();
 
 };
 
