@@ -1,7 +1,24 @@
 #include "model_collection.h"
 #include "model_cycle.h"
 
-ModelCollection::ModelCollection() {;}
+ModelCollection::ModelCollection() {
+    owner_ = nullptr;
+}
+
+
+ModelCollection::ModelCollection(const ModelCollection& otherModelCollection) :
+    cyclesForStates_(otherModelCollection.cyclesForStates_), owner_(otherModelCollection.owner_) {}
+
+
+void ModelCollection::addModelCycleForState(State state, ModelCycle newModelCycle) {
+    cyclesForStates_[state] = newModelCycle;
+    cyclesForStates_[state].setModelCollectionContainer(this);
+}
+
+
+void ModelCollection::setOwner(Object* newOwner) {
+    owner_ = newOwner;
+}
 
 
 Model* ModelCollection::getCurrentModelPtrForState(State state) {

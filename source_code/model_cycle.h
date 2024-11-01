@@ -16,6 +16,12 @@ private:
         int currentLingerCounter;
 
         ModelAndLingerPair(Model model, int lingerOn) : model(model), lingerOn(lingerOn), currentLingerCounter(0) {}
+    
+        ModelAndLingerPair(const ModelAndLingerPair& otherModelAndLingerPair) :
+            model(otherModelAndLingerPair.model), 
+            lingerOn(otherModelAndLingerPair.lingerOn), 
+            currentLingerCounter(otherModelAndLingerPair.currentLingerCounter) {}
+
     };
 
     ModelCollection* modelCollectionContainer_;
@@ -27,6 +33,8 @@ public:
     ModelCycle();
 
     void addModelAndResetIterator(Model model, int lingerOn);
+
+    void setModelCollectionContainer(ModelCollection* newModelCollectionContainer);
 
     Model& getCurrentModel();
     void moveToNextModel();

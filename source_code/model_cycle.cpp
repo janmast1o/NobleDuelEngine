@@ -12,6 +12,11 @@ void ModelCycle::addModelAndResetIterator(Model model, int lingerOn) {
 }
 
 
+void ModelCycle::setModelCollectionContainer(ModelCollection* newModelCollectionContainer) {
+    modelCollectionContainer_ = newModelCollectionContainer;
+}
+
+
 Model& ModelCycle::getCurrentModel() {
     return (*it_).model;
 }

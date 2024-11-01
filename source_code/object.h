@@ -3,6 +3,7 @@
 
 #include <SDL2/SDL.h>
 #include "structs_and_enums.cpp"
+#include "model_collection.h"
 
 class Object {
 

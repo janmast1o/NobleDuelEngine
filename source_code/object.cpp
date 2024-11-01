@@ -1,10 +1,13 @@
 #include "object.h"
+#include "model.h"
+#include "hitbox.h"
 #include "utility_functions.cpp"
 #include <cmath>
 #include <vector>
 
 Object::Object(SDL_Renderer* renderer, Point center, ModelCollection modelCollection) :
     renderer_(renderer), center_(center), modelCollection_(modelCollection) {
+        modelCollection_.setOwner(this);
         health_ = INFINITY;
         state_ = IDLE;
         previousState_ = IDLE;
@@ -82,8 +85,8 @@ void Object::redrawObject() {
     if (model != nullptr) {
         destRect.w = model->getModelWidth();
         destRect.h = model->getModelHeight();
-        destRect.x = model->getRelativeUL().x + center_.x;
-        destRect.y = model->getRelativeUL().y + center_.y;
+        destRect.x = model->getTextureRelativeUL().x + center_.x;
+        destRect.y = model->getTextureRelativeUL().y + center_.y;
         SDL_RenderCopyF(renderer_, model->getTexture(), NULL, &destRect);
     }
 }
@@ -95,14 +98,14 @@ void Object::redrawObject(bool drawHitboxes, float pointSize) {
     if (model != nullptr) {
         destRect.w = model->getModelWidth();
         destRect.h = model->getModelHeight();
-        destRect.x = model->getTextureRelativeULPtr()->x + center_.x;
-        destRect.y = model->getTextureRelativeULPtr()->y + center_.y;
+        destRect.x = model->getTextureRelativeUL().x + center_.x;
+        destRect.y = model->getTextureRelativeUL().y + center_.y;
         SDL_RenderCopyF(renderer_, model->getTexture(), NULL, &destRect);
         if (drawHitboxes) {
-            std::vector<Point> hull = model->getCurrentHitbox()->getCurrentHull();
+            std::vector<Point> hull = model->getHitbox().getCurrentHull();
             int n = hull.size();
             for (int i=0; i<n; i++) {
-                drawPoint(renderer_, hull[i].x, hull[i].y, pointSize);
+                drawPoint(renderer_, hull[i].x, -hull[i].y, pointSize);
             }
         }
     }
