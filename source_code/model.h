@@ -3,34 +3,35 @@
 
 #include <SDL2/SDL.h>
 #include "structs_and_enums.cpp"
+#include "hitbox.h"
 
-class Object;
+class ModelCycle;
 class Hitbox;
 
 class Model {
 
 private:
 
-    // Object* owner_;
+    ModelCycle* modelCycleContainer_;
     SDL_Texture* texture_;
-    Hitbox hitbox_;
+    Hitbox* hitboxPtr_;
     Rectangle relativeRectangle_;
 
 public:
 
-    Model(SDL_Texture* texture, Hitbox hitbox);
-    Model(SDL_Texture* texture, Hitbox hitbox, const Point textureULRelativeToCenter);
+    Model(SDL_Texture* texture, Hitbox* hitboxPtr);
+    Model(SDL_Texture* texture, Hitbox* hitboxPtr, const Point textureULRelativeToCenter);
     Model(const Model& otherModel);
     
-    // void setOwner(Object* owner);
+    void setModelCycleContainer(ModelCycle* newModelCycleContainer);
 
-    // Point& getCenter();
+    Point* getCurrentOwnerCenterPtr();
 
     SDL_Texture* getTexture() const;
     float getModelWidth() const;
     float getModelHeight() const;
     Point& getTextureRelativeUL();
-    Hitbox& getHitbox();
+    Hitbox* getHitboxPtr();
 
 };
 

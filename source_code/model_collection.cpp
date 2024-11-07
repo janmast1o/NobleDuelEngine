@@ -1,5 +1,5 @@
 #include "model_collection.h"
-#include "model_cycle.h"
+#include "object.h"
 
 ModelCollection::ModelCollection() {
     owner_ = nullptr;
@@ -18,6 +18,15 @@ void ModelCollection::addModelCycleForState(State state, ModelCycle newModelCycl
 
 void ModelCollection::setOwner(Object* newOwner) {
     owner_ = newOwner;
+}
+
+
+Point* ModelCollection::getCurrentOwnerCenterPtr() {
+    if (owner_ != nullptr) {
+        return &owner_->getCenter();
+    } else {
+        return nullptr;
+    }
 }
 
 

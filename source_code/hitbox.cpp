@@ -6,8 +6,8 @@ Hitbox::Hitbox(const std::vector<Point> relativeHull) :
     relativeHull_(relativeHull),
     relativeGentleSlopeTop_(findGentleSlopeTop(relativeHull)),
     relativeTop_(findTop(relativeHull)),
-    relativeLeftTop_(findLeftTop(relativeHull)),
-    relativeRightTop_(findRightTop(relativeHull)),
+    // relativeLeftTop_(findLeftTop(relativeHull)),
+    // relativeRightTop_(findRightTop(relativeHull)),
     relativeBottom_(findBottom(relativeHull)) {
         ownerModel_ = nullptr;
         active_ = false;
@@ -25,8 +25,8 @@ Hitbox::Hitbox(const Hitbox& otherHitbox) :
     relativeHull_(otherHitbox.relativeHull_),
     relativeGentleSlopeTop_(otherHitbox.relativeGentleSlopeTop_),
     relativeTop_(otherHitbox.relativeTop_),
-    relativeLeftTop_(otherHitbox.relativeLeftTop_),
-    relativeRightTop_(otherHitbox.relativeRightTop_),
+    // relativeLeftTop_(otherHitbox.relativeLeftTop_),
+    // relativeRightTop_(otherHitbox.relativeRightTop_),
     relativeBottom_(otherHitbox.relativeBottom_),
     ownerModel_(otherHitbox.ownerModel_),
     active_(otherHitbox.active_),
@@ -56,9 +56,9 @@ const std::vector<Point> Hitbox::getCurrentGentleSlopeTop() const {;}
 
 const std::vector<Point> Hitbox::getCurrentTop() const {;}
 
-const std::vector<Point> Hitbox::getCurrentLeftTop() const {;}
+// const std::vector<Point> Hitbox::getCurrentLeftTop() const {;}
 
-const std::vector<Point> Hitbox::getCurrentRightTop() const {;}
+// const std::vector<Point> Hitbox::getCurrentRightTop() const {;}
 
 const std::vector<Point> Hitbox::getCurrentBottom() const {;}
 
@@ -71,9 +71,9 @@ const std::vector<Point> Hitbox::getGentleSlopeTopAfterVectorTranslation(const P
 
 const std::vector<Point> Hitbox::getTopAfterVectorTranslation(const Point& translationVector) const {;}
 
-const std::vector<Point> Hitbox::getLeftTopAfterVectorTranslation(const Point& translationVector) const {;}
+// const std::vector<Point> Hitbox::getLeftTopAfterVectorTranslation(const Point& translationVector) const {;}
 
-const std::vector<Point> Hitbox::getRightTopAfterVectorTranslation(const Point& translationVector) const {;}
+// const std::vector<Point> Hitbox::getRightTopAfterVectorTranslation(const Point& translationVector) const {;}
 
 const std::vector<Point> Hitbox::getBottomAfterVectorTranslation(const Point& translationVector) const {;}
 

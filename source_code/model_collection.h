@@ -3,9 +3,8 @@
 
 #include <unordered_map>
 #include "structs_and_enums.cpp"
+#include "model_cycle.h"
 
-class Model;
-class ModelCycle;
 class Object;
 
 class ModelCollection {
@@ -23,6 +22,8 @@ public:
     void addModelCycleForState(State state, ModelCycle newModelCycle);
     
     void setOwner(Object* newOwner);
+
+    Point* getCurrentOwnerCenterPtr();
 
     Model* getCurrentModelPtrForState(State state);
     Model* getNewModelPtrForState(State state);

@@ -212,3 +212,48 @@ enum DamageReceiveState {
 };
 
 #endif
+
+#ifndef SCHEDULED_INSTRUCTION
+#define SCHEDULED_INSTRUCTION
+
+enum ScheduledInstruction {
+    NOTHING,
+    HANDLE_MOVE_HORIZONTALLY,
+    HANDLE_SLIDE_DOWN,
+    HANDLE_AIRBORNE,
+    HANDLE_FREEFALL,
+    HANDLE_STOP
+};
+
+#endif
+
+#ifndef SINGLE_STATE_PERSISTENCE
+#define SINGLE_STATE_PERSISTENCE
+
+struct SingleStatePersistence {
+    int movingHorizontallyTimer = 0;
+    int slideDownTimer = 0;
+    int airborneTimer = 0;
+    int freefallTimer = 0;
+};
+
+#endif
+
+#ifndef OBJECT_SPECIFIC_PHYSICS_CHAR
+#define OBJECT_SPECIFIC_PHYSICS_CHAR
+
+struct ObjectSpecificPhysicsChar {
+    float maxVerticalV;
+    float maxHorizontalV;
+    float horizontalAcc;
+    int maxAirborneAccelerableFrames;
+
+    ObjectSpecificPhysicsChar() :
+        maxVerticalV(780),
+        maxHorizontalV(225),
+        horizontalAcc(215),
+        maxAirborneAccelerableFrames(150) {}
+
+};
+
+#endif

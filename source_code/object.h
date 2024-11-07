@@ -47,6 +47,8 @@ public:
     void redrawObject();
     void redrawObject(bool drawHitboxes, float pointSize);
 
+    bool collideableWith(const Object& otherObject);
+
 };
 
 #endif

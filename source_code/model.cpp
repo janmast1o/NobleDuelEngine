@@ -1,35 +1,45 @@
 #include "model.h"
 #include "hitbox.h"
+#include "model_cycle.h"
 
-Model::Model(SDL_Texture* texture, Hitbox hitbox) : texture_(texture), hitbox_(hitbox) {
+Model::Model(SDL_Texture* texture, Hitbox* hitboxPtr) : texture_(texture), hitboxPtr_(hitboxPtr) {
     int iwidth, iheight;
     SDL_QueryTexture(texture, NULL, NULL, &iwidth, &iheight);
     relativeRectangle_ = Rectangle((float) iwidth, float(iheight));
-    hitbox_.setModelOwner(this);
-    // owner_ = nullptr;
+    hitboxPtr_->setModelOwner(this);
+    modelCycleContainer_ = nullptr;
 }
 
 
-Model::Model(SDL_Texture* texture, Hitbox hitbox, const Point textureULRelativeToCenter) : texture_(texture), hitbox_(hitbox) {
+Model::Model(SDL_Texture* texture, Hitbox* hitboxPtr, const Point textureULRelativeToCenter) : texture_(texture), hitboxPtr_(hitboxPtr) {
     int iwidth, iheight;
     SDL_QueryTexture(texture, NULL, NULL, &iwidth, &iheight);
     float fwidth = (float) iwidth;
     float fheight = (float) fheight;
     relativeRectangle_ = Rectangle(Point(0,-fheight) + textureULRelativeToCenter, Point(fwidth,0) + textureULRelativeToCenter);
-    hitbox_.setModelOwner(this);
-    // owner_ = nullptr;
+    hitboxPtr_->setModelOwner(this);
+    modelCycleContainer_ = nullptr;
 }
 
 
 Model::Model(const Model& otherModel) : 
     texture_(otherModel.texture_),
-    hitbox_(otherModel.hitbox_),
+    hitboxPtr_(otherModel.hitboxPtr_),
     relativeRectangle_(otherModel.relativeRectangle_) {}
 
 
-// owner setting
+void Model::setModelCycleContainer(ModelCycle* newModelCycleContainer) {
+    modelCycleContainer_ = newModelCycleContainer;
+}
 
-// center getting
+
+Point* Model::getCurrentOwnerCenterPtr() {
+    if (modelCycleContainer_ != nullptr) {
+        return modelCycleContainer_->getCurrentOwnerCenterPtr();
+    } else {
+        return nullptr;
+    }
+}
 
 
 SDL_Texture* Model::getTexture() const {
@@ -52,6 +62,6 @@ Point& Model::getTextureRelativeUL() {
 }
 
 
-Hitbox& Model::getHitbox() {
-    return hitbox_;
+Hitbox* Model::getHitboxPtr() {
+    return hitboxPtr_;
 }

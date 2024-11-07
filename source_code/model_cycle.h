@@ -27,14 +27,17 @@ private:
     ModelCollection* modelCollectionContainer_;
     std::list<ModelAndLingerPair> modelList_;
     std::list<ModelAndLingerPair>::iterator it_;
+    Hitbox* collisionMeshPtr_;
 
 public:
 
-    ModelCycle();
+    ModelCycle(Hitbox* collisionMesh);
 
     void addModelAndResetIterator(Model model, int lingerOn);
 
     void setModelCollectionContainer(ModelCollection* newModelCollectionContainer);
+
+    Point* getCurrentOwnerCenterPtr();
 
     Model& getCurrentModel();
     void moveToNextModel();

@@ -1,6 +1,7 @@
 #include "model_cycle.h"
+#include "model_collection.h"
 
-ModelCycle::ModelCycle() {
+ModelCycle::ModelCycle(Hitbox* collisionMeshPtr) : collisionMeshPtr_(collisionMeshPtr) {
     modelCollectionContainer_ = nullptr;
     it_ = modelList_.begin();
 }
@@ -14,6 +15,15 @@ void ModelCycle::addModelAndResetIterator(Model model, int lingerOn) {
 
 void ModelCycle::setModelCollectionContainer(ModelCollection* newModelCollectionContainer) {
     modelCollectionContainer_ = newModelCollectionContainer;
+}
+
+
+Point* ModelCycle::getCurrentOwnerCenterPtr() {
+    if (modelCollectionContainer_ != nullptr) {
+        modelCollectionContainer_->getCurrentOwnerCenterPtr();
+    } else {
+        return nullptr;
+    }
 }
 
 
