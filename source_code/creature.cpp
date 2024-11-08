@@ -11,7 +11,7 @@ Creature::Creature(SDL_Renderer* renderer, Point& center, ModelCollection& model
             item_loadout_[i] = nullptr;
         }
         item_loadout_index_ = 0;
-        jumping_v_ = 345.0;
+        jumping_v_ = 385.0;
         set_health(health);
         regular_horizontal_acc_ = 215.0;
         sprint_horizontal_acc_ = 285.0;
@@ -31,7 +31,7 @@ Creature::Creature(SDL_Renderer* renderer, Point& center, ModelCollection& model
             item_loadout_[i] = nullptr;
         }
         item_loadout_index_ = 0;
-        jumping_v_ = 345.0;
+        jumping_v_ = jumping_v;
         set_health(health);
         regular_horizontal_acc_ = 215.0;
         sprint_horizontal_acc_ = 355.0;
@@ -279,6 +279,7 @@ void Creature::set_slow_walk_max_horizontal_v(float slow_walk_max_horizontal_v) 
 
 void Creature::run_scheduled() {
     if (is_anything_scheduled()) {
+        std::cout << scheduled_ << std::endl;
         if (scheduled_ == HANDLE_MOVING_HORIZONTALLY) {
             handle_moving_horizontally();
         }

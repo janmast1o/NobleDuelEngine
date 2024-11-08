@@ -354,7 +354,7 @@ void mainLoop(SDL_Renderer* renderer) {
     ModelCycle testModelCycle(modelList); 
     std::unordered_map<State, ModelCycle&> cycleMap = {{IDLE, testModelCycle}};
     ModelCollection testModelCollection(cycleMap);
-    Sprite testPlayer(renderer, windowCenter, testModelCollection, SOLID, object_map, {SDL_SCANCODE_SPACE}, 100, item_manager);
+    Sprite testPlayer(renderer, windowCenter, testModelCollection, SOLID, object_map, 100, item_manager, {SDL_SCANCODE_SPACE});
     object_map.add_to_map(testPlayer);
     all_objects.push_back(&testPlayer);
 

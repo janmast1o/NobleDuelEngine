@@ -200,6 +200,26 @@ enum ScheduledInstruction {
     HANDLE_REVERT_TO_DEFAULT
 };
 
+std::ostream& operator<<(std::ostream& os, ScheduledInstruction instruction) {
+    switch (instruction) {
+        case NOTHING: os << "NOTHING"; break;
+        case HANDLE_MOVING_HORIZONTALLY: os << "HANDLE_MOVING_HORIZONTALLY"; break;
+        case HANDLE_STOP: os << "HANDLE_STOP"; break;
+        case HANDLE_AIRBORNE: os << "HANDLE_AIRBORNE"; break;
+        case HANDLE_FREEFALL: os << "HANDLE_FREEFALL"; break;
+        case HANDLE_SLIDE_DOWN: os << "HANDLE_SLIDE_DOWN"; break;
+        case HANDLE_JUMP: os << "HANDLE_JUMP"; break;
+        case HANDLE_PICK_UP_ITEM: os << "HANDLE_PICK_UP_ITEM"; break;
+        case HANDLE_DROP_ITEM: os << "HANDLE_DROP_ITEM"; break;
+        case HANDLE_SWITCH_TO_NEXT_ITEM: os << "HANDLE_SWITCH_TO_NEXT_ITEM"; break;
+        case HANDLE_ATTACK: os << "HANDLE_ATTACK"; break;
+        case HANDLE_CHARGE_ATTACK: os << "HANDLE_CHARGE_ATTACK"; break;
+        case HANDLE_REVERT_TO_DEFAULT: os << "HANDLE_REVERT_TO_DEFAULT"; break;
+        default: os << "UNKNOWN_INSTRUCTION"; break;
+    }
+    return os;
+}
+
 #endif
 
 #ifndef SINGLE_STATE_PERSISTENCE

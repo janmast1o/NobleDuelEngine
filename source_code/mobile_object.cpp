@@ -323,11 +323,13 @@ void MobileObject::handle_airborne() {
                     set_scheduled(HANDLE_SLIDE_DOWN);
                 }
                 else {
-                    clear_scheduled();
+                    // clear_scheduled();
+                    set_scheduled(HANDLE_FREEFALL);
                 }
             }
             else {
-                clear_scheduled();
+                //clear_scheduled();
+                set_scheduled(HANDLE_FREEFALL);
             }           
         }  
         else {
