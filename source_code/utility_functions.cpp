@@ -17,6 +17,22 @@ void drawPoint(SDL_Renderer* renderer, float x, float y, float pointSize) {
 
 #endif
 
+#ifndef GET_SIGN
+#define GET_SIGN
+
+template <typename T>
+T getSign(T x) {
+    if (std::abs(x) <= ERROR_EPS) {
+        return 0;
+    } else if (x > 0) {
+        return 1;
+    } else {
+        return -1;
+    }
+}
+
+#endif
+
 #ifndef DOT_PRODUCT
 #define DOT_PRODUCT
 

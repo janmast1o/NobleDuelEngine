@@ -187,7 +187,6 @@ float Hitbox::isCollisionAfterVectorTranslationCausedByGentleSlope(const Hitbox&
             if (otherCurrentHitboxGentleSlopeTop[i-1].x - currentHitboxBottom[currentHitboxBottomLast].x >= -ERROR_EPS 
                 && currentHitboxBottom[currentHitboxBottomLast].x - otherCurrentHitboxGentleSlopeTop[i].x >= -ERROR_EPS) {
                 alpha = findSlopeCoefficient(otherCurrentHitboxGentleSlopeTop[i-1], otherCurrentHitboxGentleSlopeTop[i]);
-                alpha = std::abs(alpha);
                 break;
             }
         }
@@ -197,9 +196,16 @@ float Hitbox::isCollisionAfterVectorTranslationCausedByGentleSlope(const Hitbox&
             if (otherCurrentHitboxGentleSlopeTop[i-1].x - currentHitboxBottom[0].x >= -ERROR_EPS
                 && currentHitboxBottom[0].x - otherCurrentHitboxGentleSlopeTop[i].x >= -ERROR_EPS) {
                 alpha = findSlopeCoefficient(otherCurrentHitboxGentleSlopeTop[i-1], otherCurrentHitboxGentleSlopeTop[i]);
-                alpha = std::abs(alpha);
                 break;
             }
+        }
+    }
+    if (std::abs(alpha)-MAXIMUM_GENTLE_SLOPE_COEFFICIENT <= ERROR_EPS) {
+        Point vTranslationVector(translationVector.x, translationVector.x*alpha);
+        if (isDirectlyAboveAfterVectorTranslation(otherHitbox, vTranslationVector)) {
+            return alpha;
+        } else {
+            return -INFINITY;
         }
     }
     return alpha;

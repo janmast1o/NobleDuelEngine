@@ -22,29 +22,31 @@ protected:
 
     std::list<MobileObject*> spawnedObjects_;
 
+    void removeGroundReactionAcceleration();
+    void addGroundReactionAcceleration();
+
+    void zeroVelocity();
+    void zeroAirborneGhostHorizontalVelocity();
+
     virtual void handleMoveHorizontally();
     void handleSlideDown();
     void handleAirborne();
     void handleFreefall();
     void handleStop();
 
-    void removeGroundReactionAcceleration();
-    void addGroundReactionAcceleration();
+    bool collidesWithAfterVectorTranslation(Object& otherObject, const Point& translationVector) const;
+    bool isDirectlyAboveAfterVectorTranslation(Object& otherObject, const Point& translationVector) const;
+    bool collidesWithTopAfterVectorTranslation(Object& otherObject, const Point& translationVector) const;
+    float isCollisionAfterVectorTranslationCausedByGentleSlope(Object& otherObject, const Point& translationVector) const;
+    float findSlopeCoefficientDirectlyBelowAfterVectorTranslation(Object& otherObject, const Point& translationVector) const;
+    float getVerticalDistanceToObjectBelowAfterVectorTranslation(Object& otherObject, const Point& translationVector) const;
+
+    virtual void translateObjectByVector(const Point& translationVector);
 
     ScheduledInstruction getSCheduled() const;
     ScheduledInstruction getPreviouslyScheduled() const;
     void setScheduled(ScheduledInstruction newScheduled);
     void clearScheduled();
-
-    void zeroVelocity();
-    void zeroAirborneGhostHorizontalVelocity();
-
-    bool collidesWithAfterVectorTranslation(Object& otherObject, const Point& translationVector) const;
-    bool isDirectlyAboveAfterVectorTranslation(Object& otherObject, const Point& translationVector) const;
-    bool collidesWithTop(Object& otherObject, const Point& translationVector) const;
-    float isCollisionAfterVectorTranslationCausedByGentleSlope(Object& otherObject, const Point& translationVector) const;
-    float findSlopeCoefficientDirectlyBelow(Object& otherObject, const Point& translationVector) const;
-    virtual void translateObjectByVector(const Point& translationVector);
 
 public:
 
