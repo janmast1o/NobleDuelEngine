@@ -18,7 +18,12 @@ Object::Object(SDL_Renderer* renderer, Point center, ModelCollection modelCollec
 
 Model* Object::getNextModelPtr() {
     ;
-}    
+}
+
+
+Hitbox& Object::getCurrentCollisionMesh() const {
+    return modelCollection_.getCurrentCollisionMesh(state_);
+}
 
 
 SDL_Renderer* Object::getRenderer() const {

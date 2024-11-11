@@ -39,6 +39,8 @@ public:
 
     Point* getCurrentOwnerCenterPtr();
 
+    Hitbox& getCurrentCollisionMesh() const;
+
     Model& getCurrentModel();
     void moveToNextModel();
     Model& moveAndGetModel();

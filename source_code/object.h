@@ -24,6 +24,10 @@ protected:
 
     Model* getNextModelPtr();
 
+    Hitbox& getCurrentCollisionMesh() const;
+
+    friend class MobileObject;
+
 public:
 
     Object(SDL_Renderer* renderer, Point center, ModelCollection modelCollection);

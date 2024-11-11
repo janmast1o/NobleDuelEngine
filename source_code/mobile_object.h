@@ -39,11 +39,10 @@ protected:
     bool collidesWithTopAfterVectorTranslation(Object& otherObject, const Point& translationVector) const;
     float isCollisionAfterVectorTranslationCausedByGentleSlope(Object& otherObject, const Point& translationVector) const;
     float findSlopeCoefficientDirectlyBelowAfterVectorTranslation(Object& otherObject, const Point& translationVector) const;
-    float getVerticalDistanceToObjectBelowAfterVectorTranslation(Object& otherObject, const Point& translationVector) const;
 
     virtual void translateObjectByVector(const Point& translationVector);
 
-    ScheduledInstruction getSCheduled() const;
+    ScheduledInstruction getScheduled() const;
     ScheduledInstruction getPreviouslyScheduled() const;
     void setScheduled(ScheduledInstruction newScheduled);
     void clearScheduled();

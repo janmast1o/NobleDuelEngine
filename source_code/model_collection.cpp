@@ -30,6 +30,19 @@ Point* ModelCollection::getCurrentOwnerCenterPtr() {
 }
 
 
+Hitbox& ModelCollection::getCurrentCollisionMesh(State state) const {
+    auto x = cyclesForStates_.find(state);
+    if (x != cyclesForStates_.end()) {
+        return x->second.getCurrentCollisionMesh();
+    } else {
+        x = cyclesForStates_.find(IDLE);
+        if (x != cyclesForStates_.end()) {
+            return x->second.getCurrentCollisionMesh();
+        }    
+    }
+}
+
+
 Model* ModelCollection::getCurrentModelPtrForState(State state) {
     auto x = cyclesForStates_.find(state);
     if (x != cyclesForStates_.end()) {

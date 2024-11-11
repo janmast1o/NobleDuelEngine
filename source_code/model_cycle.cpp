@@ -27,6 +27,11 @@ Point* ModelCycle::getCurrentOwnerCenterPtr() {
 }
 
 
+Hitbox& ModelCycle::getCurrentCollisionMesh() const {
+    return *collisionMeshPtr_;
+}
+
+
 Model& ModelCycle::getCurrentModel() {
     return (*it_).model;
 }

@@ -25,6 +25,8 @@ public:
 
     Point* getCurrentOwnerCenterPtr();
 
+    Hitbox& getCurrentCollisionMesh(State state) const;
+
     Model* getCurrentModelPtrForState(State state);
     Model* getNewModelPtrForState(State state);
     Model* getFirstModelPtrForState(State state);
