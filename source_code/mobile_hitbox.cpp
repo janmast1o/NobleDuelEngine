@@ -10,24 +10,21 @@ void translateStdVectorByVector(std::vector<Point>& vectorToTranslate, const Poi
 }
 
 
-MobileHitbox::MobileHitbox(const std::vector<Point> relativeHull) :
-    Hitbox(relativeHull) {}
+MobileHitbox::MobileHitbox(int id, const std::vector<Point> relativeHull) :
+    Hitbox(id, relativeHull) {}
 
 
-MobileHitbox::MobileHitbox(const MobileHitbox& otherMobileHitbox) :
-    Hitbox(otherMobileHitbox) {}
+MobileHitbox::MobileHitbox(int id, const MobileHitbox& otherMobileHitbox) :
+    Hitbox(id, otherMobileHitbox) {}
 
 
 const Rectangle MobileHitbox::getCurrentRectangle() const {
     Rectangle currentRectangle = relativeRectangle_;
-    if (ownerModel_ != nullptr) {
-        Point* objectOwnerCenterPtr = ownerModel_->getCurrentOwnerCenterPtr();
-        if (objectOwnerCenterPtr != nullptr) {
-            currentRectangle.lowerLeft += *objectOwnerCenterPtr;
-            currentRectangle.lowerRight += *objectOwnerCenterPtr;
-            currentRectangle.upperRight += *objectOwnerCenterPtr;
-            currentRectangle.upperLeft += *objectOwnerCenterPtr;
-        }
+    if (ownerCenterPtr_ != nullptr) {
+        currentRectangle.lowerLeft += *ownerCenterPtr_;
+        currentRectangle.lowerRight += *ownerCenterPtr_;
+        currentRectangle.upperRight += *ownerCenterPtr_;
+        currentRectangle.upperLeft += *ownerCenterPtr_;
     }
     return currentRectangle;
 }
@@ -35,11 +32,8 @@ const Rectangle MobileHitbox::getCurrentRectangle() const {
 
 const std::vector<Point> MobileHitbox::getCurrentHull() const {
     std::vector<Point> currentHull = relativeHull_;
-    if (ownerModel_ != nullptr) {
-        Point* objectOwnerCenterPtr = ownerModel_->getCurrentOwnerCenterPtr();
-        if (objectOwnerCenterPtr != nullptr) {
-            translateStdVectorByVector(currentHull, *objectOwnerCenterPtr);
-        }
+    if (ownerCenterPtr_ != nullptr) {
+        translateStdVectorByVector(currentHull, *ownerCenterPtr_);
     }
     return currentHull;
 }
@@ -47,11 +41,8 @@ const std::vector<Point> MobileHitbox::getCurrentHull() const {
 
 const std::vector<Point> MobileHitbox::getCurrentGentleSlopeTop() const {
     std::vector<Point> currentGentleSlopeTop = relativeGentleSlopeTop_;
-    if (ownerModel_ != nullptr) {
-        Point* objectOwnerCenterPtr = ownerModel_->getCurrentOwnerCenterPtr();
-        if (objectOwnerCenterPtr != nullptr) {
-            translateStdVectorByVector(currentGentleSlopeTop, *objectOwnerCenterPtr);
-        }
+    if (ownerCenterPtr_ != nullptr) {
+        translateStdVectorByVector(currentGentleSlopeTop, *ownerCenterPtr_);
     }
     return currentGentleSlopeTop;
 }
@@ -59,11 +50,8 @@ const std::vector<Point> MobileHitbox::getCurrentGentleSlopeTop() const {
 
 const std::vector<Point> MobileHitbox::getCurrentTop() const {
     std::vector<Point> currentTop = relativeTop_;
-    if (ownerModel_ != nullptr) {
-        Point* objectOwnerCenterPtr = ownerModel_->getCurrentOwnerCenterPtr();
-        if (objectOwnerCenterPtr != nullptr) {
-            translateStdVectorByVector(currentTop, *objectOwnerCenterPtr);
-        }
+    if (ownerCenterPtr_ != nullptr) {
+        translateStdVectorByVector(currentTop, *ownerCenterPtr_);
     }
     return currentTop;
 }
@@ -71,11 +59,8 @@ const std::vector<Point> MobileHitbox::getCurrentTop() const {
 
 const std::vector<Point> MobileHitbox::getCurrentBottom() const {
     std::vector<Point> currentBottom = relativeBottom_;
-    if (ownerModel_ != nullptr) {
-        Point* objectOwnerCenterPtr = ownerModel_->getCurrentOwnerCenterPtr();
-        if (objectOwnerCenterPtr != nullptr) {
-            translateStdVectorByVector(currentBottom, *objectOwnerCenterPtr);
-        }
+    if (ownerCenterPtr_ != nullptr) {
+        translateStdVectorByVector(currentBottom, *ownerCenterPtr_);
     }
     return currentBottom;
 }
@@ -83,15 +68,11 @@ const std::vector<Point> MobileHitbox::getCurrentBottom() const {
 
 const Rectangle MobileHitbox::getRectangleAfterVectorTranslation(const Point& translationVector) const {
     Rectangle currentRectangle = relativeRectangle_;
-    if (ownerModel_ != nullptr) {
-        Point* objectOwnerCenterPtr = ownerModel_->getCurrentOwnerCenterPtr();
-        if (objectOwnerCenterPtr != nullptr) {
-            Point v = *objectOwnerCenterPtr + translationVector;
-            currentRectangle.lowerLeft += v;
-            currentRectangle.lowerRight += v;
-            currentRectangle.upperRight += v;
-            currentRectangle.upperLeft += v;
-        }
+    if (ownerCenterPtr_ != nullptr) {
+        currentRectangle.lowerLeft += *ownerCenterPtr_+translationVector;
+        currentRectangle.lowerRight += *ownerCenterPtr_+translationVector;
+        currentRectangle.upperRight += *ownerCenterPtr_+translationVector;
+        currentRectangle.upperLeft += *ownerCenterPtr_+translationVector;
     }
     return currentRectangle;
 }
@@ -99,11 +80,8 @@ const Rectangle MobileHitbox::getRectangleAfterVectorTranslation(const Point& tr
 
 const std::vector<Point> MobileHitbox::getHullAfterVectorTranslation(const Point& translationVector) const {
     std::vector<Point> currentHull = relativeHull_;
-    if (ownerModel_ != nullptr) {
-        Point* objectOwnerCenterPtr = ownerModel_->getCurrentOwnerCenterPtr();
-        if (objectOwnerCenterPtr != nullptr) {
-            translateStdVectorByVector(currentHull, *objectOwnerCenterPtr+translationVector);
-        }
+    if (ownerCenterPtr_ != nullptr) {
+        translateStdVectorByVector(currentHull, *ownerCenterPtr_+translationVector);
     }
     return currentHull;
 }
@@ -111,11 +89,8 @@ const std::vector<Point> MobileHitbox::getHullAfterVectorTranslation(const Point
 
 const std::vector<Point> MobileHitbox::getGentleSlopeTopAfterVectorTranslation(const Point& translationVector) const {
     std::vector<Point> currentGentleSlopeTop = relativeGentleSlopeTop_;
-    if (ownerModel_ != nullptr) {
-        Point* objectOwnerCenterPtr = ownerModel_->getCurrentOwnerCenterPtr();
-        if (objectOwnerCenterPtr != nullptr) {
-            translateStdVectorByVector(currentGentleSlopeTop, *objectOwnerCenterPtr+translationVector);
-        }
+    if (ownerCenterPtr_ != nullptr) {
+        translateStdVectorByVector(currentGentleSlopeTop, *ownerCenterPtr_+translationVector);
     }
     return currentGentleSlopeTop;
 }
@@ -123,11 +98,8 @@ const std::vector<Point> MobileHitbox::getGentleSlopeTopAfterVectorTranslation(c
 
 const std::vector<Point> MobileHitbox::getTopAfterVectorTranslation(const Point& translationVector) const {
     std::vector<Point> currentTop = relativeTop_;
-    if (ownerModel_ != nullptr) {
-        Point* objectOwnerCenterPtr = ownerModel_->getCurrentOwnerCenterPtr();
-        if (objectOwnerCenterPtr != nullptr) {
-            translateStdVectorByVector(currentTop, *objectOwnerCenterPtr+translationVector);
-        }
+    if (ownerCenterPtr_ != nullptr) {
+        translateStdVectorByVector(currentTop, *ownerCenterPtr_+translationVector);
     }
     return currentTop;
 }
@@ -135,11 +107,8 @@ const std::vector<Point> MobileHitbox::getTopAfterVectorTranslation(const Point&
 
 const std::vector<Point> MobileHitbox::getBottomAfterVectorTranslation(const Point& translationVector) const {
     std::vector<Point> currentBottom = relativeBottom_;
-    if (ownerModel_ != nullptr) {
-        Point* objectOwnerCenterPtr = ownerModel_->getCurrentOwnerCenterPtr();
-        if (objectOwnerCenterPtr != nullptr) {
-            translateStdVectorByVector(currentBottom, *objectOwnerCenterPtr+translationVector);
-        }
+    if (ownerCenterPtr_ != nullptr) {
+        translateStdVectorByVector(currentBottom, *ownerCenterPtr_+translationVector);
     }
     return currentBottom;
 }

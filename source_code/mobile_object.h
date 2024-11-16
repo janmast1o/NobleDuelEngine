@@ -2,6 +2,8 @@
 #define MOBILE_OBJECT_H
 
 #include "object.h"
+#include "object_map.h"
+#include "mobile_hitbox.h"
 
 class MobileObject : public Object {
 
@@ -49,7 +51,7 @@ protected:
 
 public:
 
-    MobileObject(SDL_Renderer* renderer, Point center, ModelCollection modelCollection);
+    MobileObject(SDL_Renderer* renderer, Point center, ModelCollection modelCollection, ObjectMap& objectMap);
     
     float getMaxVerticalV() const;
     void setMaxVerticalV(float newMaxVerticalV);
@@ -70,6 +72,8 @@ public:
 
     bool isAnythingScheduled() const;
     virtual void runScheduled();
+
+    virtual ~MobileObject() = default;
 
 };
 

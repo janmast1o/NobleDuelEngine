@@ -6,8 +6,6 @@ Model::Model(SDL_Texture* texture, Hitbox* hitboxPtr) : texture_(texture), hitbo
     int iwidth, iheight;
     SDL_QueryTexture(texture, NULL, NULL, &iwidth, &iheight);
     relativeRectangle_ = Rectangle((float) iwidth, float(iheight));
-    hitboxPtr_->setModelOwner(this);
-    modelCycleContainer_ = nullptr;
 }
 
 
@@ -15,10 +13,8 @@ Model::Model(SDL_Texture* texture, Hitbox* hitboxPtr, const Point textureULRelat
     int iwidth, iheight;
     SDL_QueryTexture(texture, NULL, NULL, &iwidth, &iheight);
     float fwidth = (float) iwidth;
-    float fheight = (float) fheight;
+    float fheight = (float) iheight;
     relativeRectangle_ = Rectangle(Point(0,-fheight) + textureULRelativeToCenter, Point(fwidth,0) + textureULRelativeToCenter);
-    hitboxPtr_->setModelOwner(this);
-    modelCycleContainer_ = nullptr;
 }
 
 
@@ -28,31 +24,17 @@ Model::Model(const Model& otherModel) :
     relativeRectangle_(otherModel.relativeRectangle_) {}
 
 
-void Model::setModelCycleContainer(ModelCycle* newModelCycleContainer) {
-    modelCycleContainer_ = newModelCycleContainer;
-}
-
-
-Point* Model::getCurrentOwnerCenterPtr() {
-    if (modelCycleContainer_ != nullptr) {
-        return modelCycleContainer_->getCurrentOwnerCenterPtr();
-    } else {
-        return nullptr;
-    }
-}
-
-
 SDL_Texture* Model::getTexture() const {
     return texture_;
 }
 
 
-float Model::getModelWidth() const {
+float Model::getModelTextureWidth() const {
     return relativeRectangle_.upperRight.x - relativeRectangle_.lowerLeft.x;
 }
 
 
-float Model::getModelHeight() const {
+float Model::getModelTextureHeight() const {
     return relativeRectangle_.upperRight.y - relativeRectangle_.lowerLeft.y;
 }
 
@@ -62,6 +44,6 @@ Point& Model::getTextureRelativeUL() {
 }
 
 
-Hitbox* Model::getHitboxPtr() {
+Hitbox* Model::getHitboxPtr() const {
     return hitboxPtr_;
 }

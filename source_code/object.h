@@ -2,8 +2,9 @@
 #define OBJECT_H
 
 #include <SDL2/SDL.h>
-#include "structs_and_enums.cpp"
+#include "structs_and_enums.h"
 #include "model_collection.h"
+#include "static_hitbox.h"
 
 class Object {
 
@@ -19,6 +20,8 @@ private:
     State state_;
     State previousState_;
     DamageReceiveState damageReceiveState_;
+
+    void registerOwnerCenterPtrForHitboxes();
 
 protected:
 
@@ -37,6 +40,7 @@ public:
     int getHealth() const;
     void setHealth(int newHealth);
     void subtractFromHealth(int subtractAmount);
+    bool isAlive() const;
 
     Point& getCenter();
     void setCenter(const Point& newCenter);
@@ -48,10 +52,14 @@ public:
     State getPreviousState() const;
     void setNewState(State newState);
 
+    std::list<int> getAllTiedHitboxes() const;
+
     void redrawObject();
     void redrawObject(bool drawHitboxes, float pointSize);
 
     bool collideableWith(const Object& otherObject);
+
+    virtual ~Object() = default;
 
 };
 

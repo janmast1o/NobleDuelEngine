@@ -1,12 +1,12 @@
 #include "mobile_object.h"
 #include "object.h"
 #include "constants.h"
-#include "utility_functions.cpp"
+#include "utility_functions.h"
 #include <cmath>
 
-MobileObject::MobileObject(SDL_Renderer* renderer, Point center, ModelCollection modelCollection) :
-    Object(renderer, center, modelCollection) {
-        acceleration_.horizontalAcceleration = -GRAVITATIONAL_PULL;
+MobileObject::MobileObject(SDL_Renderer* renderer, Point center, ModelCollection modelCollection, ObjectMap& objectMap) :
+    Object(renderer, center, modelCollection), objectMap_(objectMap) {
+        acceleration_.verticalAcceleration = -GRAVITATIONAL_PULL;
         slopeInclineDirectlyUnderneath_ = 0;
         scheduled_ = HANDLE_FREEFALL;
         previouslyScheduled_ = NOTHING;
@@ -69,25 +69,25 @@ void MobileObject::newHorizontalAcceleration(Direction direction) {
 
 
 void MobileObject::newVelocity() {
-    if (std::abs(velocity_.horizontalVelocity) > LOWEST_V_UNAFFECTED_BY_AIR_RES) {
-        velocity_.horizontalVelocity -= getSign(velocity_.horizontalVelocity)*AIR_RES_COEFFICIENT*std::pow(velocity_.horizontalVelocity, 2);
-    }
+    // if (std::abs(velocity_.horizontalVelocity) > LOWEST_V_UNAFFECTED_BY_AIR_RES) {
+    //     velocity_.horizontalVelocity -= getSign(velocity_.horizontalVelocity)*AIR_RES_COEFFICIENT*std::pow(velocity_.horizontalVelocity, 2);
+    // }
     if (std::abs(velocity_.horizontalVelocity) < objectSpecificPhysicsChar_.maxHorizontalV) {
         velocity_.horizontalVelocity += acceleration_.horizontalAcceleration*(1.0/FPS);
     }
-    if (std::abs(velocity_.verticalVelocity) > LOWEST_V_UNAFFECTED_BY_AIR_RES) {
-        velocity_.verticalVelocity -= getSign(velocity_.verticalVelocity)*AIR_RES_COEFFICIENT*std::pow(velocity_.verticalVelocity, 2);
-    }
+    // if (std::abs(velocity_.verticalVelocity) > LOWEST_V_UNAFFECTED_BY_AIR_RES) {
+    //     velocity_.verticalVelocity -= getSign(velocity_.verticalVelocity)*AIR_RES_COEFFICIENT*std::pow(velocity_.verticalVelocity, 2);
+    // }
     if (std::abs(velocity_.verticalVelocity) < objectSpecificPhysicsChar_.maxVerticalV) {
-        velocity_.verticalVelocity += acceleration_.veticalAcceleration*(1.0/FPS);
+        velocity_.verticalVelocity += acceleration_.verticalAcceleration*(1.0/FPS);
     }
     if ((scheduled_ == HANDLE_AIRBORNE && singleStatePersistenceTimer_.airborneTimer < MAX_AIRBORNE_ACCELERABLE) || 
         (scheduled_ == HANDLE_FREEFALL && singleStatePersistenceTimer_.freefallTimer < MAX_AIRBORNE_ACCELERABLE)) {
-            if (std::abs(airborneGhostHorizontalVelocity_.horizontalVelocity) > LOWEST_V_UNAFFECTED_BY_AIR_RES) {
-                airborneGhostHorizontalVelocity_.horizontalVelocity -= getSign(airborneGhostHorizontalVelocity_.horizontalVelocity)
-                                                                               *AIR_RES_COEFFICIENT
-                                                                               *std::pow(airborneGhostHorizontalVelocity_.horizontalVelocity, 2);
-            }
+            // if (std::abs(airborneGhostHorizontalVelocity_.horizontalVelocity) > LOWEST_V_UNAFFECTED_BY_AIR_RES) {
+            //     airborneGhostHorizontalVelocity_.horizontalVelocity -= getSign(airborneGhostHorizontalVelocity_.horizontalVelocity)
+            //                                                                    *AIR_RES_COEFFICIENT
+            //                                                                    *std::pow(airborneGhostHorizontalVelocity_.horizontalVelocity, 2);
+            // }
             if (std::abs(airborneGhostHorizontalVelocity_.horizontalVelocity) < objectSpecificPhysicsChar_.maxHorizontalV) {
                 airborneGhostHorizontalVelocity_.horizontalVelocity += getSign(airborneGhostHorizontalVelocity_.horizontalVelocity)*objectSpecificPhysicsChar_.horizontalAcc*(1.0/FPS);
             }
@@ -108,12 +108,23 @@ int MobileObject::getFacedSideAsInt() const {
 
 
 void MobileObject::removeGroundReactionAcceleration() {
-    acceleration_.veticalAcceleration = GRAVITATIONAL_PULL;
+    acceleration_.verticalAcceleration = -GRAVITATIONAL_PULL;
 }
 
 
 void MobileObject::addGroundReactionAcceleration() {
-    acceleration_.veticalAcceleration = 0;
+    acceleration_.verticalAcceleration = 0;
+}
+
+
+void MobileObject::zeroVelocity() {
+    velocity_.horizontalVelocity = 0;
+    velocity_.verticalVelocity = 0;
+}
+
+
+void MobileObject::zeroAirborneGhostHorizontalVelocity() {
+    airborneGhostHorizontalVelocity_.horizontalVelocity = 0;
 }
 
 
@@ -270,7 +281,7 @@ void MobileObject::handleAirborne() {
     float sx = velocity_.horizontalVelocity*(1.0/FPS);
     float sy = velocity_.verticalVelocity*(1.0/FPS);
     Point svec(sx, sy);
-    std::list<Object*> potentiallyColliding = objectMap_.getPotentiallyColliding();
+    std::list<Object*> potentiallyColliding = objectMap_.getPotentiallyColliding(*this);
     bool collisionDetected = false;
     bool groundUnderneathFound = false;
     float alpha = -INFINITY;
@@ -331,18 +342,22 @@ void MobileObject::handleFreefall() {
     newVelocity();
     float sy = velocity_.verticalVelocity*(1.0/FPS);
     Point svec(0, sy);
-    std::list<Object*> potentiallyUndeneath = objectMap_.getPotentiallyUnderneath(this);
+    std::list<Object*> potentiallyUndeneath = objectMap_.getPotentiallyUnderneath(*this);
     float groundUnderneathFound = false;
     float alpha = -INFINITY;
 
     for (Object* p : potentiallyUndeneath) {
         if (p != this && collideableWith(*p)) {
-            if (collidesWithAfterVectorTranslation(*p, svec)) {
+            if (collidesWithTopAfterVectorTranslation(*p, svec)) {
                 groundUnderneathFound = true;
                 alpha = findSlopeCoefficientDirectlyBelowAfterVectorTranslation(*p, svec);
                 break;
             }
         }
+    }
+
+    if (groundUnderneathFound) {
+        std::cout << groundUnderneathFound << std::endl;
     }
     
     if (groundUnderneathFound) {
@@ -358,6 +373,7 @@ void MobileObject::handleFreefall() {
             clearScheduled();
         }
     } else {
+        translateObjectByVector(svec);
         setScheduled(HANDLE_FREEFALL);
     }
     if (isLeftFacing(getPreviousState())) {
@@ -460,6 +476,7 @@ void MobileObject::runScheduled() {
                 handleStop();
                 break;
             default:
+                clearScheduled();
                 break;                
         }
     }

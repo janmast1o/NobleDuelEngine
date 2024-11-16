@@ -1,23 +1,33 @@
 #include "object.h"
 #include "model.h"
 #include "hitbox.h"
-#include "utility_functions.cpp"
+#include "utility_functions.h"
 #include <cmath>
 #include <vector>
+#include <unordered_set>
 
 Object::Object(SDL_Renderer* renderer, Point center, ModelCollection modelCollection) :
     renderer_(renderer), center_(center), modelCollection_(modelCollection) {
-        modelCollection_.setOwner(this);
         health_ = INFINITY;
         matter_ = SOLID;
         state_ = IDLE;
         previousState_ = IDLE;
         damageReceiveState_ = INVULNERABLE;
+        registerOwnerCenterPtrForHitboxes();
     }
 
 
+void Object::registerOwnerCenterPtrForHitboxes() {
+    modelCollection_.registerOwnerCenterPtrForHitboxes(&center_);
+}
+
+
 Model* Object::getNextModelPtr() {
-    ;
+    if (previousState_ == state_) {
+        return modelCollection_.getNewModelPtrForState(state_);
+    } else {
+        return modelCollection_.getFirstModelPtrForState(state_);
+    }
 }
 
 
@@ -49,13 +59,19 @@ void Object::subtractFromHealth(int subtractAmount) {
 }
 
 
+bool Object::isAlive() const {
+    return health_ > 0;
+}
+
+
 Point& Object::getCenter() {
     return center_;
 }
 
 
 void Object::setCenter(const Point& newCenter) {
-    center_ = newCenter;
+    center_.x = newCenter.x;
+    center_.y = newCenter.y;
 }
 
 
@@ -85,14 +101,19 @@ void Object::setNewState(State newState) {
 }
 
 
+std::list<int> Object::getAllTiedHitboxes() const {
+    return modelCollection_.getAllTiedHitboxes();
+}
+
+
 void Object::redrawObject() {
     SDL_FRect destRect;
     Model* model = getNextModelPtr();
     if (model != nullptr) {
-        destRect.w = model->getModelWidth();
-        destRect.h = model->getModelHeight();
+        destRect.w = model->getModelTextureWidth();
+        destRect.h = model->getModelTextureHeight();
         destRect.x = model->getTextureRelativeUL().x + center_.x;
-        destRect.y = model->getTextureRelativeUL().y + center_.y;
+        destRect.y = -(model->getTextureRelativeUL().y + center_.y);
         SDL_RenderCopyF(renderer_, model->getTexture(), NULL, &destRect);
     }
 }
@@ -102,10 +123,10 @@ void Object::redrawObject(bool drawHitboxes, float pointSize) {
     SDL_FRect destRect;
     Model* model = getNextModelPtr();
     if (model != nullptr) {
-        destRect.w = model->getModelWidth();
-        destRect.h = model->getModelHeight();
+        destRect.w = model->getModelTextureWidth();
+        destRect.h = model->getModelTextureHeight();
         destRect.x = model->getTextureRelativeUL().x + center_.x;
-        destRect.y = model->getTextureRelativeUL().y + center_.y;
+        destRect.y = -(model->getTextureRelativeUL().y + center_.y);
         SDL_RenderCopyF(renderer_, model->getTexture(), NULL, &destRect);
         if (drawHitboxes) {
             std::vector<Point> hull = model->getHitboxPtr()->getCurrentHull();

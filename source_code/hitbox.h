@@ -1,20 +1,22 @@
 #ifndef HITBOX_H
 #define HITBOX_H
 
-#include "structs_and_enums.cpp"
+#include "structs_and_enums.h"
 #include <vector>
 
-class Model;
+class HitboxContainer;
 
 class Hitbox {
 
 private:
 
+    const int id_;
+    
     bool active_;
     
 protected:
 
-    Model* ownerModel_;
+    Point* ownerCenterPtr_;
     Rectangle relativeRectangle_;
     
     const std::vector<Point> relativeHull_;
@@ -26,10 +28,12 @@ protected:
 
 public:
 
-    Hitbox(const std::vector<Point> relativeHull);
-    Hitbox(const Hitbox& otherHitbox);
+    Hitbox(int id, const std::vector<Point> relativeHull);
+    Hitbox(int id, const Hitbox& otherHitbox);
 
-    virtual void setModelOwner(Model* newOwnerModel);
+    int getId() const;
+    Point* getOwnerCenterPtr() const;
+    virtual void setOwnerCenterPtr(Point* ownerCenterPtr);
 
     void makeActive();
     void makeInactive();

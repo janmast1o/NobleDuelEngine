@@ -1,12 +1,17 @@
 #include "static_hitbox.h"
 #include "model.h"
 
-StaticHitbox::StaticHitbox(const std::vector<Point> realtiveHull) : 
-    Hitbox(realtiveHull) {}
+StaticHitbox::StaticHitbox(int id, const std::vector<Point> realtiveHull) : 
+    Hitbox(id, realtiveHull),
+    rectangle_(relativeRectangle_),
+    hull_(relativeHull_),
+    gentleSlopeTop_(relativeGentleSlopeTop_),
+    top_(relativeTop_),
+    bottom_(relativeBottom_) {}
 
 
-StaticHitbox::StaticHitbox(const StaticHitbox& otherStaticHitbox) :
-    Hitbox(otherStaticHitbox),
+StaticHitbox::StaticHitbox(int id, const StaticHitbox& otherStaticHitbox) :
+    Hitbox(id, otherStaticHitbox),
     rectangle_(otherStaticHitbox.rectangle_),
     hull_(otherStaticHitbox.hull_),
     gentleSlopeTop_(otherStaticHitbox.gentleSlopeTop_),
@@ -14,33 +19,30 @@ StaticHitbox::StaticHitbox(const StaticHitbox& otherStaticHitbox) :
     bottom_(otherStaticHitbox.bottom_) {}
 
 
-void StaticHitbox::setModelOwner(Model* newOwnerModel) {
-    ownerModel_ = newOwnerModel;
+void StaticHitbox::setOwnerCenterPtr(Point* ownerCenterPtr) {
+    ownerCenterPtr_ = ownerCenterPtr;
     rectangle_ = relativeRectangle_;
     hull_ = relativeHull_;
     gentleSlopeTop_ = relativeGentleSlopeTop_;
     top_ = relativeTop_;
     bottom_ = relativeBottom_;
-    if (newOwnerModel != nullptr) {
-        Point* objectOwnerCenterPtr = ownerModel_->getCurrentOwnerCenterPtr();
-        if (objectOwnerCenterPtr != nullptr) {
-            rectangle_.lowerLeft += *objectOwnerCenterPtr;
-            rectangle_.lowerRight += *objectOwnerCenterPtr;
-            rectangle_.upperRight += *objectOwnerCenterPtr;
-            rectangle_.upperLeft += *objectOwnerCenterPtr;
-            for (int i=0; i<hull_.size(); i++) {
-                hull_[i] += *objectOwnerCenterPtr;
-            }
-            for (int i=0; i<gentleSlopeTop_.size(); i++) {
-                gentleSlopeTop_[i] += *objectOwnerCenterPtr;
-            }
-            for (int i=0; i<top_.size(); i++) {
-                top_[i] += *objectOwnerCenterPtr;
-            }
-            for (int i=0; i<bottom_.size(); i++) {
-                bottom_[i] += *objectOwnerCenterPtr;
-            }
-        }  
+    if (ownerCenterPtr_ != nullptr) {
+        rectangle_.lowerLeft += *ownerCenterPtr_;
+        rectangle_.lowerRight += *ownerCenterPtr_;
+        rectangle_.upperRight += *ownerCenterPtr_;
+        rectangle_.upperLeft += *ownerCenterPtr_;
+        for (int i=0; i<hull_.size(); i++) {
+            hull_[i] += *ownerCenterPtr_;
+        }
+        for (int i=0; i<gentleSlopeTop_.size(); i++) {
+            gentleSlopeTop_[i] += *ownerCenterPtr_;
+        }
+        for (int i=0; i<top_.size(); i++) {
+            top_[i] += *ownerCenterPtr_;
+        }
+        for (int i=0; i<bottom_.size(); i++) {
+            bottom_[i] += *ownerCenterPtr_;
+        }
     }
 }   
 

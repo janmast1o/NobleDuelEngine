@@ -1,17 +1,29 @@
 CXX = g++
-FLAGS = -Wall -g -o
-STANDARD = -std=c++17
-SDL_FLAGS = -lSDL2 -lSDL2_image -lSDL2_mixer -lSDL2_ttf
+CXXFLAGS = -std=c++17 -Wall -g
 
-all_targets = compiled/main
+SOURCES = main.cpp \
+          source_code/offline_engine.cpp \
+		  source_code/player.cpp \
+		  source_code/creature.cpp \
+		  source_code/mobile_object.cpp \
+		  source_code/object_map.cpp \
+		  source_code/object.cpp \
+		  source_code/model_collection.cpp \
+		  source_code/model_cycle.cpp \
+		  source_code/model.cpp \
+		  source_code/hitbox_container.cpp \
+		  source_code/static_hitbox.cpp \
+		  source_code/mobile_hitbox.cpp \
+		  source_code/hitbox.cpp \
+		  source_code/utility_functions.cpp \
+		  source_code/structs_and_enums.cpp \
+		  source_code/constants.h
 
 
-all: $(all_targets)
+TARGET = compiled/main
 
-
-compiled/main: main.cpp
-	$(CXX) $(STANDARD) $(FLAGS) compiled/main main.cpp $(SDL_FLAGS)
-
+$(TARGET): $(SOURCES)
+	$(CXX) $(CXXFLAGS) -o $(TARGET) $(SOURCES) -lSDL2 -lSDL2_image -lSDL2_mixer -lSDL2_ttf
 
 clean:
-	rm -r --force $(all_targets)	
+	rm -rf compiled/*

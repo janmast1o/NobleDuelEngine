@@ -1,15 +1,17 @@
 #include "hitbox.h"
 #include "model.h"
-#include "utility_functions.cpp"
+#include "utility_functions.h"
+#include "constants.h"
 
-Hitbox::Hitbox(const std::vector<Point> relativeHull) : 
+Hitbox::Hitbox(int id, const std::vector<Point> relativeHull) : 
+    id_(id),
     relativeHull_(relativeHull),
     relativeGentleSlopeTop_(findGentleSlopeTop(relativeHull)),
     relativeTop_(findTop(relativeHull)),
     // relativeLeftTop_(findLeftTop(relativeHull)),
     // relativeRightTop_(findRightTop(relativeHull)),
     relativeBottom_(findBottom(relativeHull)) {
-        ownerModel_ = nullptr;
+        ownerCenterPtr_ = nullptr;
         active_ = false;
         float leftmostX = relativeHull_[support(relativeHull_, Point(-1,0))].x;
         float rightmostX = relativeHull_[support(relativeHull_, Point(1,0))].x;
@@ -21,21 +23,32 @@ Hitbox::Hitbox(const std::vector<Point> relativeHull) :
     }
 
 
-Hitbox::Hitbox(const Hitbox& otherHitbox) :
+Hitbox::Hitbox(int id, const Hitbox& otherHitbox) :
+    id_(id),
     relativeHull_(otherHitbox.relativeHull_),
     relativeGentleSlopeTop_(otherHitbox.relativeGentleSlopeTop_),
     relativeTop_(otherHitbox.relativeTop_),
     // relativeLeftTop_(otherHitbox.relativeLeftTop_),
     // relativeRightTop_(otherHitbox.relativeRightTop_),
     relativeBottom_(otherHitbox.relativeBottom_),
-    ownerModel_(otherHitbox.ownerModel_),
+    ownerCenterPtr_(otherHitbox.ownerCenterPtr_),
     active_(otherHitbox.active_),
     relativeRectangle_(otherHitbox.relativeRectangle_) {}
 
 
-void Hitbox::setModelOwner(Model* newModelOwner) {
-    ownerModel_ = newModelOwner;
-}    
+int Hitbox::getId() const {
+    return id_;
+}
+
+
+Point* Hitbox::getOwnerCenterPtr() const {
+    return ownerCenterPtr_;
+} 
+
+
+void Hitbox::setOwnerCenterPtr(Point* ownerCenterPtr) {
+    ownerCenterPtr_ = ownerCenterPtr;
+}
 
 
 void Hitbox::makeActive() {
@@ -151,6 +164,7 @@ bool Hitbox::collidesWithTopAfterVectorTranslation(const Hitbox& otherHitbox, co
     }
     std::vector<Point> currentHitboxHull = getHullAfterVectorTranslation(translationVector);
     const std::vector<Point> otherCurrentHitboxTop = otherHitbox.getCurrentTop();
+    // std::cout << currentHitboxHull[0] << ", " << otherCurrentHitboxTop[0] << std::endl;
     if (gjk(currentHitboxHull, otherCurrentHitboxTop)) {
         float sx = translationVector.x;
         Point horizontalPushVector;
@@ -161,7 +175,7 @@ bool Hitbox::collidesWithTopAfterVectorTranslation(const Hitbox& otherHitbox, co
             horizontalPushVector = {SLIGHT_HORIZONTAL_PUSH, 0};
         }
         else {
-            horizontalPushVector = {0, 0};
+            return true;
         }
         for (int i = 0; i < currentHitboxHull.size(); i++) {
             currentHitboxHull[i] = currentHitboxHull[i] + horizontalPushVector;

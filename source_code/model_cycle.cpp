@@ -1,29 +1,27 @@
 #include "model_cycle.h"
 #include "model_collection.h"
 
-ModelCycle::ModelCycle(Hitbox* collisionMeshPtr) : collisionMeshPtr_(collisionMeshPtr) {
-    modelCollectionContainer_ = nullptr;
+
+ModelCycle::ModelCycle() : collisionMeshPtr_(nullptr) {
     it_ = modelList_.begin();
 }
+
+
+ModelCycle::ModelCycle(Hitbox* collisionMeshPtr) : collisionMeshPtr_(collisionMeshPtr) {
+    it_ = modelList_.begin();
+}
+
+
+ModelCycle::ModelCycle(const ModelCycle& otherModelCycle) :
+    modelList_(otherModelCycle.modelList_),
+    collisionMeshPtr_(otherModelCycle.collisionMeshPtr_) {
+        it_ = modelList_.begin();
+    }
 
 
 void ModelCycle::addModelAndResetIterator(Model model, int lingerOn) {
-    modelList_.push_back(ModelAndLingerPair(model, lingerOn));
+    modelList_.emplace_back(model, lingerOn);
     it_ = modelList_.begin();
-}
-
-
-void ModelCycle::setModelCollectionContainer(ModelCollection* newModelCollectionContainer) {
-    modelCollectionContainer_ = newModelCollectionContainer;
-}
-
-
-Point* ModelCycle::getCurrentOwnerCenterPtr() {
-    if (modelCollectionContainer_ != nullptr) {
-        modelCollectionContainer_->getCurrentOwnerCenterPtr();
-    } else {
-        return nullptr;
-    }
 }
 
 
@@ -32,7 +30,7 @@ Hitbox& ModelCycle::getCurrentCollisionMesh() const {
 }
 
 
-Model& ModelCycle::getCurrentModel() {
+Model& ModelCycle::getCurrentModel() const {
     return (*it_).model;
 }
 

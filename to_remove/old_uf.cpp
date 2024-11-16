@@ -1,6 +1,10 @@
-#include "utility_functions.h"
-#include "constants.h"
+#include <SDL2/SDL.h>
 #include <vector>
+#include "structs_and_enums.h"
+#include "constants.h"
+
+#ifndef DRAW_POINT
+#define DRAW_POINT
 
 void drawPoint(SDL_Renderer* renderer, float x, float y, float pointSize) {
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
@@ -12,17 +16,45 @@ void drawPoint(SDL_Renderer* renderer, float x, float y, float pointSize) {
     SDL_RenderFillRectF(renderer, &pointRect);
 }
 
+#endif
+
+#ifndef GET_SIGN
+#define GET_SIGN
+
+template <typename T>
+T getSign(T x) {
+    if (std::abs(x) <= ERROR_EPS) {
+        return 0;
+    } else if (x > 0) {
+        return 1;
+    } else {
+        return -1;
+    }
+}
+
+#endif
+
+#ifndef DOT_PRODUCT
+#define DOT_PRODUCT
 
 float dotProduct(const Point& A, const Point& B) {
     return A.x*B.x + A.y*B.y;
 }
 
+#endif
+
+#ifndef TRIPLE_PROD
+#define TRIPLE_PROD
 
 Point tripleProduct(const Point& A, const Point& B, const Point& C) {
     float alpha = A.x*B.y - A.y*B.x;
     return Point(-alpha*C.y, alpha*C.x);
 }
 
+#endif
+
+#ifndef SUPPORT
+#define SUPPORT
 
 int support(const std::vector<Point>& S, const Point& d) {
     int sought = 0;
@@ -43,6 +75,10 @@ int support(const std::vector<Point>& S, const Point& d) {
     return sought;
 }
 
+#endif
+
+#ifndef FIND_SLOPE_COEFFICIENT
+#define FIND_SLOPE_COEFFICIENT
 
 float findSlopeCoefficient(const Point& A, const Point& B) {
     if (std::abs(A.x-B.x) < ERROR_EPS) {
@@ -52,6 +88,10 @@ float findSlopeCoefficient(const Point& A, const Point& B) {
     }
 }
 
+#endif
+
+#ifndef FIND_GENTLE_SLOPE_TOP
+#define FIND_GENTLE_SLOPE_TOP
 
 std::vector<Point> findGentleSlopeTop(const std::vector<Point>& polygon) {
     float maxSlopeCoefficient = MAXIMUM_GENTLE_SLOPE_COEFFICIENT;
@@ -102,6 +142,10 @@ std::vector<Point> findGentleSlopeTop(const std::vector<Point>& polygon) {
     }
 }
 
+#endif
+
+#ifndef FIND_TOP
+#define FIND_TOP
 
 std::vector<Point> findTop(const std::vector<Point>& polygon) {
     int n = polygon.size();
@@ -134,6 +178,10 @@ std::vector<Point> findTop(const std::vector<Point>& polygon) {
     return top;
 }
 
+#endif
+
+#ifndef FIND_LEFT_TOP
+#define FIND_LEFT_TOP
 
 std::vector<Point> findLeftTop(const std::vector<Point>& polygon) {
     int n = polygon.size();
@@ -153,6 +201,10 @@ std::vector<Point> findLeftTop(const std::vector<Point>& polygon) {
     return leftTop;
 }
 
+#endif
+
+#ifndef FIND_RIGHT_TOP
+#define FIND_RIGHT_TOP
 
 std::vector<Point> findRightTop(const std::vector<Point>& polygon) {
     int n = polygon.size();
@@ -172,6 +224,10 @@ std::vector<Point> findRightTop(const std::vector<Point>& polygon) {
     return rightTop;
 }
 
+#endif
+
+#ifndef FIND_BOTTOM
+#define FIND_BOTTOM
 
 std::vector<Point> findBottom(const std::vector<Point>& polygon) {
     int n = polygon.size();
@@ -202,6 +258,10 @@ std::vector<Point> findBottom(const std::vector<Point>& polygon) {
     return bottom;
 }
 
+#endif
+
+#ifndef GJK
+#define GJK
 
 bool gjk(const std::vector<Point>& S, const std::vector<Point>& R) {
     if (S.size() == 0 || R.size() == 0) {
@@ -250,6 +310,10 @@ bool gjk(const std::vector<Point>& S, const std::vector<Point>& R) {
     }
 }
 
+#endif
+
+#ifndef IS_LEFT_FACING
+#define IS_LEFT_FACING
 
 bool isLeftFacing(State state) {
     return state == IDLE_LEFT || 
@@ -259,6 +323,10 @@ bool isLeftFacing(State state) {
            state == QUICKLY_M_LEFT;
 }
 
+#endif
+
+#ifndef IS_RIGHT_FACING
+#define IS_RIGHT_FACING
 
 bool isRightFacing(State state) {
     return state == IDLE_RIGHT || 
@@ -267,3 +335,5 @@ bool isRightFacing(State state) {
            state == FREEFALL_RIGHT || 
            state == QUICKLY_M_RIGHT;
 }
+
+#endif

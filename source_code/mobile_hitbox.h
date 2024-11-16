@@ -7,8 +7,8 @@ class MobileHitbox : public Hitbox {
 
 public:    
 
-    MobileHitbox(const std::vector<Point> relativeHull);
-    MobileHitbox(const MobileHitbox& otherMobileHitbox);
+    MobileHitbox(int id, const std::vector<Point> relativeHull);
+    MobileHitbox(int id, const MobileHitbox& otherMobileHitbox);
 
     const Rectangle getCurrentRectangle() const override;
     const std::vector<Point> getCurrentHull() const override;

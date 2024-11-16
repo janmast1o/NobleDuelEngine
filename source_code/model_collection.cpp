@@ -1,32 +1,34 @@
 #include "model_collection.h"
 #include "object.h"
+#include <unordered_set>
 
-ModelCollection::ModelCollection() {
-    owner_ = nullptr;
-}
+ModelCollection::ModelCollection() {}
 
 
 ModelCollection::ModelCollection(const ModelCollection& otherModelCollection) :
-    cyclesForStates_(otherModelCollection.cyclesForStates_), owner_(otherModelCollection.owner_) {}
+    cyclesForStates_(otherModelCollection.cyclesForStates_) {}
+
+
+
+void ModelCollection::registerOwnerCenterPtrForHitboxes(Point* ownerCenterPtr) {
+    std::unordered_map<int, Hitbox*> allTiedHitboxesMap;
+    for (auto& p : cyclesForStates_) {
+        for (auto& r : p.second) {
+            Hitbox* hitboxPtr = r.model.getHitboxPtr();
+            if (hitboxPtr != nullptr) {
+                allTiedHitboxesMap.emplace(r.model.getHitboxPtr()->getId(), hitboxPtr);
+            }         
+        }
+        allTiedHitboxesMap.emplace(p.second.getCurrentCollisionMesh().getId(), &p.second.getCurrentCollisionMesh());
+    }
+    for (auto& p : allTiedHitboxesMap) {
+        p.second->setOwnerCenterPtr(ownerCenterPtr);
+    }
+}
 
 
 void ModelCollection::addModelCycleForState(State state, ModelCycle newModelCycle) {
-    cyclesForStates_[state] = newModelCycle;
-    cyclesForStates_[state].setModelCollectionContainer(this);
-}
-
-
-void ModelCollection::setOwner(Object* newOwner) {
-    owner_ = newOwner;
-}
-
-
-Point* ModelCollection::getCurrentOwnerCenterPtr() {
-    if (owner_ != nullptr) {
-        return &owner_->getCenter();
-    } else {
-        return nullptr;
-    }
+    cyclesForStates_.emplace(state, newModelCycle);
 }
 
 
@@ -87,4 +89,19 @@ Model* ModelCollection::getFirstModelPtrForState(State state) {
             return nullptr;
         }
     }
+}
+
+
+std::list<int> ModelCollection::getAllTiedHitboxes() const {
+    std::unordered_set<int> allTiedHitboxesSet;
+    for (auto& p : cyclesForStates_) {
+        for (auto& r : p.second) {
+            Hitbox* hitboxPtr = r.model.getHitboxPtr();
+            if (hitboxPtr != nullptr) {
+                allTiedHitboxesSet.emplace(r.model.getHitboxPtr()->getId());
+            }         
+        }
+        allTiedHitboxesSet.emplace(p.second.getCurrentCollisionMesh().getId());
+    }
+    return std::list<int>(allTiedHitboxesSet.begin(), allTiedHitboxesSet.end());
 }
