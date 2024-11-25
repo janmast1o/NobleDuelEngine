@@ -21,6 +21,7 @@ protected:
     void adjustAccAndVForSprint();
     void adjustAccAndVForSlowWalk();
     
+    void handleBePushedHorizontally() override;
     void handleMoveHorizontally() override;
     void handleJump();
 
@@ -30,7 +31,7 @@ protected:
 
 public:
 
-    Creature(SDL_Renderer* renderer, Point center, ModelCollection modelCollection, ObjectMap& objectMap, int health);
+    Creature(SDL_Renderer* renderer, Point center, ModelCollection modelCollection, ObjectMap& objectMap, float mass, int health);
 
     void updateTargetedPoint(const Point& newTargtedPoint);
 

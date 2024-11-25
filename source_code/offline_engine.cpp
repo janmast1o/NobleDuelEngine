@@ -35,7 +35,7 @@ OfflineEngine::OfflineEngine(int windowWidth, int windowHeight) : hitboxIdCounte
 SDL_Texture* OfflineEngine::createTexture(const char* filepath) {
     SDL_Texture* newTexture = IMG_LoadTexture(renderer_, filepath);
     if (!newTexture) {
-        std::cerr << "Failed to load texture" << std::endl;
+        std::cerr << "Failed to load texture: " << filepath << std::endl;
         return nullptr;
     }
     textures_.push_back(newTexture);
@@ -53,7 +53,7 @@ std::pair<float, float> OfflineEngine::readTexturesWidthAndHeight(SDL_Texture* t
 StaticHitbox* OfflineEngine::makeStaticHitbox(const std::vector<Point>& hull) {
     StaticHitbox* newStaticHitbox = new StaticHitbox(hitboxIdCounter_, hull);
     allHitboxes_[hitboxIdCounter_] = newStaticHitbox;
-    hitboxIdCounter_++;
+    ++hitboxIdCounter_;
     return newStaticHitbox;
 }
 
@@ -61,23 +61,23 @@ StaticHitbox* OfflineEngine::makeStaticHitbox(const std::vector<Point>& hull) {
 MobileHitbox* OfflineEngine::makeMobileHitbox(const std::vector<Point>& hull) {
     MobileHitbox* newMobileHitbox = new MobileHitbox(hitboxIdCounter_, hull);
     allHitboxes_[hitboxIdCounter_] = newMobileHitbox;
-    hitboxIdCounter_++;
+    ++hitboxIdCounter_;
     return newMobileHitbox;
 }
 
 
 Object* OfflineEngine::makeObject(Point& center, ModelCollection& modelCollection) {
     std::lock_guard<std::mutex> lock(objectCreationMutex_);
-    ObjectCreationArgs newObjectCreationArgs(renderer_, &center, &modelCollection, nullptr, 1);
+    ObjectCreationArgs newObjectCreationArgs(renderer_, &center, &modelCollection, nullptr, 1, 1);
     allObjects_.emplace_back(newObjectCreationArgs, OBJECT_TYPE);
     objectMap_.addNewObject(*allObjects_.back().object);
     return allObjects_.back().object;
 }
 
 
-MobileObject* OfflineEngine::makeMobileObject(Point& center, ModelCollection& modelCollection) {
+MobileObject* OfflineEngine::makeMobileObject(Point& center, ModelCollection& modelCollection, float mass) {
     std::lock_guard<std::mutex> lock(objectCreationMutex_);
-    ObjectCreationArgs newMobileObjectCreationArgs(renderer_, &center, &modelCollection, &objectMap_, 1);
+    ObjectCreationArgs newMobileObjectCreationArgs(renderer_, &center, &modelCollection, &objectMap_, mass, 1);
     allObjects_.emplace_back(newMobileObjectCreationArgs, MOBILE_OBJECT_TYPE);
     mobileObjectPtrs_.push_back(dynamic_cast<MobileObject*>(allObjects_.back().object));
     objectMap_.addNewObject(*allObjects_.back().object);
@@ -85,9 +85,9 @@ MobileObject* OfflineEngine::makeMobileObject(Point& center, ModelCollection& mo
 }
 
 
-Creature* OfflineEngine::makeCreature(Point& center, ModelCollection& modelCollection, int health) {
+Creature* OfflineEngine::makeCreature(Point& center, ModelCollection& modelCollection, float mass, int health) {
     std::lock_guard<std::mutex> lock(objectCreationMutex_);
-    ObjectCreationArgs newCreatureCreationArgs(renderer_, &center, &modelCollection, &objectMap_, health);
+    ObjectCreationArgs newCreatureCreationArgs(renderer_, &center, &modelCollection, &objectMap_, mass, health);
     allObjects_.emplace_back(newCreatureCreationArgs, CREATURE_TYPE);
     mobileObjectPtrs_.push_back(dynamic_cast<MobileObject*>(allObjects_.back().object));
     objectMap_.addNewObject(*allObjects_.back().object);
@@ -95,9 +95,9 @@ Creature* OfflineEngine::makeCreature(Point& center, ModelCollection& modelColle
 }
 
 
-Player* OfflineEngine::makePlayer(Point& center, ModelCollection& modelCollection, int health) {
+Player* OfflineEngine::makePlayer(Point& center, ModelCollection& modelCollection, float mass, int health) {
     std::lock_guard<std::mutex> lock(objectCreationMutex_);
-    ObjectCreationArgs newPlayerCreationArgs(renderer_, &center, &modelCollection, &objectMap_, health);
+    ObjectCreationArgs newPlayerCreationArgs(renderer_, &center, &modelCollection, &objectMap_, mass, health);
     allObjects_.emplace_back(newPlayerCreationArgs, PLAYER_TYPE);
     playerPtr_ = dynamic_cast<Player*>(allObjects_.back().object);
     objectMap_.addNewObject(*allObjects_.back().object);
@@ -140,7 +140,7 @@ void OfflineEngine::run() {
                 it = mobileObjectPtrs_.erase(it);
             } else {
                 (*it)->runScheduled();
-                it++;
+                ++it;
             }
         }
 
@@ -152,7 +152,7 @@ void OfflineEngine::run() {
             if (!(*it).object->isAlive()) {
                 if (!(*it).previouslyDead) {
                     (*it).previouslyDead = true;
-                    it++;
+                    ++it;
                 } else {
                     for (int h : (*it).tiedHitboxes) {
                         if (allHitboxes_.find(h) != allHitboxes_.end() && allHitboxes_[h] != nullptr) {
@@ -164,7 +164,7 @@ void OfflineEngine::run() {
                 }
             } else {
                 (*it).object->redrawObject();
-                it++;
+                ++it;
             }
         }
 

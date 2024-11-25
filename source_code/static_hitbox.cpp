@@ -31,16 +31,16 @@ void StaticHitbox::setOwnerCenterPtr(Point* ownerCenterPtr) {
         rectangle_.lowerRight += *ownerCenterPtr_;
         rectangle_.upperRight += *ownerCenterPtr_;
         rectangle_.upperLeft += *ownerCenterPtr_;
-        for (int i=0; i<hull_.size(); i++) {
+        for (int i=0; i<hull_.size(); ++i) {
             hull_[i] += *ownerCenterPtr_;
         }
-        for (int i=0; i<gentleSlopeTop_.size(); i++) {
+        for (int i=0; i<gentleSlopeTop_.size(); ++i) {
             gentleSlopeTop_[i] += *ownerCenterPtr_;
         }
-        for (int i=0; i<top_.size(); i++) {
+        for (int i=0; i<top_.size(); ++i) {
             top_[i] += *ownerCenterPtr_;
         }
-        for (int i=0; i<bottom_.size(); i++) {
+        for (int i=0; i<bottom_.size(); ++i) {
             bottom_[i] += *ownerCenterPtr_;
         }
     }

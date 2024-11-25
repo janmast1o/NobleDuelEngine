@@ -36,10 +36,10 @@ Model& ModelCycle::getCurrentModel() const {
 
 
 void ModelCycle::moveToNextModel() {
-    (*it_).currentLingerCounter++;
+    ++(*it_).currentLingerCounter;
     if ((*it_).currentLingerCounter == (*it_).lingerOn) {
         (*it_).currentLingerCounter = 0;
-        it_++;
+        ++it_;
         if (it_ == modelList_.end()) {
             it_ = modelList_.begin();
         }

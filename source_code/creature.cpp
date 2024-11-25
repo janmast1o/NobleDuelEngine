@@ -2,8 +2,8 @@
 #include "constants.h"
 
 
-Creature::Creature(SDL_Renderer* renderer, Point center, ModelCollection modelCollection, ObjectMap& objectMap, int health) :
-    MobileObject(renderer, center, modelCollection, objectMap) {
+Creature::Creature(SDL_Renderer* renderer, Point center, ModelCollection modelCollection, ObjectMap& objectMap, float mass, int health) :
+    MobileObject(renderer, center, modelCollection, objectMap, mass) {
         setHealth(health);
     }
 
@@ -26,8 +26,105 @@ void Creature::adjustAccAndVForSlowWalk() {
 }  
 
 
+void Creature::handleBePushedHorizontally() {
+    ++singleStatePersistenceTimer_.movingHorizontallyTimer;
+    singleStatePersistenceTimer_.airborneTimer = 0;
+    singleStatePersistenceTimer_.freefallTimer = 0;
+    singleStatePersistenceTimer_.slideDownTimer = 0;
+
+    previouslyScheduled_ = scheduled_;
+
+    newVelocity();
+    float sx = velocity_.horizontalVelocity*(1.0/FPS);
+
+    if (std::abs(sx) < ERROR_EPS) {
+        clearScheduled();
+        return;
+    }
+
+    float sy = sx*slopeInclineDirectlyUnderneath_;
+    Point svec(sx, sy);
+    std::list<Object*> potentiallyColliding = objectMap_.getPotentiallyColliding(*this);
+    bool collisionDetected = false;
+    bool groundUnderneathFound = false;
+    bool changingSlopes = false;
+    float alpha = -INFINITY;
+    float beta = INFINITY;
+    float gamma = -INFINITY;
+
+    // for (Object* p : potentiallyColliding) {
+    //     if (p != this && collideableWith(*p)) {
+    //         if (collidesWithAfterVectorTranslation(*p, svec)) {
+    //             if (isDirectlyAboveAfterVectorTranslation(*p, svec)) {
+    //                 groundUnderneathFound = true;
+    //                 changingSlopes = false;
+    //             } else {
+    //                 alpha = isCollisionAfterVectorTranslationCausedByGentleSlope(*p, svec);
+    //                 if (std::abs(alpha)-MAXIMUM_GENTLE_SLOPE_COEFFICIENT <= ERROR_EPS) {
+    //                     svec.y = alpha*sx;
+    //                     groundUnderneathFound = true;
+    //                     changingSlopes = false;
+    //                 } else {
+    //                     collisionDetected = true;
+    //                 }
+    //             }
+    //         } else if (!groundUnderneathFound) {
+    //             float delta;
+    //             if (isDirectlyAboveAfterVectorTranslation(*p, svec)) {
+    //                 groundUnderneathFound = true;
+    //             } else {
+    //                 delta = findMinVertDistanceFromTopAfterVectorTranslation(*p, svec);
+    //                 if (delta > 0 && delta < 2*MAXIMUM_GENTLE_SLOPE_COEFFICIENT*std::abs(svec.x)) {
+    //                     gamma = findSlopeCoefficientDirectlyBelowAfterVectorTranslation(*p, svec);
+    //                     groundUnderneathFound = true;
+    //                     changingSlopes = true;
+    //                     beta = delta;
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
+
+    horizontalMovementMainBody(svec, potentiallyColliding, alpha, beta, gamma, 
+                               collisionDetected, groundUnderneathFound, changingSlopes);
+
+    if (!collisionDetected && !changingSlopes) {
+        translateObjectByVector(svec);
+        if (!groundUnderneathFound) {
+            acceleration_.horizontalAcceleration = 0;
+            airborneGhostHorizontalVelocity_.horizontalVelocity = velocity_.horizontalVelocity;
+            velocity_.horizontalVelocity = 0;
+            removeGroundReactionAcceleration();
+            setScheduled(HANDLE_FREEFALL);
+        } else {
+            if (std::abs(alpha)-MAXIMUM_GENTLE_SLOPE_COEFFICIENT <= ERROR_EPS) {
+                slopeInclineDirectlyUnderneath_ = alpha;
+            }
+            clearScheduled();
+        }
+    } else if (!collisionDetected && changingSlopes) {
+        slopeInclineDirectlyUnderneath_ = gamma;
+        translateObjectByVector(svec+Point(0,-beta));
+        if (std::abs(beta)-MAXIMUM_GENTLE_SLOPE_COEFFICIENT > -ERROR_EPS) {
+            removeGroundReactionAcceleration();
+            setScheduled(HANDLE_SLIDE_DOWN);
+        } else {
+            setScheduled(HANDLE_BE_PUSHED_HORIZONTALLY);
+        }
+    } else {
+        setScheduled(HANDLE_BE_PUSHED_HORIZONTALLY);
+    }
+
+    if (svec.x < 0) {
+        setNewState(PUSHED_LEFT);
+    } else if (svec.x > 0) {
+        setNewState(PUSHED_RIGHT);
+    }
+}
+
+
 void Creature::handleMoveHorizontally() {
-    singleStatePersistenceTimer_.movingHorizontallyTimer++;
+    ++singleStatePersistenceTimer_.movingHorizontallyTimer;
     singleStatePersistenceTimer_.airborneTimer = 0;
     singleStatePersistenceTimer_.freefallTimer = 0;
     singleStatePersistenceTimer_.slideDownTimer = 0;
@@ -41,30 +138,48 @@ void Creature::handleMoveHorizontally() {
     std::list<Object*> potentiallyColliding = objectMap_.getPotentiallyColliding(*this);
     bool collisionDetected = false;
     bool groundUnderneathFound = false;
+    bool changingSlopes = false;
     float alpha = -INFINITY;
-    float beta = -INFINITY;
+    float beta = INFINITY;
+    float gamma = -INFINITY;
 
-    for (Object* p : potentiallyColliding) {
-        if (p != this && collideableWith(*p)) {
-            if (collidesWithAfterVectorTranslation(*p, svec)) {
-                if (isDirectlyAboveAfterVectorTranslation(*p, svec)) {
-                    groundUnderneathFound = true;
-                } else {
-                    groundUnderneathFound = true;
-                    alpha = isCollisionAfterVectorTranslationCausedByGentleSlope(*p, svec);
-                    if (std::abs(alpha)-MAXIMUM_GENTLE_SLOPE_COEFFICIENT <= ERROR_EPS) {
-                        svec.y = alpha*sx;
-                    } else {
-                        collisionDetected = true;
-                    }
-                }
-            } else if (!groundUnderneathFound && isDirectlyAboveAfterVectorTranslation(*p, svec)) {
-                groundUnderneathFound = true;
-            }
-        }
-    }
+    // for (Object* p : potentiallyColliding) {
+    //     if (p != this && collideableWith(*p)) {
+    //         if (collidesWithAfterVectorTranslation(*p, svec)) {
+    //             if (isDirectlyAboveAfterVectorTranslation(*p, svec)) {
+    //                 groundUnderneathFound = true;
+    //                 changingSlopes = false;
+    //             } else {
+    //                 alpha = isCollisionAfterVectorTranslationCausedByGentleSlope(*p, svec);
+    //                 if (std::abs(alpha)-MAXIMUM_GENTLE_SLOPE_COEFFICIENT <= ERROR_EPS) {
+    //                     svec.y = alpha*sx;
+    //                     groundUnderneathFound = true;
+    //                     changingSlopes = false;
+    //                 } else {
+    //                     collisionDetected = true;
+    //                 }
+    //             }
+    //         } else if (!groundUnderneathFound) {
+    //             float delta;
+    //             if (isDirectlyAboveAfterVectorTranslation(*p, svec)) {
+    //                 groundUnderneathFound = true;
+    //             } else {
+    //                 delta = findMinVertDistanceFromTopAfterVectorTranslation(*p, svec);
+    //                 if (delta > 0 && delta < 2*MAXIMUM_GENTLE_SLOPE_COEFFICIENT*std::abs(svec.x)) {
+    //                     gamma = findSlopeCoefficientDirectlyBelowAfterVectorTranslation(*p, svec);
+    //                     groundUnderneathFound = true;
+    //                     changingSlopes = true;
+    //                     beta = delta;
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
 
-    if (!collisionDetected) {
+    horizontalMovementMainBody(svec, potentiallyColliding, alpha, beta, gamma, 
+                               collisionDetected, groundUnderneathFound, changingSlopes);
+
+    if (!collisionDetected && !changingSlopes) {
         translateObjectByVector(svec);
         if (!groundUnderneathFound) {
             acceleration_.horizontalAcceleration = 0;
@@ -75,9 +190,16 @@ void Creature::handleMoveHorizontally() {
         } else {
             if (std::abs(alpha)-MAXIMUM_GENTLE_SLOPE_COEFFICIENT <= ERROR_EPS) {
                 slopeInclineDirectlyUnderneath_ = alpha;
-            } else if (std::abs(beta)-MAXIMUM_GENTLE_SLOPE_COEFFICIENT <= ERROR_EPS) { // another potentially problematic
-                slopeInclineDirectlyUnderneath_ = beta;
             }
+            clearScheduled();
+        }
+    } else if (!collisionDetected && changingSlopes) {
+        slopeInclineDirectlyUnderneath_ = gamma;
+        translateObjectByVector(svec+Point(0,-beta));
+        if (std::abs(gamma)-MAXIMUM_GENTLE_SLOPE_COEFFICIENT > -ERROR_EPS) {
+            removeGroundReactionAcceleration();
+            setScheduled(HANDLE_SLIDE_DOWN);
+        } else {
             clearScheduled();
         }
     } else {
@@ -197,22 +319,31 @@ void Creature::setSlowWalkMaxHorizontalV(float newSlowWalkMaxHorizontalV) {
 void Creature::runScheduled() {
     if (isAnythingScheduled()) {
         switch (scheduled_) {
+            case HANDLE_BE_PUSHED_HORIZONTALLY:
+                handleBePushedHorizontally();
+                break;
             case HANDLE_MOVE_HORIZONTALLY:
+                // std::cout << "HMH" << std::endl;
                 handleMoveHorizontally();
                 break;
             case HANDLE_SLIDE_DOWN:
+                // std::cout << "HSD" << std::endl;
                 handleSlideDown();
                 break;
             case HANDLE_AIRBORNE:
+                // std::cout << "HA" << std::endl;
                 handleAirborne();
                 break;
             case HANDLE_FREEFALL:
+                // std::cout << "HF" << std::endl;
                 handleFreefall();
                 break;
             case HANDLE_STOP:
+                /// std::cout << "HS" << std::endl;
                 handleStop();
                 break;
             case HANDLE_JUMP:
+                // std::cout << "HJ" << std::endl;
                 handleJump();
                 break;    
             default:

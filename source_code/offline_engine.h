@@ -21,13 +21,15 @@ private:
         Point* center;
         ModelCollection* modelCollection;
         ObjectMap* objectMap;
+        float mass;
         int health;
 
-        ObjectCreationArgs(SDL_Renderer* renderer, Point* center, ModelCollection* modelCollection, ObjectMap* objectMap, int health) :
+        ObjectCreationArgs(SDL_Renderer* renderer, Point* center, ModelCollection* modelCollection, ObjectMap* objectMap, float mass, int health) :
             renderer(renderer),
             center(center),
             modelCollection(modelCollection),
             objectMap(objectMap),
+            mass(mass),
             health(health) {}
 
     };
@@ -49,13 +51,15 @@ private:
                     objectCreationArgs.renderer,
                     *objectCreationArgs.center,
                     *objectCreationArgs.modelCollection,
-                    *objectCreationArgs.objectMap
+                    *objectCreationArgs.objectMap,
+                    objectCreationArgs.mass
                 ) :
                 (specifier == CREATURE_TYPE) ? new Creature(
                     objectCreationArgs.renderer,
                     *objectCreationArgs.center,
                     *objectCreationArgs.modelCollection,
                     *objectCreationArgs.objectMap,
+                    objectCreationArgs.mass,
                     objectCreationArgs.health
                 ) :
                 (specifier == PLAYER_TYPE) ? new Player(
@@ -63,6 +67,7 @@ private:
                     *objectCreationArgs.center,
                     *objectCreationArgs.modelCollection,
                     *objectCreationArgs.objectMap,
+                    objectCreationArgs.mass,
                     objectCreationArgs.health
                 ) :
                 new Object(
@@ -110,9 +115,9 @@ public:
     MobileHitbox* makeMobileHitbox(const std::vector<Point>& hull);
 
     Object* makeObject(Point& center, ModelCollection& modelCollection);
-    MobileObject* makeMobileObject(Point& center, ModelCollection& modelCollection);
-    Creature* makeCreature(Point& center, ModelCollection& modelCollection, int health);
-    Player* makePlayer(Point& center, ModelCollection& modelCollection, int health);
+    MobileObject* makeMobileObject(Point& center, ModelCollection& modelCollection, float mass);
+    Creature* makeCreature(Point& center, ModelCollection& modelCollection, float mass, int health);
+    Player* makePlayer(Point& center, ModelCollection& modelCollection, float mass, int health);
 
     void run();
 

@@ -1,5 +1,6 @@
 #include <iostream>
 #include <SDL2/SDL.h>
+#include <optional>
 
 #ifndef POINT_H
 #define POINT_H
@@ -93,6 +94,8 @@ enum State {
     FREEFALL_RIGHT,
     SLIDE_DOWN_LEFT,
     SLIDE_DOWN_RIGHT,
+    PUSHED_LEFT,
+    PUSHED_RIGHT,
 
     OWNED,
     OWNED_LEFT,
@@ -120,6 +123,7 @@ enum DamageReceiveState {
 
 enum ScheduledInstruction {
     NOTHING,
+    HANDLE_BE_PUSHED_HORIZONTALLY,
     HANDLE_MOVE_HORIZONTALLY,
     HANDLE_SLIDE_DOWN,
     HANDLE_AIRBORNE,
@@ -216,4 +220,27 @@ struct PlayerSpecificKeyMapping {
 };
 
 #endif
+
+#ifndef T_ENTRY_H
+#define T_ENTRY_H
+
+struct TEntry {
+    std::optional<Point> sPoint;
+    std::optional<Point> rPoint;
+    std::optional<Point> previousSPoint;
+    std::optional<Point> nextSPoint;
+    std::optional<Point> previousRPoint;
+    std::optional<Point> nextRPoint;
+};
+
+#endif
+
+// #ifndef MOM_DICT_SCHEDULED_SPECS
+// #define MOM_DICT_SCHEDULED_SPECS
+
+// struct MomDictatedScheduledSpec {
+
+// };
+
+// #endif
 

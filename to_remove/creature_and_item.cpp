@@ -46,7 +46,7 @@ void Item::update_last_use() {
 Creature::Creature(SDL_Renderer* renderer, Point& center, ModelCollection& model_collection, Matter matter, ObjectMap& object_map, int health) :
     MobileObject(renderer, center, model_collection, matter, object_map) {
         item_loadout_.reserve(ITEM_LOADOUT_SIZE);
-        for (int i=0; i<ITEM_LOADOUT_SIZE; i++) {
+        for (int i=0; i<ITEM_LOADOUT_SIZE; ++i) {
             item_loadout_[i] = nullptr;
         }
         item_loadout_index_ = 0;

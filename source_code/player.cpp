@@ -1,8 +1,8 @@
 #include "player.h"
 #include "constants.h"
 
-Player::Player(SDL_Renderer* renderer, Point center, ModelCollection modelCollection, ObjectMap& objectMap, int health) : 
-    Creature(renderer, center, modelCollection, objectMap, health) {
+Player::Player(SDL_Renderer* renderer, Point center, ModelCollection modelCollection, ObjectMap& objectMap, float mass, int health) : 
+    Creature(renderer, center, modelCollection, objectMap, mass, health) {
         previousKeyboardState_[keyMapping_.interact] = 0;
         previousKeyboardState_[keyMapping_.switchToNextItem] = 0;
         previousKeyboardState_[keyMapping_.dropItem] = 0;

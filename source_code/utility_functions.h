@@ -4,6 +4,7 @@
 #include "structs_and_enums.h"
 #include "constants.h"
 #include <vector>
+#include <list>
 
 void drawPoint(SDL_Renderer* renderer, float x, float y, float pointSize);
 
@@ -26,6 +27,8 @@ int support(const std::vector<Point>& S, const Point& d);
 
 float findSlopeCoefficient(const Point& A, const Point& B);
 
+std::pair<float, float> findLineCoefficients(const Point& A, const Point& B);
+
 std::vector<Point> findGentleSlopeTop(const std::vector<Point>& polygon);
 
 std::vector<Point> findTop(const std::vector<Point>& polygon);
@@ -36,7 +39,11 @@ std::vector<Point> findRightTop(const std::vector<Point>& polygon);
 
 std::vector<Point> findBottom(const std::vector<Point>& polygon);
 
-bool gjk(const std::vector<Point>&S, const std::vector<Point>& R);
+bool gjk(const std::vector<Point>& S, const std::vector<Point>& R);
+
+void fillT(typename std::list<TEntry>::iterator it, int startEl, int endEl);
+
+float minVertDistance(const std::vector<Point>& S, const std::vector<Point>& R);
 
 bool isLeftFacing(State state);
 

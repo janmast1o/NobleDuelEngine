@@ -21,7 +21,7 @@ private:
 
 public:
 
-    Player(SDL_Renderer* renderer, Point center, ModelCollection modelCollection, ObjectMap& objectMap, int health);
+    Player(SDL_Renderer* renderer, Point center, ModelCollection modelCollection, ObjectMap& objectMap, float mass, int health);
 
     void addBufferable(const int newBufferable);
     void removeBufferable(const int bufferable);

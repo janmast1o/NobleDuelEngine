@@ -122,7 +122,7 @@ void Object::redrawObject() {
 void Object::redrawObject(bool drawHitboxes, float pointSize) {
     SDL_FRect destRect;
     Model* model = getNextModelPtr();
-    if (model != nullptr) {
+    if (model != nullptr && model->getTexture() != nullptr) {
         destRect.w = model->getModelTextureWidth();
         destRect.h = model->getModelTextureHeight();
         destRect.x = model->getTextureRelativeUL().x + center_.x;
@@ -131,7 +131,7 @@ void Object::redrawObject(bool drawHitboxes, float pointSize) {
         if (drawHitboxes) {
             std::vector<Point> hull = model->getHitboxPtr()->getCurrentHull();
             int n = hull.size();
-            for (int i=0; i<n; i++) {
+            for (int i=0; i<n; ++i) {
                 drawPoint(renderer_, hull[i].x, -hull[i].y, pointSize);
             }
         }
@@ -140,7 +140,10 @@ void Object::redrawObject(bool drawHitboxes, float pointSize) {
 
 
 bool Object::collideableWith(const Object& otherObject) {
-    if (matter_ == SOLID) {
+    if (matter_ == PHANTOM_SOLID || otherObject.matter_ == PHANTOM) {
+        return true;
+    }
+    else if (matter_ == SOLID) {
         if (otherObject.matter_ == SOLID) {
             return true;
         }
@@ -166,3 +169,11 @@ bool Object::collideableWith(const Object& otherObject) {
     }
     return true;
 }
+
+
+bool Object::canBeMovedByOtherObject(float otherObjectMass, float otherObjectHVelocity) const {
+    return false;
+}
+
+
+void Object::bePushedByOtherObject(float otherObjectMass, float otherObjectHVelocity, const Point& translationVector) {;}

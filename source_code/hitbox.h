@@ -61,6 +61,8 @@ public:
     bool isDirectlyAboveAfterVectorTranslation(const Hitbox& otherHitbox, const Point& translationVector) const;
 
     bool collidesWithTopAfterVectorTranslation(const Hitbox& otherHitbox, const Point& translationVector) const;
+    float findMinVertDistanceFromTop(const Hitbox& otherHitbox) const;
+    float findMinVertDistanceFromTopAfterVectorTranslation(const Hitbox& otherHitbox, const Point& translationVector) const;
     float isCollisionAfterVectorTranslationCausedByGentleSlope(const Hitbox& otherHitbox, const Point& translationVector) const;
 
     float findSlopeCoefficientDirectlyBelowAfterVectorTranslation(const Hitbox& otherHitbox, const Point& translationVector) const;

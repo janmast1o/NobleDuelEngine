@@ -4,7 +4,7 @@
 
 void translateStdVectorByVector(std::vector<Point>& vectorToTranslate, const Point& translationVector) {
     int n = vectorToTranslate.size();
-    for (int i=0; i<n; i++) {
+    for (int i=0; i<n; ++i) {
         vectorToTranslate[i] += translationVector;
     }
 }
