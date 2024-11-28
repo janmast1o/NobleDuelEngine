@@ -1,5 +1,5 @@
 #include "structs_and_enums.h"
-
+#include "constants.h"
 
 Point::Point() : x(0), y(0) {}
 Point::Point(float x, float y) : x(x), y(y) {}
@@ -110,8 +110,10 @@ bool Rectangle::collidesWith(const Rectangle& otherRectangle) const {
 
 
 ObjectSpecificPhysicsChar::ObjectSpecificPhysicsChar() :
-    maxVerticalV(780),
-    maxHorizontalV(225),
+    maxSRVerticalV(780),
+    maxSRHorizontalV(225),
+    maxTrueVerticalV(800),
+    maxTrueHorizontalV(400),
     horizontalAcc(215),
     maxAirborneAccelerableFrames(150) {}
 
@@ -135,3 +137,51 @@ PlayerSpecificKeyMapping::PlayerSpecificKeyMapping() :
     interact(SDL_SCANCODE_E),
     switchToNextItem(SDL_SCANCODE_C),
     dropItem(SDL_SCANCODE_R) {}
+
+
+// MomDictScheduledSpecs::MomDictScheduledSpecs() :
+//     receivedVelocity(0),
+//     receivedExplicitHTranslation(0),
+//     blocked(false) {}
+
+
+// void MomDictScheduledSpecs::clear() {
+//     receivedVelocity = 0;
+//     receivedExplicitHTranslation = 0;
+//     blocked = false;
+// }    
+
+
+// bool MomDictScheduledSpecs::isAvailable() {
+//     return (std::abs(receivedVelocity) > ERROR_EPS || std::abs(receivedExplicitHTranslation) > ERROR_EPS) && !blocked;
+// }
+
+
+// bool MomDictScheduledSpecs::isReceivedVelocityEmpty() {
+//     return std::abs(receivedVelocity) < ERROR_EPS;
+// }
+
+
+// bool MomDictScheduledSpecs::isReceivedExplicitHTranslationEmpty() {
+//     return std::abs(receivedExplicitHTranslation) < ERROR_EPS;
+// }
+
+
+MomentumDictated::MomentumDictated() :
+    receivedHVelocity(0),
+    receivedExplicitHTranslation(0),
+    cumultativeReceivedMomentum(0) {}
+    // receviedWeights(0) {}
+
+
+void MomentumDictated::clear() {
+    receivedHVelocity = 0;
+    receivedExplicitHTranslation = 0;
+    cumultativeReceivedMomentum = 0;
+    // receviedWeights = 0;
+}    
+
+
+bool MomentumDictated::isEmpty() const {
+    return receivedHVelocity < ERROR_EPS && receivedExplicitHTranslation < ERROR_EPS && cumultativeReceivedMomentum < ERROR_EPS;
+}

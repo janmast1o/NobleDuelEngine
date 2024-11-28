@@ -29,6 +29,8 @@ float findSlopeCoefficient(const Point& A, const Point& B);
 
 std::pair<float, float> findLineCoefficients(const Point& A, const Point& B);
 
+float calculateVelocityAfterCollision(float mass, float hVelocity, float otherMass, float otherHVelocity);
+
 std::vector<Point> findGentleSlopeTop(const std::vector<Point>& polygon);
 
 std::vector<Point> findTop(const std::vector<Point>& polygon);

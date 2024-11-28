@@ -107,18 +107,18 @@ void prepareGame(int windowWidth, int windowHeight, OfflineEngine& engine) {
     Point rightBranchCenter = {1201, -160};
     Object* rightBranch = engine.makeObject(rightBranchCenter, rightBranchModelCollection);
 
-    SDL_Texture* leftTrStoneTexture = engine.createTexture("resources/triangular_left_facing_stone_.png");
-    std::pair<float, float> leftTrStoneWAH = engine.readTexturesWidthAndHeight(leftTrStoneTexture);
-    float leftTrStoneW = leftTrStoneWAH.first;
-    float leftTrStoneH = leftTrStoneWAH.second;
-    Model leftTrStoneModel(leftTrStoneTexture, nullptr);
-    StaticHitbox* leftTrStoneMesh = engine.makeStaticHitbox({{-leftTrStoneW/2, -leftTrStoneH/2}, {leftTrStoneW/2, -leftTrStoneH/2}, {-leftTrStoneW/2, leftTrStoneH/2}});
-    ModelCycle leftTrStoneModelCycle(leftTrStoneMesh);
-    leftTrStoneModelCycle.addModelAndResetIterator(leftTrStoneModel, 1);
-    ModelCollection leftTrStoneModelCollection;
-    leftTrStoneModelCollection.addModelCycleForState(IDLE, leftTrStoneModelCycle);
-    Point leftTrStoneCenter = {200, -735};
-    Object* leftTrStone = engine.makeObject(leftTrStoneCenter, leftTrStoneModelCollection);
+    // SDL_Texture* leftTrStoneTexture = engine.createTexture("resources/triangular_left_facing_stone_.png");
+    // std::pair<float, float> leftTrStoneWAH = engine.readTexturesWidthAndHeight(leftTrStoneTexture);
+    // float leftTrStoneW = leftTrStoneWAH.first;
+    // float leftTrStoneH = leftTrStoneWAH.second;
+    // Model leftTrStoneModel(leftTrStoneTexture, nullptr);
+    // StaticHitbox* leftTrStoneMesh = engine.makeStaticHitbox({{-leftTrStoneW/2, -leftTrStoneH/2}, {leftTrStoneW/2, -leftTrStoneH/2}, {-leftTrStoneW/2, leftTrStoneH/2}});
+    // ModelCycle leftTrStoneModelCycle(leftTrStoneMesh);
+    // leftTrStoneModelCycle.addModelAndResetIterator(leftTrStoneModel, 1);
+    // ModelCollection leftTrStoneModelCollection;
+    // leftTrStoneModelCollection.addModelCycleForState(IDLE, leftTrStoneModelCycle);
+    // Point leftTrStoneCenter = {200, -735};
+    // Object* leftTrStone = engine.makeObject(leftTrStoneCenter, leftTrStoneModelCollection);
 
     SDL_Texture* rightTrStoneTexture = engine.createTexture("resources/triangular_right_facing_stone_.png");
     std::pair<float, float> rightTrStoneWAH = engine.readTexturesWidthAndHeight(rightTrStoneTexture);

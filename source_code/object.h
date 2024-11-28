@@ -59,8 +59,8 @@ public:
 
     bool collideableWith(const Object& otherObject);
 
-    virtual bool canBeMovedByOtherObject(float otherObjectMass, float otherObjectHVelocity) const;
-    virtual void bePushedByOtherObject(float otherObjectMass, float otherObjectHVelocity, const Point& translationVector); 
+    virtual bool participatingInMomentum() const;
+    virtual void registerBeingAffectedByOutsideMomentum(float otherObjectMass, float otherObjectHVelocity, float hTranslation); 
 
     virtual ~Object() = default;
 

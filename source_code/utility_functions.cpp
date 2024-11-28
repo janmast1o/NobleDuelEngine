@@ -62,6 +62,11 @@ std::pair<float, float> findLineCoefficients(const Point& A, const Point& B) {
 }
 
 
+float calculateVelocityAfterCollision(float mass, float hVelocity, float otherMass, float otherHVelocity) {
+    return ((mass-otherMass)*hVelocity + 2*otherMass*otherHVelocity) / (mass+otherMass);
+}
+
+
 std::vector<Point> findGentleSlopeTop(const std::vector<Point>& polygon) {
     float maxSlopeCoefficient = MAXIMUM_GENTLE_SLOPE_COEFFICIENT;
     int n = polygon.size();

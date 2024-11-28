@@ -161,7 +161,7 @@ void Creature::run_scheduled() {
         else if (scheduled_ == HANDLE_FREEFALL) {
             handle_freefall();
         }
-        else if (scheduled_ == HANDLE_SLIDE_DOWN) {
+        else if (scheduled_ == HANDLE_SLIDE_DOWN_WITH_RETRY) {
             handle_slide_down();
         }
         else if (scheduled_ == HANDLE_JUMP) {

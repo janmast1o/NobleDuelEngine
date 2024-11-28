@@ -12,8 +12,10 @@ protected:
 
     float mass_;
     float slopeInclineDirectlyUnderneath_;
-    std::function<bool(float, float, float)> shouldIgnoreOutsideMomentumFunction_;
-    std::function<bool(float, float, float)> shouldOnlyBeMovedSlightlyByOutsideMomentmFunction_;
+    MomentumDictated currentMomentumDictated_;
+
+    std::function<bool(float, float)> shouldIgnoreOutsideMomentumFunction_;
+    std::function<bool(float, float)> shouldOnlyBeMovedSlightlyByOutsideMomentmFunction_;
 
     Velocity velocity_;
     Acceleration acceleration_;
@@ -35,13 +37,20 @@ protected:
     void zeroVelocity();
     void zeroAirborneGhostHorizontalVelocity();
 
+    void applyFriction();
+
+    // void updateAwaitingMomDictScheduledVelocity(float receivedVelocity);
+    // void updateAwaitingMomDictScheduledExplicitHTransaltion(float receivedExplicitHTranslation);
+
     void horizontalMovementMainBody(Point& svec, const std::list<Object*>& potentiallyColliding, 
                                     float& alpha, float& beta, float& gamma, bool& collisionDetected, bool& groundUnderneathFound, bool& changingSlopes);
 
-    virtual void handleBePushedHorizontally();
+    void adjustSVecForMaxVReqs(Point& svec) const;                                
+
+    virtual void handleBePushedHorizontally(HandleParams handleParams = {0, true});
     virtual void handleMoveHorizontally();
-    void handleSlideDown();
-    void handleAirborne();
+    void handleSlideDown(HandleParams handleParams = {0, true});
+    void handleAirborne(HandleParams handleParams = {0, false});
     void handleFreefall();
     void handleStop();
 
@@ -63,12 +72,21 @@ protected:
 public:
 
     MobileObject(SDL_Renderer* renderer, Point center, ModelCollection modelCollection, ObjectMap& objectMap, float mass);
-    
-    float getMaxVerticalV() const;
-    void setMaxVerticalV(float newMaxVerticalV);
 
-    float getMaxHorizontalV() const;
-    void setMaxHorizontalV(float newMaxHorizontalV);
+    float getCurrentHVelocity() const;
+    float getMass() const;
+    
+    float getMaxSRVerticalV() const;
+    void setMaxSRVerticalV(float newMaxSRVerticalV);
+
+    float getMaxSRHorizontalV() const;
+    void setMaxSRHorizontalV(float newMaxSRHorizontalV);
+
+    float getTrueMaxVerticalV() const;
+    void setTrueMaxVerticalV(float newTrueMaxVerticalV);
+
+    float getTrueMaxHorizontalV() const;
+    void setTrueMaxHorizontalV(float newTrueMAxHorizontalV);
 
     float getHorizontalAcc() const;
     void setHorizontalAcc(float newHorizontalAcc);
@@ -81,11 +99,12 @@ public:
 
     int getFacedSideAsInt() const;
 
-    bool isAnythingScheduled() const;
-    virtual void runScheduled();
+    bool participatingInMomentum() const override;
+    void registerBeingAffectedByOutsideMomentum(float otherObjectMass, float otherObjectHVelocity, float hTranslation) override; 
 
-    bool canBeMovedByOtherObject(float otherObjectMass, float otherObjectHVelocity) const override;
-    void bePushedByOtherObject(float otherObjectMass, float otherObjectHVelocity, const Point& translationVector) override; 
+    bool isAnythingScheduled() const;
+    void runScheduledForNonEmptyMomentum();
+    virtual void runScheduled();
 
     virtual ~MobileObject() = default;
 

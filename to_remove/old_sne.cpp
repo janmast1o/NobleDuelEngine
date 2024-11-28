@@ -220,7 +220,7 @@ enum DamageReceiveState {
 enum ScheduledInstruction {
     NOTHING,
     HANDLE_MOVE_HORIZONTALLY,
-    HANDLE_SLIDE_DOWN,
+    HANDLE_SLIDE_DOWN_WITH_RETRY,
     HANDLE_AIRBORNE,
     HANDLE_FREEFALL,
     HANDLE_STOP,
@@ -245,14 +245,14 @@ struct SingleStatePersistence {
 #define OBJECT_SPECIFIC_PHYSICS_CHAR
 
 struct ObjectSpecificPhysicsChar {
-    float maxVerticalV;
-    float maxHorizontalV;
+    float maxSRVerticalV;
+    float maxSRHorizontalV;
     float horizontalAcc;
     int maxAirborneAccelerableFrames;
 
     ObjectSpecificPhysicsChar() :
-        maxVerticalV(780),
-        maxHorizontalV(225),
+        maxSRVerticalV(780),
+        maxSRHorizontalV(225),
         horizontalAcc(215),
         maxAirborneAccelerableFrames(150) {}
 

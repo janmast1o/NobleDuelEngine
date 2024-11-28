@@ -123,9 +123,11 @@ enum DamageReceiveState {
 
 enum ScheduledInstruction {
     NOTHING,
-    HANDLE_BE_PUSHED_HORIZONTALLY,
+    HANDLE_BE_PUSHED_HORIZONTALLY_WITH_RETRY,
+    HANDLE_BE_PUSHED_HORIZONTALLY_NO_RETRY,
     HANDLE_MOVE_HORIZONTALLY,
-    HANDLE_SLIDE_DOWN,
+    HANDLE_SLIDE_DOWN_WITH_RETRY,
+    HANDLE_SLIDE_DOWN_NO_RETRY,
     HANDLE_AIRBORNE,
     HANDLE_FREEFALL,
     HANDLE_STOP,
@@ -170,8 +172,10 @@ struct SingleStatePersistence {
 #define OBJECT_SPECIFIC_PHYSICS_CHAR_H
 
 struct ObjectSpecificPhysicsChar {
-    float maxVerticalV;
-    float maxHorizontalV;
+    float maxSRVerticalV;
+    float maxSRHorizontalV;
+    float maxTrueVerticalV;
+    float maxTrueHorizontalV;
     float horizontalAcc;
     int maxAirborneAccelerableFrames;
 
@@ -238,9 +242,43 @@ struct TEntry {
 // #ifndef MOM_DICT_SCHEDULED_SPECS
 // #define MOM_DICT_SCHEDULED_SPECS
 
-// struct MomDictatedScheduledSpec {
+// struct MomDictScheduledSpecs {
+//     float receivedVelocity;
+//     float receivedExplicitHTranslation;
+//     bool blocked;
+
+//     MomDictScheduledSpecs();
+//     void clear();
+//     bool isAvailable();
+//     bool isReceivedVelocityEmpty();
+//     bool isReceivedExplicitHTranslationEmpty();
 
 // };
 
 // #endif
 
+#ifndef MOMENTUM_DICTATED
+#define MOMENTUM_DICTATED
+
+struct MomentumDictated {
+    float receivedHVelocity;
+    float receivedExplicitHTranslation;
+    float cumultativeReceivedMomentum;
+    // float receviedWeights;
+
+    MomentumDictated();
+    void clear();
+    bool isEmpty() const;
+};
+
+#endif
+
+#ifndef HANDLE_PARAMS
+#define HANDLE_PARAMS
+
+struct HandleParams {
+    float paramSx = 0;
+    bool retry = false;
+};
+
+#endif

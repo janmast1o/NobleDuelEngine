@@ -21,7 +21,7 @@ protected:
     void adjustAccAndVForSprint();
     void adjustAccAndVForSlowWalk();
     
-    void handleBePushedHorizontally() override;
+    void handleBePushedHorizontally(HandleParams handleParams = {0, true}) override;
     void handleMoveHorizontally() override;
     void handleJump();
 

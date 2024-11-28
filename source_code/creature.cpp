@@ -10,23 +10,23 @@ Creature::Creature(SDL_Renderer* renderer, Point center, ModelCollection modelCo
 
 void Creature::adjustAccAndVForRegular() {
     objectSpecificPhysicsChar_.horizontalAcc = creatureSpecificPhysicsChar_.regularHorizontalAcc;
-    objectSpecificPhysicsChar_.maxHorizontalV = creatureSpecificPhysicsChar_.regularMaxHorizontalV;
+    objectSpecificPhysicsChar_.maxSRHorizontalV = creatureSpecificPhysicsChar_.regularMaxHorizontalV;
 }
 
 
 void Creature::adjustAccAndVForSprint() {
     objectSpecificPhysicsChar_.horizontalAcc = creatureSpecificPhysicsChar_.sprintHorizontalAcc;
-    objectSpecificPhysicsChar_.maxHorizontalV = creatureSpecificPhysicsChar_.sprintMaxHorizontalV;
+    objectSpecificPhysicsChar_.maxSRHorizontalV = creatureSpecificPhysicsChar_.sprintMaxHorizontalV;
 }
 
 
 void Creature::adjustAccAndVForSlowWalk() {
     objectSpecificPhysicsChar_.horizontalAcc = creatureSpecificPhysicsChar_.slowWalkHorizontalAcc;
-    objectSpecificPhysicsChar_.maxHorizontalV = creatureSpecificPhysicsChar_.slowWalkMaxHorizontalV;
+    objectSpecificPhysicsChar_.maxSRHorizontalV = creatureSpecificPhysicsChar_.slowWalkMaxHorizontalV;
 }  
 
 
-void Creature::handleBePushedHorizontally() {
+void Creature::handleBePushedHorizontally(HandleParams handleParams) {
     ++singleStatePersistenceTimer_.movingHorizontallyTimer;
     singleStatePersistenceTimer_.airborneTimer = 0;
     singleStatePersistenceTimer_.freefallTimer = 0;
@@ -35,15 +35,15 @@ void Creature::handleBePushedHorizontally() {
     previouslyScheduled_ = scheduled_;
 
     newVelocity();
-    float sx = velocity_.horizontalVelocity*(1.0/FPS);
-
+    applyFriction();
+    float sx = velocity_.horizontalVelocity*(1.0/FPS) + handleParams.paramSx;
     if (std::abs(sx) < ERROR_EPS) {
         clearScheduled();
         return;
     }
-
     float sy = sx*slopeInclineDirectlyUnderneath_;
     Point svec(sx, sy);
+    adjustSVecForMaxVReqs(svec);
     std::list<Object*> potentiallyColliding = objectMap_.getPotentiallyColliding(*this);
     bool collisionDetected = false;
     bool groundUnderneathFound = false;
@@ -51,39 +51,6 @@ void Creature::handleBePushedHorizontally() {
     float alpha = -INFINITY;
     float beta = INFINITY;
     float gamma = -INFINITY;
-
-    // for (Object* p : potentiallyColliding) {
-    //     if (p != this && collideableWith(*p)) {
-    //         if (collidesWithAfterVectorTranslation(*p, svec)) {
-    //             if (isDirectlyAboveAfterVectorTranslation(*p, svec)) {
-    //                 groundUnderneathFound = true;
-    //                 changingSlopes = false;
-    //             } else {
-    //                 alpha = isCollisionAfterVectorTranslationCausedByGentleSlope(*p, svec);
-    //                 if (std::abs(alpha)-MAXIMUM_GENTLE_SLOPE_COEFFICIENT <= ERROR_EPS) {
-    //                     svec.y = alpha*sx;
-    //                     groundUnderneathFound = true;
-    //                     changingSlopes = false;
-    //                 } else {
-    //                     collisionDetected = true;
-    //                 }
-    //             }
-    //         } else if (!groundUnderneathFound) {
-    //             float delta;
-    //             if (isDirectlyAboveAfterVectorTranslation(*p, svec)) {
-    //                 groundUnderneathFound = true;
-    //             } else {
-    //                 delta = findMinVertDistanceFromTopAfterVectorTranslation(*p, svec);
-    //                 if (delta > 0 && delta < 2*MAXIMUM_GENTLE_SLOPE_COEFFICIENT*std::abs(svec.x)) {
-    //                     gamma = findSlopeCoefficientDirectlyBelowAfterVectorTranslation(*p, svec);
-    //                     groundUnderneathFound = true;
-    //                     changingSlopes = true;
-    //                     beta = delta;
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
 
     horizontalMovementMainBody(svec, potentiallyColliding, alpha, beta, gamma, 
                                collisionDetected, groundUnderneathFound, changingSlopes);
@@ -107,12 +74,16 @@ void Creature::handleBePushedHorizontally() {
         translateObjectByVector(svec+Point(0,-beta));
         if (std::abs(beta)-MAXIMUM_GENTLE_SLOPE_COEFFICIENT > -ERROR_EPS) {
             removeGroundReactionAcceleration();
-            setScheduled(HANDLE_SLIDE_DOWN);
+            setScheduled(HANDLE_SLIDE_DOWN_WITH_RETRY);
         } else {
-            setScheduled(HANDLE_BE_PUSHED_HORIZONTALLY);
+            setScheduled(HANDLE_BE_PUSHED_HORIZONTALLY_WITH_RETRY);
         }
     } else {
-        setScheduled(HANDLE_BE_PUSHED_HORIZONTALLY);
+        if (handleParams.retry) {
+            setScheduled(HANDLE_BE_PUSHED_HORIZONTALLY_NO_RETRY);
+        } else {
+            clearScheduled();
+        }
     }
 
     if (svec.x < 0) {
@@ -135,6 +106,7 @@ void Creature::handleMoveHorizontally() {
     float sx = velocity_.horizontalVelocity*(1.0/FPS);
     float sy = sx*slopeInclineDirectlyUnderneath_;
     Point svec(sx, sy);
+    adjustSVecForMaxVReqs(svec);
     std::list<Object*> potentiallyColliding = objectMap_.getPotentiallyColliding(*this);
     bool collisionDetected = false;
     bool groundUnderneathFound = false;
@@ -142,39 +114,6 @@ void Creature::handleMoveHorizontally() {
     float alpha = -INFINITY;
     float beta = INFINITY;
     float gamma = -INFINITY;
-
-    // for (Object* p : potentiallyColliding) {
-    //     if (p != this && collideableWith(*p)) {
-    //         if (collidesWithAfterVectorTranslation(*p, svec)) {
-    //             if (isDirectlyAboveAfterVectorTranslation(*p, svec)) {
-    //                 groundUnderneathFound = true;
-    //                 changingSlopes = false;
-    //             } else {
-    //                 alpha = isCollisionAfterVectorTranslationCausedByGentleSlope(*p, svec);
-    //                 if (std::abs(alpha)-MAXIMUM_GENTLE_SLOPE_COEFFICIENT <= ERROR_EPS) {
-    //                     svec.y = alpha*sx;
-    //                     groundUnderneathFound = true;
-    //                     changingSlopes = false;
-    //                 } else {
-    //                     collisionDetected = true;
-    //                 }
-    //             }
-    //         } else if (!groundUnderneathFound) {
-    //             float delta;
-    //             if (isDirectlyAboveAfterVectorTranslation(*p, svec)) {
-    //                 groundUnderneathFound = true;
-    //             } else {
-    //                 delta = findMinVertDistanceFromTopAfterVectorTranslation(*p, svec);
-    //                 if (delta > 0 && delta < 2*MAXIMUM_GENTLE_SLOPE_COEFFICIENT*std::abs(svec.x)) {
-    //                     gamma = findSlopeCoefficientDirectlyBelowAfterVectorTranslation(*p, svec);
-    //                     groundUnderneathFound = true;
-    //                     changingSlopes = true;
-    //                     beta = delta;
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
 
     horizontalMovementMainBody(svec, potentiallyColliding, alpha, beta, gamma, 
                                collisionDetected, groundUnderneathFound, changingSlopes);
@@ -198,7 +137,7 @@ void Creature::handleMoveHorizontally() {
         translateObjectByVector(svec+Point(0,-beta));
         if (std::abs(gamma)-MAXIMUM_GENTLE_SLOPE_COEFFICIENT > -ERROR_EPS) {
             removeGroundReactionAcceleration();
-            setScheduled(HANDLE_SLIDE_DOWN);
+            setScheduled(HANDLE_SLIDE_DOWN_WITH_RETRY);
         } else {
             clearScheduled();
         }
@@ -317,35 +256,43 @@ void Creature::setSlowWalkMaxHorizontalV(float newSlowWalkMaxHorizontalV) {
 
 
 void Creature::runScheduled() {
-    if (isAnythingScheduled()) {
+    if (!currentMomentumDictated_.isEmpty() && !shouldIgnoreOutsideMomentumFunction_(mass_, currentMomentumDictated_.cumultativeReceivedMomentum)) {
+        runScheduledForNonEmptyMomentum();
+    }
+    else if (isAnythingScheduled()) {
+        currentMomentumDictated_.clear();
         switch (scheduled_) {
-            case HANDLE_BE_PUSHED_HORIZONTALLY:
+            case HANDLE_BE_PUSHED_HORIZONTALLY_WITH_RETRY:
                 handleBePushedHorizontally();
                 break;
+            case HANDLE_BE_PUSHED_HORIZONTALLY_NO_RETRY:
+                handleBePushedHorizontally({0, false});
+                break;     
             case HANDLE_MOVE_HORIZONTALLY:
                 // std::cout << "HMH" << std::endl;
                 handleMoveHorizontally();
                 break;
-            case HANDLE_SLIDE_DOWN:
+            case HANDLE_SLIDE_DOWN_WITH_RETRY:
                 // std::cout << "HSD" << std::endl;
                 handleSlideDown();
+                break;
+            case HANDLE_SLIDE_DOWN_NO_RETRY:
+                handleSlideDown({0, false});
+                break;    
+            case HANDLE_JUMP:
+                handleJump();
                 break;
             case HANDLE_AIRBORNE:
                 // std::cout << "HA" << std::endl;
                 handleAirborne();
                 break;
             case HANDLE_FREEFALL:
-                // std::cout << "HF" << std::endl;
                 handleFreefall();
                 break;
             case HANDLE_STOP:
-                /// std::cout << "HS" << std::endl;
+                // std::cout << "HS" << std::endl;
                 handleStop();
                 break;
-            case HANDLE_JUMP:
-                // std::cout << "HJ" << std::endl;
-                handleJump();
-                break;    
             default:
                 clearScheduled();
                 break;                

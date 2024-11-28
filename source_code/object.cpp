@@ -171,9 +171,9 @@ bool Object::collideableWith(const Object& otherObject) {
 }
 
 
-bool Object::canBeMovedByOtherObject(float otherObjectMass, float otherObjectHVelocity) const {
+bool Object::participatingInMomentum() const {
     return false;
 }
 
 
-void Object::bePushedByOtherObject(float otherObjectMass, float otherObjectHVelocity, const Point& translationVector) {;}
+void Object::registerBeingAffectedByOutsideMomentum(float otherObjectMass, float otherObjectHVelocity, float hTranslation) {;}
