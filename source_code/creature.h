@@ -57,6 +57,8 @@ public:
     void setSlowWalkHorizontalAcc(float newSlowWalkHorizontalAcc);
     void setSlowWalkMaxHorizontalV(float newSlowWalkMaxHorizontalV);
 
+    bool canHaveOtherOnTop() const override;
+
     void runScheduled() override;
 
     virtual ~Creature() = default;

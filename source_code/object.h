@@ -27,7 +27,7 @@ protected:
 
     Model* getNextModelPtr();
 
-    Hitbox& getCurrentCollisionMesh() const;
+    // Hitbox& getCurrentCollisionMesh() const;
 
     friend class MobileObject;
 
@@ -35,8 +35,12 @@ public:
 
     Object(SDL_Renderer* renderer, Point center, ModelCollection modelCollection);
 
+    virtual bool isMobile() const;
+
     SDL_Renderer* getRenderer() const;
-    
+
+    Hitbox& getCurrentCollisionMesh() const;
+ 
     int getHealth() const;
     void setHealth(int newHealth);
     void subtractFromHealth(int subtractAmount);
@@ -58,6 +62,8 @@ public:
     void redrawObject(bool drawHitboxes, float pointSize);
 
     bool collideableWith(const Object& otherObject);
+
+    virtual bool canHaveOtherOnTop() const;
 
     virtual bool participatingInMomentum() const;
     virtual void registerBeingAffectedByOutsideMomentum(float otherObjectMass, float otherObjectHVelocity, float hTranslation); 

@@ -129,59 +129,50 @@ CreatureSpecificPhysicsChar::CreatureSpecificPhysicsChar() :
 
 
 PlayerSpecificKeyMapping::PlayerSpecificKeyMapping() :
-    moveLeft(SDL_SCANCODE_A),
-    moveRight(SDL_SCANCODE_D),
-    sprintModifier(SDL_SCANCODE_LSHIFT),
-    slowWalkModifier(SDL_SCANCODE_V),
-    jump(SDL_SCANCODE_SPACE),
-    interact(SDL_SCANCODE_E),
-    switchToNextItem(SDL_SCANCODE_C),
-    dropItem(SDL_SCANCODE_R) {}
+    moveLeftMapped(SDL_SCANCODE_A),
+    moveRightMapped(SDL_SCANCODE_D),
+    sprintModifierMapped(SDL_SCANCODE_LSHIFT),
+    slowWalkModifierMapped(SDL_SCANCODE_V),
+    jumpMapped(SDL_SCANCODE_SPACE),
+    interactMapped(SDL_SCANCODE_E),
+    switchToNextItemMapped(SDL_SCANCODE_C),
+    dropItemMapped(SDL_SCANCODE_R) {}
 
 
-// MomDictScheduledSpecs::MomDictScheduledSpecs() :
-//     receivedVelocity(0),
-//     receivedExplicitHTranslation(0),
-//     blocked(false) {}
+PlayerActionReq PlayerSpecificKeyMapping::buildPlayerActionReq(const Uint8* keyboardState) const {
+    PlayerActionReq newPlayerActionReq;
+    newPlayerActionReq.moveLeft = keyboardState[moveLeftMapped];
+    newPlayerActionReq.moveRight = keyboardState[moveRightMapped];
+    newPlayerActionReq.sprintModifier = keyboardState[sprintModifierMapped];
+    newPlayerActionReq.slowWalkModifier = keyboardState[slowWalkModifierMapped];
+    newPlayerActionReq.jump = keyboardState[jumpMapped];
+    newPlayerActionReq.interact = keyboardState[interactMapped];
+    newPlayerActionReq.switchToNextItem = keyboardState[switchToNextItemMapped];
+    newPlayerActionReq.dropItem = keyboardState[dropItemMapped];
 
-
-// void MomDictScheduledSpecs::clear() {
-//     receivedVelocity = 0;
-//     receivedExplicitHTranslation = 0;
-//     blocked = false;
-// }    
-
-
-// bool MomDictScheduledSpecs::isAvailable() {
-//     return (std::abs(receivedVelocity) > ERROR_EPS || std::abs(receivedExplicitHTranslation) > ERROR_EPS) && !blocked;
-// }
-
-
-// bool MomDictScheduledSpecs::isReceivedVelocityEmpty() {
-//     return std::abs(receivedVelocity) < ERROR_EPS;
-// }
-
-
-// bool MomDictScheduledSpecs::isReceivedExplicitHTranslationEmpty() {
-//     return std::abs(receivedExplicitHTranslation) < ERROR_EPS;
-// }
+    return newPlayerActionReq;
+}    
 
 
 MomentumDictated::MomentumDictated() :
     receivedHVelocity(0),
     receivedExplicitHTranslation(0),
-    cumultativeReceivedMomentum(0) {}
-    // receviedWeights(0) {}
+    cumultativeReceivedMomentum(0),
+    maxReceivedPosExplicitHTranslation(0),
+    maxReceivedNegExplicitHTranslation(0) {}
 
 
 void MomentumDictated::clear() {
     receivedHVelocity = 0;
     receivedExplicitHTranslation = 0;
     cumultativeReceivedMomentum = 0;
-    // receviedWeights = 0;
+    maxReceivedPosExplicitHTranslation = 0;
+    maxReceivedNegExplicitHTranslation = 0;
 }    
 
 
 bool MomentumDictated::isEmpty() const {
-    return receivedHVelocity < ERROR_EPS && receivedExplicitHTranslation < ERROR_EPS && cumultativeReceivedMomentum < ERROR_EPS;
+    return std::abs(receivedHVelocity) < ERROR_EPS &&
+           std::abs(receivedExplicitHTranslation) < ERROR_EPS && 
+           std::abs(cumultativeReceivedMomentum) < ERROR_EPS;
 }

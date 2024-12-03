@@ -221,6 +221,17 @@ bool gjk(const std::vector<Point>& S, const std::vector<Point>& R) {
     if (S.size() == 0 || R.size() == 0) {
         return false;
     }
+
+    // std::cout << "In GJK" << std::endl;
+    // for (auto& p : S) {
+    //     std::cout << p << ", ";
+    // }
+    // std::cout << std::endl;
+    // for (auto& p : R) {
+    //     std::cout << p << ", ";
+    // }
+    // std::cout << std::endl;
+
     Point d(1, 0);
     Point origin(0, 0);
     Point A, B, C, AB, AC, AO, ABPerpendicular, ACPerpendicular;
@@ -230,7 +241,7 @@ bool gjk(const std::vector<Point>& S, const std::vector<Point>& R) {
 
     while (true) {
         A = S[support(S, d)] - R[support(R, -d)];
-        if (dotProduct(A, d) < ERROR_EPS) {
+        if (dotProduct(A, d) < 0) {
             return false;
         } else {
             simplex.push_back(A);

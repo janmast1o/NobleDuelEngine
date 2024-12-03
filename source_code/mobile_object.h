@@ -14,8 +14,18 @@ protected:
     float slopeInclineDirectlyUnderneath_;
     MomentumDictated currentMomentumDictated_;
 
-    std::function<bool(float, float)> shouldIgnoreOutsideMomentumFunction_;
-    std::function<bool(float, float)> shouldOnlyBeMovedSlightlyByOutsideMomentmFunction_;
+    float slideOffDirectionAsFloat_;
+    float presetSlideOffTopPFDistance_;
+
+    float presetDistanceToBePushedPF_;
+    float distanceCoveredSoFar_;
+    float presetDistanceToBePushed_;
+
+    Object* objectCurrentlyUnderneath_;
+
+    std::function<bool(float, float, float)> shouldIgnoreOutsideMomentumFunction_;
+    std::function<bool(float, float, float)> shouldOnlyBeMovedSlightlyByOutsideMomentmFunction_;
+    std::function<bool(float, float)> canCarryWeightOnTop_;
 
     Velocity velocity_;
     Acceleration acceleration_;
@@ -43,24 +53,38 @@ protected:
     // void updateAwaitingMomDictScheduledExplicitHTransaltion(float receivedExplicitHTranslation);
 
     void horizontalMovementMainBody(Point& svec, const std::list<Object*>& potentiallyColliding, 
-                                    float& alpha, float& beta, float& gamma, bool& collisionDetected, bool& groundUnderneathFound, bool& changingSlopes);
+                                    float& alpha, float& beta, float& gamma, bool& collisionDetected, bool& groundUnderneathFound, bool& changingSlopes,
+                                    bool moveHorizontallyCurrentlyHandled, std::list<MobileObject*>& foundMobileDirectlyAbove,
+                                    Object* alphaTempObjectCurrentlyUnderneath, Object* gammaTempObjectCurrentlyUnderneath);
 
-    void adjustSVecForMaxVReqs(Point& svec) const;                                
+    void freefallMainBody(Point& svec, const std::list<Object*>& potentiallyUnderneath,
+                          float& alpha, float& delta, 
+                          bool& groundUnderneathFound,
+                          Object* alphaTempObjectCurrentlyUnderneath);
+    
+    void adjustSVecForMaxVReqs(Point& svec) const;   
+    bool moveMobileDirectlyAbove(std::list<MobileObject*>& mobileDirectlyAbove, const Point& translationVector);                             
 
+    void handleCheckForGroundDirectlyUnderneath();
     virtual void handleBePushedHorizontally(HandleParams handleParams = {0, true});
+    void handleEscapeFromUnderneathObjectOnTop(HandleParams handleParams = {0, true});
     virtual void handleMoveHorizontally();
     void handleSlideDown(HandleParams handleParams = {0, true});
+    void handleSlideOffTop();
     void handleAirborne(HandleParams handleParams = {0, false});
     void handleFreefall();
+    void handleForeverFreefall();
     void handleStop();
 
     bool collidesWithAfterVectorTranslation(Object& otherObject, const Point& translationVector) const;
+    bool isDirectlyAbove(Object& otherObject) const;
     bool isDirectlyAboveAfterVectorTranslation(Object& otherObject, const Point& translationVector) const;
     bool collidesWithTopAfterVectorTranslation(Object& otherObject, const Point& translationVector) const;
     float findMinVertDistanceFromTop(Object& otherObject) const;
     float findMinVertDistanceFromTopAfterVectorTranslation(Object& otherObject, const Point& translationVector) const;
     float isCollisionAfterVectorTranslationCausedByGentleSlope(Object& otherObject, const Point& translationVector) const;
     float findSlopeCoefficientDirectlyBelowAfterVectorTranslation(Object& otherObject, const Point& translationVector) const;
+    float findSlopeCoefficientDirectlyBelow(Object& otherObject) const;
 
     virtual void translateObjectByVector(const Point& translationVector);
 
@@ -72,6 +96,8 @@ protected:
 public:
 
     MobileObject(SDL_Renderer* renderer, Point center, ModelCollection modelCollection, ObjectMap& objectMap, float mass);
+
+    bool isMobile() const override;
 
     float getCurrentHVelocity() const;
     float getMass() const;

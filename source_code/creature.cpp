@@ -51,12 +51,21 @@ void Creature::handleBePushedHorizontally(HandleParams handleParams) {
     float alpha = -INFINITY;
     float beta = INFINITY;
     float gamma = -INFINITY;
+    std::list<MobileObject*> foundMobileDirectlyAbove;
+    Object* alphaTempObjectCurrentlyUnderneath;
+    Object* gammaTempObjectCurrentlyUnderneath;
 
     horizontalMovementMainBody(svec, potentiallyColliding, alpha, beta, gamma, 
-                               collisionDetected, groundUnderneathFound, changingSlopes);
+                               collisionDetected, groundUnderneathFound, changingSlopes,
+                               false, foundMobileDirectlyAbove,
+                               alphaTempObjectCurrentlyUnderneath,
+                               gammaTempObjectCurrentlyUnderneath);
 
     if (!collisionDetected && !changingSlopes) {
-        translateObjectByVector(svec);
+        if (moveMobileDirectlyAbove(foundMobileDirectlyAbove, svec)) {
+            translateObjectByVector(svec);
+        }
+
         if (!groundUnderneathFound) {
             acceleration_.horizontalAcceleration = 0;
             airborneGhostHorizontalVelocity_.horizontalVelocity = velocity_.horizontalVelocity;
@@ -66,18 +75,25 @@ void Creature::handleBePushedHorizontally(HandleParams handleParams) {
         } else {
             if (std::abs(alpha)-MAXIMUM_GENTLE_SLOPE_COEFFICIENT <= ERROR_EPS) {
                 slopeInclineDirectlyUnderneath_ = alpha;
+                objectCurrentlyUnderneath_ = alphaTempObjectCurrentlyUnderneath;
             }
-            clearScheduled();
+            setScheduled(HANDLE_BE_PUSHED_HORIZONTALLY_WITH_RETRY); // previously no retry
         }
+
     } else if (!collisionDetected && changingSlopes) {
         slopeInclineDirectlyUnderneath_ = gamma;
-        translateObjectByVector(svec+Point(0,-beta));
+        objectCurrentlyUnderneath_ = gammaTempObjectCurrentlyUnderneath;
+        if (moveMobileDirectlyAbove(foundMobileDirectlyAbove, svec+Point(0,-beta))) {
+            translateObjectByVector(svec+Point(0,-beta));
+        }
+
         if (std::abs(beta)-MAXIMUM_GENTLE_SLOPE_COEFFICIENT > -ERROR_EPS) {
             removeGroundReactionAcceleration();
             setScheduled(HANDLE_SLIDE_DOWN_WITH_RETRY);
         } else {
             setScheduled(HANDLE_BE_PUSHED_HORIZONTALLY_WITH_RETRY);
         }
+
     } else {
         if (handleParams.retry) {
             setScheduled(HANDLE_BE_PUSHED_HORIZONTALLY_NO_RETRY);
@@ -114,12 +130,21 @@ void Creature::handleMoveHorizontally() {
     float alpha = -INFINITY;
     float beta = INFINITY;
     float gamma = -INFINITY;
+    std::list<MobileObject*> foundMobileDirectlyAbove;
+    Object* alphaTempObjectCurrentlyUnderneath;
+    Object* gammaTempObjectCurrentlyUnderneath;
 
     horizontalMovementMainBody(svec, potentiallyColliding, alpha, beta, gamma, 
-                               collisionDetected, groundUnderneathFound, changingSlopes);
+                               collisionDetected, groundUnderneathFound, changingSlopes, 
+                               true, foundMobileDirectlyAbove,
+                               alphaTempObjectCurrentlyUnderneath,
+                               gammaTempObjectCurrentlyUnderneath);
 
     if (!collisionDetected && !changingSlopes) {
-        translateObjectByVector(svec);
+        if (moveMobileDirectlyAbove(foundMobileDirectlyAbove, svec)) {
+            translateObjectByVector(svec);
+        }
+
         if (!groundUnderneathFound) {
             acceleration_.horizontalAcceleration = 0;
             airborneGhostHorizontalVelocity_.horizontalVelocity = velocity_.horizontalVelocity;
@@ -129,18 +154,25 @@ void Creature::handleMoveHorizontally() {
         } else {
             if (std::abs(alpha)-MAXIMUM_GENTLE_SLOPE_COEFFICIENT <= ERROR_EPS) {
                 slopeInclineDirectlyUnderneath_ = alpha;
+                objectCurrentlyUnderneath_ = alphaTempObjectCurrentlyUnderneath;
             }
             clearScheduled();
         }
+
     } else if (!collisionDetected && changingSlopes) {
         slopeInclineDirectlyUnderneath_ = gamma;
-        translateObjectByVector(svec+Point(0,-beta));
+        objectCurrentlyUnderneath_ = gammaTempObjectCurrentlyUnderneath;
+        if (moveMobileDirectlyAbove(foundMobileDirectlyAbove, svec+Point(0,-beta))) {
+            translateObjectByVector(svec+Point(0,-beta));
+        }
+
         if (std::abs(gamma)-MAXIMUM_GENTLE_SLOPE_COEFFICIENT > -ERROR_EPS) {
             removeGroundReactionAcceleration();
             setScheduled(HANDLE_SLIDE_DOWN_WITH_RETRY);
         } else {
             clearScheduled();
         }
+
     } else {
         clearScheduled();
     }
@@ -171,6 +203,7 @@ void Creature::handleMoveHorizontally() {
 
 
 void Creature::handleJump() {
+    previouslyScheduled_ = scheduled_;
     velocity_.verticalVelocity = creatureSpecificPhysicsChar_.jumpingV;
     removeGroundReactionAcceleration();
     airborneGhostHorizontalVelocity_.horizontalVelocity = velocity_.horizontalVelocity;
@@ -255,9 +288,15 @@ void Creature::setSlowWalkMaxHorizontalV(float newSlowWalkMaxHorizontalV) {
 }
 
 
+bool Creature::canHaveOtherOnTop() const {
+    return false;
+}
+
+
 void Creature::runScheduled() {
-    if (!currentMomentumDictated_.isEmpty() && !shouldIgnoreOutsideMomentumFunction_(mass_, currentMomentumDictated_.cumultativeReceivedMomentum)) {
-        runScheduledForNonEmptyMomentum();
+    if (!currentMomentumDictated_.isEmpty() && 
+        !shouldIgnoreOutsideMomentumFunction_(mass_, objectSpecificPhysicsChar_.maxTrueHorizontalV, std::abs(currentMomentumDictated_.cumultativeReceivedMomentum))) {
+            runScheduledForNonEmptyMomentum();
     }
     else if (isAnythingScheduled()) {
         currentMomentumDictated_.clear();
@@ -297,5 +336,8 @@ void Creature::runScheduled() {
                 clearScheduled();
                 break;                
         }
+    } else {
+        handleCheckForGroundDirectlyUnderneath();
+        currentMomentumDictated_.clear();
     }
 }

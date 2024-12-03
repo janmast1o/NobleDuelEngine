@@ -22,6 +22,11 @@ void Object::registerOwnerCenterPtrForHitboxes() {
 }
 
 
+bool Object::isMobile() const {
+    return false;
+}
+
+
 Model* Object::getNextModelPtr() {
     if (previousState_ == state_) {
         return modelCollection_.getNewModelPtrForState(state_);
@@ -167,6 +172,11 @@ bool Object::collideableWith(const Object& otherObject) {
             return true;
         }
     }
+    return true;
+}
+
+
+bool Object::canHaveOtherOnTop() const {
     return true;
 }
 

@@ -107,18 +107,18 @@ void prepareGame(int windowWidth, int windowHeight, OfflineEngine& engine) {
     Point rightBranchCenter = {1201, -160};
     Object* rightBranch = engine.makeObject(rightBranchCenter, rightBranchModelCollection);
 
-    // SDL_Texture* leftTrStoneTexture = engine.createTexture("resources/triangular_left_facing_stone_.png");
-    // std::pair<float, float> leftTrStoneWAH = engine.readTexturesWidthAndHeight(leftTrStoneTexture);
-    // float leftTrStoneW = leftTrStoneWAH.first;
-    // float leftTrStoneH = leftTrStoneWAH.second;
-    // Model leftTrStoneModel(leftTrStoneTexture, nullptr);
-    // StaticHitbox* leftTrStoneMesh = engine.makeStaticHitbox({{-leftTrStoneW/2, -leftTrStoneH/2}, {leftTrStoneW/2, -leftTrStoneH/2}, {-leftTrStoneW/2, leftTrStoneH/2}});
-    // ModelCycle leftTrStoneModelCycle(leftTrStoneMesh);
-    // leftTrStoneModelCycle.addModelAndResetIterator(leftTrStoneModel, 1);
-    // ModelCollection leftTrStoneModelCollection;
-    // leftTrStoneModelCollection.addModelCycleForState(IDLE, leftTrStoneModelCycle);
-    // Point leftTrStoneCenter = {200, -735};
-    // Object* leftTrStone = engine.makeObject(leftTrStoneCenter, leftTrStoneModelCollection);
+    SDL_Texture* leftTrStoneTexture = engine.createTexture("resources/triangular_left_facing_stone_.png");
+    std::pair<float, float> leftTrStoneWAH = engine.readTexturesWidthAndHeight(leftTrStoneTexture);
+    float leftTrStoneW = leftTrStoneWAH.first;
+    float leftTrStoneH = leftTrStoneWAH.second;
+    Model leftTrStoneModel(leftTrStoneTexture, nullptr);
+    StaticHitbox* leftTrStoneMesh = engine.makeStaticHitbox({{-leftTrStoneW/2, -leftTrStoneH/2}, {leftTrStoneW/2, -leftTrStoneH/2}, {-leftTrStoneW/2, leftTrStoneH/2}});
+    ModelCycle leftTrStoneModelCycle(leftTrStoneMesh);
+    leftTrStoneModelCycle.addModelAndResetIterator(leftTrStoneModel, 1);
+    ModelCollection leftTrStoneModelCollection;
+    leftTrStoneModelCollection.addModelCycleForState(IDLE, leftTrStoneModelCycle);
+    Point leftTrStoneCenter = {200, -735};
+    Object* leftTrStone = engine.makeObject(leftTrStoneCenter, leftTrStoneModelCollection);
 
     SDL_Texture* rightTrStoneTexture = engine.createTexture("resources/triangular_right_facing_stone_.png");
     std::pair<float, float> rightTrStoneWAH = engine.readTexturesWidthAndHeight(rightTrStoneTexture);
@@ -171,6 +171,46 @@ void prepareGame(int windowWidth, int windowHeight, OfflineEngine& engine) {
     lowerCentralFloatingModelCollection.addModelCycleForState(IDLE, lowerCentralFloatingModelCycle);
     Point lowerCentralFloatingCenter = {windowWidth/2, -575};
     Object* lowerCentralFloating = engine.makeObject(lowerCentralFloatingCenter, lowerCentralFloatingModelCollection);
+
+    SDL_Texture* obstacleTexture = engine.createTexture("resources/vertical_short_block.png");
+    std::pair<float, float> obstacleWAH = engine.readTexturesWidthAndHeight(obstacleTexture);
+    float obstacleW = obstacleWAH.first;
+    float obstacleH = obstacleWAH.second;
+    Model obstacleModel(obstacleTexture, nullptr);
+    StaticHitbox* obstacleMesh = engine.makeStaticHitbox({{-obstacleW/2, -obstacleH/2}, {obstacleW/2, -obstacleH/2}, {obstacleW/2, obstacleH/2}, {-obstacleW/2, obstacleH/2}});
+    ModelCycle obstacleModelCycle(obstacleMesh);
+    obstacleModelCycle.addModelAndResetIterator(obstacleModel, 1);
+    ModelCollection obstacleModelCollection;
+    obstacleModelCollection.addModelCycleForState(IDLE, obstacleModelCycle);
+    Point obstacleCenter = {1120, -285};
+    Object* obstacle = engine.makeObject(obstacleCenter, obstacleModelCollection);
+
+    SDL_Texture* obstacle1Texture = engine.createTexture("resources/vertical_short_block.png");
+    std::pair<float, float> obstacle1WAH = engine.readTexturesWidthAndHeight(obstacle1Texture);
+    float obstacle1W = obstacle1WAH.first;
+    float obstacle1H = obstacle1WAH.second;
+    Model obstacle1Model(obstacle1Texture, nullptr);
+    StaticHitbox* obstacle1Mesh = engine.makeStaticHitbox({{-obstacle1W/2, -obstacle1H/2}, {obstacle1W/2, -obstacle1H/2}, {obstacle1W/2, obstacle1H/2}, {-obstacleW/2, obstacleH/2}});
+    ModelCycle obstacle1ModelCycle(obstacle1Mesh);
+    obstacle1ModelCycle.addModelAndResetIterator(obstacle1Model, 1);
+    ModelCollection obstacle1ModelCollection;
+    obstacle1ModelCollection.addModelCycleForState(IDLE, obstacle1ModelCycle);
+    Point obstacle1Center = {270, -285};
+    Object* obstacle1 = engine.makeObject(obstacle1Center, obstacle1ModelCollection);
+
+    SDL_Texture* simpleLightCreateTexture = engine.createTexture("resources/simple_crate.png");
+    std::pair<float, float> simpleLightCreateWAH = engine.readTexturesWidthAndHeight(simpleLightCreateTexture);
+    float simpleLightCreateW = simpleLightCreateWAH.first;
+    float simpleLightCreateH = simpleLightCreateWAH.second;
+    MobileHitbox* simpleLightCreateHitbox = engine.makeMobileHitbox({{-simpleLightCreateW/2, -simpleLightCreateH/2}, {simpleLightCreateW/2, -simpleLightCreateH/2}, {simpleLightCreateW/2, simpleLightCreateH/2}, {-simpleLightCreateW/2, simpleLightCreateH/2}});
+    Model simpleLightCreateModel(simpleLightCreateTexture, simpleLightCreateHitbox);
+    MobileHitbox* simpleLightCreateMesh = engine.makeMobileHitbox({{-simpleLightCreateW/2, -simpleLightCreateH/2}, {simpleLightCreateW/2, -simpleLightCreateH/2}, {simpleLightCreateW/2, simpleLightCreateH/2}, {-simpleLightCreateW/2, simpleLightCreateH/2}});
+    ModelCycle simpleLightCreateModelCycle(simpleLightCreateMesh);
+    simpleLightCreateModelCycle.addModelAndResetIterator(simpleLightCreateModel, 1);
+    ModelCollection simpleLightCreateModelCollection;
+    simpleLightCreateModelCollection.addModelCycleForState(IDLE, simpleLightCreateModelCycle);
+    Point simpleLightCreateCenter = {650, 0};
+    MobileObject* simpleLightCreate = engine.makeMobileObject(simpleLightCreateCenter, simpleLightCreateModelCollection, 25);
     
     SDL_Texture* playerTexture = engine.createTexture("resources/first_sprite_tbg_2.png");
     std::pair<float, float> playerWAH = engine.readTexturesWidthAndHeight(playerTexture);
@@ -183,10 +223,30 @@ void prepareGame(int windowWidth, int windowHeight, OfflineEngine& engine) {
     playerModelCycle.addModelAndResetIterator(playerModel, 1);
     ModelCollection playerModelCollection;
     playerModelCollection.addModelCycleForState(IDLE, playerModelCycle);
-    Point playerCenter = {windowWidth/2, 0};
+    Point playerCenter = {windowWidth/2+50, 0};
     Player* player = engine.makePlayer(playerCenter, playerModelCollection, 50, 100);
-    
 
+    SDL_Texture* player2Texture = engine.createTexture("resources/first_sprite_tbg_2.png");
+    std::pair<float, float> player2WAH = engine.readTexturesWidthAndHeight(player2Texture);
+    float player2W = player2WAH.first;
+    float player2H = player2WAH.second;
+    MobileHitbox* player2Hitbox = engine.makeMobileHitbox({{-player2W/2, -player2H/2}, {player2W/2, -player2H/2}, {player2W/2, player2H/2}, {-player2W/2, player2H/2}});
+    Model player2Model(player2Texture, player2Hitbox);
+    MobileHitbox* player2Mesh = engine.makeMobileHitbox({{-player2W/2, -player2H/2}, {player2W/2, -player2H/2}, {player2W/2, player2H/2}, {-player2W/2, player2H/2}});
+    ModelCycle player2ModelCycle(player2Mesh);
+    player2ModelCycle.addModelAndResetIterator(player2Model, 1);
+    ModelCollection player2ModelCollection;
+    player2ModelCollection.addModelCycleForState(IDLE, player2ModelCycle);
+    Point player2Center = {windowWidth/2+100, 0};
+    Player* player2 = engine.makePlayer2(player2Center, player2ModelCollection, 250, 100);
+    PlayerSpecificKeyMapping& player2KeyMapping = player2->getKeyMappingRef();
+    player2KeyMapping.moveLeftMapped = SDL_SCANCODE_LEFT;
+    player2KeyMapping.moveRightMapped = SDL_SCANCODE_RIGHT;
+    player2KeyMapping.jumpMapped = SDL_SCANCODE_UP;
+    player2KeyMapping.sprintModifierMapped = SDL_SCANCODE_RCTRL;
+    player2KeyMapping.slowWalkModifierMapped = SDL_SCANCODE_RSHIFT;
+    player2->setSprintMaxHorizontalV(500);
+    player2->setTrueMaxHorizontalV(500);
 }
 
 
@@ -205,6 +265,10 @@ int main() {
     // std::cout << minVertDistance(R1, S1) << std::endl;
     // std::cout << minVertDistance(P1, S1) << std::endl;
     // std::cout << minVertDistance(P1, R1) << std::endl;
+
+    // std::vector<Point> S = {{593.98, -332.5}, {642.98, -332.5}, {642.98, -283.5}, {593.98, -283.5}};
+    // std::vector<Point> R = {{631, -332.5}, {669, -332.5}, {669, -292.5}, {631, -292.5}};
+    // std::cout << gjk(S, R) << std::endl;
 
     return 0;
 }

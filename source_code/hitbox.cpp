@@ -111,6 +111,7 @@ bool Hitbox::collidesWithAfterVectorTranslation(const Hitbox& otherHitbox, const
     }
     const std::vector<Point> currentHitboxHull = getHullAfterVectorTranslation(translationVector);
     const std::vector<Point> otherCurrentHitboxHull = otherHitbox.getCurrentHull();
+    
     return gjk(currentHitboxHull, otherCurrentHitboxHull);
 }
 
@@ -137,7 +138,7 @@ bool Hitbox::isDirectlyAbove(const Hitbox& otherHitbox) const {
 
 bool Hitbox::isDirectlyAboveAfterVectorTranslation(const Hitbox& otherHitbox, const Point& translationVector) const {
     const Point slightRaiseVector(0, SLIGHT_RAISE);
-    const Rectangle pushedDownCurrentRectangle = getRectangleAfterVectorTranslation(-slightRaiseVector+translationVector);
+    const Rectangle pushedDownCurrentRectangle = getRectangleAfterVectorTranslation(translationVector-slightRaiseVector);
     const Rectangle otherCurrentRectangle = otherHitbox.getCurrentRectangle();
     if (!pushedDownCurrentRectangle.collidesWith(otherCurrentRectangle)) {
         return false;
@@ -245,6 +246,43 @@ float Hitbox::isCollisionAfterVectorTranslationCausedByGentleSlope(const Hitbox&
 
 float Hitbox::findSlopeCoefficientDirectlyBelowAfterVectorTranslation(const Hitbox& otherHitbox, const Point& translationVector) const {
     const std::vector<Point> currentHitboxBottom = getBottomAfterVectorTranslation(translationVector);
+    const std::vector<Point> otherCurrentHitboxTop = otherHitbox.getCurrentTop();
+    int currentHitboxBottomLast = currentHitboxBottom.size()-1;
+    float alpha = 0.0;
+    float slopeCoefficient;
+    for (int i=1; i<otherCurrentHitboxTop.size(); i++) {
+        slopeCoefficient = findSlopeCoefficient(otherCurrentHitboxTop[i-1], otherCurrentHitboxTop[i]);
+        if (slopeCoefficient < -ERROR_EPS) {
+            if (otherCurrentHitboxTop[i-1].x - currentHitboxBottom[0].x >= -ERROR_EPS
+                && currentHitboxBottom[0].x - otherCurrentHitboxTop[i].x >= -ERROR_EPS) {
+                    alpha = slopeCoefficient;
+                    break;
+            }
+        } else if (slopeCoefficient > ERROR_EPS) {
+            if (otherCurrentHitboxTop[i-1].x - currentHitboxBottom[currentHitboxBottomLast].x >= -ERROR_EPS
+                && currentHitboxBottom[currentHitboxBottomLast].x - otherCurrentHitboxTop[i].x >= -ERROR_EPS) {
+                    alpha = slopeCoefficient;
+                    break;
+            }
+        } else {
+            if (otherCurrentHitboxTop[i-1].x - currentHitboxBottom[0].x >= -ERROR_EPS
+                && currentHitboxBottom[0].x - otherCurrentHitboxTop[i].x >= -ERROR_EPS) {
+                    alpha = slopeCoefficient;
+                    break;
+            } else if (otherCurrentHitboxTop[i-1].x - currentHitboxBottom[currentHitboxBottomLast].x >= -ERROR_EPS
+                && currentHitboxBottom[currentHitboxBottomLast].x - otherCurrentHitboxTop[i].x >= -ERROR_EPS) {
+                    alpha = slopeCoefficient;
+                    break;
+            }
+        }
+    }
+
+    return alpha;
+}
+
+
+float Hitbox::findSlopeCoefficientDirectlyBelow(const Hitbox& otherHitbox) const {
+    const std::vector<Point> currentHitboxBottom = getCurrentBottom();
     const std::vector<Point> otherCurrentHitboxTop = otherHitbox.getCurrentTop();
     int currentHitboxBottomLast = currentHitboxBottom.size()-1;
     float alpha = 0.0;

@@ -66,7 +66,8 @@ public:
     float isCollisionAfterVectorTranslationCausedByGentleSlope(const Hitbox& otherHitbox, const Point& translationVector) const;
 
     float findSlopeCoefficientDirectlyBelowAfterVectorTranslation(const Hitbox& otherHitbox, const Point& translationVector) const;
-     
+    float findSlopeCoefficientDirectlyBelow(const Hitbox& otherHitbox) const; 
+
 };
 
 #endif

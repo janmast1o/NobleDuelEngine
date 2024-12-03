@@ -131,7 +131,9 @@ enum ScheduledInstruction {
     HANDLE_AIRBORNE,
     HANDLE_FREEFALL,
     HANDLE_STOP,
-    HANDLE_JUMP
+    HANDLE_JUMP,
+    HANDLE_FOREVER_FREEFALL,
+    HANDLE_SLIDE_OFF_TOP
 };
 
 #endif
@@ -204,23 +206,43 @@ struct CreatureSpecificPhysicsChar {
 
 #endif
 
+#ifndef PLAYER_ACTION_REQ
+#define PLAYER_ACTION_REQ
+
+struct PlayerActionReq {
+    bool moveLeft = false;
+    bool moveRight = false;
+
+    bool sprintModifier = false;
+    bool slowWalkModifier = false;
+
+    bool jump = false;
+
+    bool interact = false;
+    bool switchToNextItem = false;
+    bool dropItem = false;
+};
+
+#endif
+
 #ifndef PLAYER_SPECIFIC_KEY_MAPPING_H
 #define PLAYER_SPECIFIC_KEY_MAPPING_H
 
 struct PlayerSpecificKeyMapping {
-    int moveLeft;
-    int moveRight;
+    int moveLeftMapped;
+    int moveRightMapped;
 
-    int sprintModifier;
-    int slowWalkModifier;
+    int sprintModifierMapped;
+    int slowWalkModifierMapped;
 
-    int jump;
+    int jumpMapped;
 
-    int interact;
-    int switchToNextItem;
-    int dropItem;
+    int interactMapped;
+    int switchToNextItemMapped;
+    int dropItemMapped;
 
     PlayerSpecificKeyMapping();
+    PlayerActionReq buildPlayerActionReq(const Uint8* keyboardState) const;
 };
 
 #endif
@@ -239,24 +261,6 @@ struct TEntry {
 
 #endif
 
-// #ifndef MOM_DICT_SCHEDULED_SPECS
-// #define MOM_DICT_SCHEDULED_SPECS
-
-// struct MomDictScheduledSpecs {
-//     float receivedVelocity;
-//     float receivedExplicitHTranslation;
-//     bool blocked;
-
-//     MomDictScheduledSpecs();
-//     void clear();
-//     bool isAvailable();
-//     bool isReceivedVelocityEmpty();
-//     bool isReceivedExplicitHTranslationEmpty();
-
-// };
-
-// #endif
-
 #ifndef MOMENTUM_DICTATED
 #define MOMENTUM_DICTATED
 
@@ -264,7 +268,8 @@ struct MomentumDictated {
     float receivedHVelocity;
     float receivedExplicitHTranslation;
     float cumultativeReceivedMomentum;
-    // float receviedWeights;
+    float maxReceivedPosExplicitHTranslation;
+    float maxReceivedNegExplicitHTranslation;
 
     MomentumDictated();
     void clear();

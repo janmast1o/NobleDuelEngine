@@ -292,27 +292,27 @@ struct CreatureSpecificPhysicsChar {
 #define PLAYER_SPECIFIC_KEY_MAPPING
 
 struct PlayerSpecificKeyMapping {
-    int moveLeft;
-    int moveRight;
+    int moveLeftMapped;
+    int moveRightMapped;
 
-    int sprintModifier;
-    int slowWalkModifier;
+    int sprintModifierMapped;
+    int slowWalkModifierMapped;
 
-    int jump;
+    int jumpMapped;
 
-    int interact;
-    int switchToNextItem;
-    int dropItem;
+    int interactMapped;
+    int switchToNextItemMapped;
+    int dropItemMapped;
 
     PlayerSpecificKeyMapping() :
-        moveLeft(SDL_SCANCODE_A),
-        moveRight(SDL_SCANCODE_D),
-        sprintModifier(SDL_SCANCODE_LSHIFT),
-        slowWalkModifier(SDL_SCANCODE_V),
-        jump(SDL_SCANCODE_SPACE),
-        interact(SDL_SCANCODE_E),
-        switchToNextItem(SDL_SCANCODE_C),
-        dropItem(SDL_SCANCODE_R) {}
+        moveLeftMapped(SDL_SCANCODE_A),
+        moveRightMapped(SDL_SCANCODE_D),
+        sprintModifierMapped(SDL_SCANCODE_LSHIFT),
+        slowWalkModifierMapped(SDL_SCANCODE_V),
+        jumpMapped(SDL_SCANCODE_SPACE),
+        interactMapped(SDL_SCANCODE_E),
+        switchToNextItemMapped(SDL_SCANCODE_C),
+        dropItemMapped(SDL_SCANCODE_R) {}
 
 };
 

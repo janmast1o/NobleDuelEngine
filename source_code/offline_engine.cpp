@@ -32,6 +32,11 @@ OfflineEngine::OfflineEngine(int windowWidth, int windowHeight) : hitboxIdCounte
 }
 
 
+// PlayerActionReq OfflineEngine::updatePlayerReqs() const {
+//     return playerKeyMapping_.buildPlayerActionReq(SDL_GetKeyboardState(NULL));
+// }
+
+
 SDL_Texture* OfflineEngine::createTexture(const char* filepath) {
     SDL_Texture* newTexture = IMG_LoadTexture(renderer_, filepath);
     if (!newTexture) {
@@ -105,6 +110,16 @@ Player* OfflineEngine::makePlayer(Point& center, ModelCollection& modelCollectio
 }
 
 
+Player* OfflineEngine::makePlayer2(Point& center, ModelCollection& modelCollection, float mass, int health) {
+    std::lock_guard<std::mutex> lock(objectCreationMutex_);
+    ObjectCreationArgs newPlayerCreationArgs(renderer_, &center, &modelCollection, &objectMap_, mass, health);
+    allObjects_.emplace_back(newPlayerCreationArgs, PLAYER_TYPE);
+    player2Ptr_ = dynamic_cast<Player*>(allObjects_.back().object);
+    objectMap_.addNewObject(*allObjects_.back().object);
+    return player2Ptr_;
+}
+
+
 void OfflineEngine::run() {
     SDL_SetRenderDrawColor(renderer_, 0xFF, 0xFF, 0xFF, 255);
     std::thread framerateCapThread;
@@ -125,12 +140,23 @@ void OfflineEngine::run() {
 
         SDL_RenderClear(renderer_);
         
+        // PlayerActionReq newPlayerActionReq = updatePlayerReqs();
+
         if (playerPtr_ != nullptr) {
             if (!playerPtr_->isAlive()) {
                 playerPtr_ = nullptr;
             } else {
                 playerPtr_->updateTargetedPoint(Point((float) mouseX, (float) -mouseY));
                 playerPtr_->readInputs(SDL_GetKeyboardState(NULL));
+            }
+        }
+
+        if (player2Ptr_ != nullptr) {
+            if (!player2Ptr_->isAlive()) {
+                player2Ptr_ = nullptr;
+            } else {
+                player2Ptr_->updateTargetedPoint(Point((float) mouseX, (float) -mouseY));
+                player2Ptr_->readInputs(SDL_GetKeyboardState(NULL));
             }
         }
 
@@ -146,6 +172,10 @@ void OfflineEngine::run() {
 
         if (playerPtr_ != nullptr) {
             playerPtr_->runScheduled();
+        }
+
+        if (player2Ptr_ != nullptr) {
+            player2Ptr_->runScheduled();
         }
 
         for (auto it = allObjects_.begin(); it != allObjects_.end(); ) {

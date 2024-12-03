@@ -97,11 +97,15 @@ private:
     std::list<MobileObject*> mobileObjectPtrs_;
 
     Player* playerPtr_;
+
+    Player* player2Ptr_;
     
     ObjectMap objectMap_;
     std::unordered_map<int, Hitbox*> allHitboxes_;
 
     std::list<SDL_Texture*> textures_;
+
+    // PlayerActionReq updatePlayerReqs() const;
 
 public:
 
@@ -118,6 +122,7 @@ public:
     MobileObject* makeMobileObject(Point& center, ModelCollection& modelCollection, float mass);
     Creature* makeCreature(Point& center, ModelCollection& modelCollection, float mass, int health);
     Player* makePlayer(Point& center, ModelCollection& modelCollection, float mass, int health);
+    Player* makePlayer2(Point& center, ModelCollection& modelCollection, float mass, int health);
 
     void run();
 

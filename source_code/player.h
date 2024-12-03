@@ -11,7 +11,11 @@ private:
     std::unordered_map<int, Uint8> previousKeyboardState_;
     std::unordered_map<int, int> bufferedInputs_;
 
+    // PlayerActionReq previousPlayerReqs_;
+    // PlayerActionReq bufferedInputs_;
+
     void rememberPreviousKeyboardState(const Uint8* keyboardState);
+    // void rememberPreviousPlayerReqs(const PlayerActionReq playerActionReq);
     void bufferInputs(const Uint8* keyboardState);
     void decrementBufferTimers();
     void zeroBuffers();
@@ -23,6 +27,8 @@ public:
 
     Player(SDL_Renderer* renderer, Point center, ModelCollection modelCollection, ObjectMap& objectMap, float mass, int health);
 
+    PlayerSpecificKeyMapping& getKeyMappingRef();
+    
     void addBufferable(const int newBufferable);
     void removeBufferable(const int bufferable);
     void clearBufferables();

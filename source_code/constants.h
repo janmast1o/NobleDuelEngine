@@ -7,7 +7,8 @@ const float GRAVITATIONAL_PULL = 725;
 const float AIR_RES_ACC = 35;
 const float LOWEST_V_UNAFFECTED_BY_AIR_RES = 40;
 const float SLOPE_RES_COEFF = 0.25;
-const float FRICTION_ACC = 30;
+const float FRICTION_ACC = 90;
+const float SLIDE_OFF_TOP_SPEED = 300;
 
 const float MAX_AIRBORNE_ACCELERABLE = 180;
 

@@ -3,17 +3,24 @@
 
 Player::Player(SDL_Renderer* renderer, Point center, ModelCollection modelCollection, ObjectMap& objectMap, float mass, int health) : 
     Creature(renderer, center, modelCollection, objectMap, mass, health) {
-        previousKeyboardState_[keyMapping_.interact] = 0;
-        previousKeyboardState_[keyMapping_.switchToNextItem] = 0;
-        previousKeyboardState_[keyMapping_.dropItem] = 0;
+        previousKeyboardState_[keyMapping_.interactMapped] = 0;
+        previousKeyboardState_[keyMapping_.switchToNextItemMapped] = 0;
+        previousKeyboardState_[keyMapping_.dropItemMapped] = 0;
     }
 
 
 void Player::rememberPreviousKeyboardState(const Uint8* keyboardState) {
-    previousKeyboardState_[keyMapping_.interact] = keyboardState[keyMapping_.interact];
-    previousKeyboardState_[keyMapping_.switchToNextItem] = keyboardState[keyMapping_.switchToNextItem];
-    previousKeyboardState_[keyMapping_.dropItem] = keyboardState[keyMapping_.dropItem];
+    previousKeyboardState_[keyMapping_.interactMapped] = keyboardState[keyMapping_.interactMapped];
+    previousKeyboardState_[keyMapping_.switchToNextItemMapped] = keyboardState[keyMapping_.switchToNextItemMapped];
+    previousKeyboardState_[keyMapping_.dropItemMapped] = keyboardState[keyMapping_.dropItemMapped];
 }    
+
+
+// void Player::rememberPreviousPlayerReqs(const PlayerActionReq playerActionReq) {
+//     previousPlayerReqs_.interact = playerActionReq.interact;
+//     previousPlayerReqs_.dropItem = playerActionReq.dropItem;
+//     previousPlayerReqs_.switchToNextItem = playerActionReq.switchToNextItem;
+// }
 
 
 void Player::bufferInputs(const Uint8* keyboardState) {
@@ -87,19 +94,24 @@ void Player::clearBufferables() {
 }
 
 
+PlayerSpecificKeyMapping& Player::getKeyMappingRef() {
+    return keyMapping_;
+}
+
+
 void Player::readInputs(const Uint8* newKeyboardState) {
     if (!isAnythingScheduled()) {
-        if (isOnPressRequested(keyMapping_.moveLeft, newKeyboardState)) {
-            if (!isOnPressRequested(keyMapping_.moveRight, newKeyboardState)) {
+        if (isOnPressRequested(keyMapping_.moveLeftMapped, newKeyboardState)) {
+            if (!isOnPressRequested(keyMapping_.moveRightMapped, newKeyboardState)) {
                 adjustAccAndVForRegular();
-                if (isOnPressRequested(keyMapping_.sprintModifier, newKeyboardState)) {
+                if (isOnPressRequested(keyMapping_.sprintModifierMapped, newKeyboardState)) {
                     adjustAccAndVForSprint();
-                } else if (isOnPressRequested(keyMapping_.slowWalkModifier, newKeyboardState)) {
+                } else if (isOnPressRequested(keyMapping_.slowWalkModifierMapped, newKeyboardState)) {
                     adjustAccAndVForSlowWalk();
                 }
                 newHorizontalAcceleration(LEFT);
 
-                if (isOnPressRequested(keyMapping_.jump, newKeyboardState)) {
+                if (isOnPressRequested(keyMapping_.jumpMapped, newKeyboardState)) {
                     setScheduled(HANDLE_JUMP);
                 } else {
                     setScheduled(HANDLE_MOVE_HORIZONTALLY);
@@ -107,17 +119,17 @@ void Player::readInputs(const Uint8* newKeyboardState) {
             } else {
                 setScheduled(HANDLE_STOP);
             }
-        } else if (isOnPressRequested(keyMapping_.moveRight, newKeyboardState)) {
-            if (!isOnPressRequested(keyMapping_.moveLeft, newKeyboardState)) {
+        } else if (isOnPressRequested(keyMapping_.moveRightMapped, newKeyboardState)) {
+            if (!isOnPressRequested(keyMapping_.moveLeftMapped, newKeyboardState)) {
                 adjustAccAndVForRegular();
-                if (isOnPressRequested(keyMapping_.sprintModifier, newKeyboardState)) {
+                if (isOnPressRequested(keyMapping_.sprintModifierMapped, newKeyboardState)) {
                     adjustAccAndVForSprint();
-                } else if (isOnPressRequested(keyMapping_.slowWalkModifier, newKeyboardState)) {
+                } else if (isOnPressRequested(keyMapping_.slowWalkModifierMapped, newKeyboardState)) {
                     adjustAccAndVForSlowWalk();
                 }
                 newHorizontalAcceleration(RIGHT);
 
-                if (isOnPressRequested(keyMapping_.jump, newKeyboardState)) {
+                if (isOnPressRequested(keyMapping_.jumpMapped, newKeyboardState)) {
                     setScheduled(HANDLE_JUMP);
                 } else {
                     setScheduled(HANDLE_MOVE_HORIZONTALLY);
@@ -125,7 +137,7 @@ void Player::readInputs(const Uint8* newKeyboardState) {
             } else {
                 setScheduled(HANDLE_STOP);
             }
-        } else if (isOnPressRequested(keyMapping_.jump, newKeyboardState)) {
+        } else if (isOnPressRequested(keyMapping_.jumpMapped, newKeyboardState)) {
             setScheduled(HANDLE_JUMP);
         } else if (getPreviouslyScheduled() != HANDLE_STOP) {
             setScheduled(HANDLE_STOP);
