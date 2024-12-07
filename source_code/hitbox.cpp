@@ -69,10 +69,6 @@ const std::vector<Point> Hitbox::getCurrentGentleSlopeTop() const {;}
 
 const std::vector<Point> Hitbox::getCurrentTop() const {;}
 
-// const std::vector<Point> Hitbox::getCurrentLeftTop() const {;}
-
-// const std::vector<Point> Hitbox::getCurrentRightTop() const {;}
-
 const std::vector<Point> Hitbox::getCurrentBottom() const {;}
 
 
@@ -84,12 +80,13 @@ const std::vector<Point> Hitbox::getGentleSlopeTopAfterVectorTranslation(const P
 
 const std::vector<Point> Hitbox::getTopAfterVectorTranslation(const Point& translationVector) const {;}
 
-// const std::vector<Point> Hitbox::getLeftTopAfterVectorTranslation(const Point& translationVector) const {;}
-
-// const std::vector<Point> Hitbox::getRightTopAfterVectorTranslation(const Point& translationVector) const {;}
-
 const std::vector<Point> Hitbox::getBottomAfterVectorTranslation(const Point& translationVector) const {;}
 
+
+float Hitbox::getCurrentLeftmostX() const {;}
+
+float Hitbox::getCurrentRightmostX() const {;}
+    
 
 bool Hitbox::collidesWith(const Hitbox& otherHitbox) const {
     const Rectangle currentRectangle = getCurrentRectangle();
@@ -165,10 +162,6 @@ bool Hitbox::collidesWithTopAfterVectorTranslation(const Hitbox& otherHitbox, co
     }
     std::vector<Point> currentHitboxHull = getHullAfterVectorTranslation(translationVector);
     const std::vector<Point> otherCurrentHitboxTop = otherHitbox.getCurrentTop();
-    // for (Point p : currentHitboxHull) std::cout << p << " ";
-    // std::cout << std::endl;
-    // for (Point p : otherCurrentHitboxTop) std::cout << p << " ";
-    // std::cout << std::endl;
     if (gjk(currentHitboxHull, otherCurrentHitboxTop)) {
         float sx = translationVector.x;
         Point horizontalPushVector;
@@ -315,4 +308,14 @@ float Hitbox::findSlopeCoefficientDirectlyBelow(const Hitbox& otherHitbox) const
     }
 
     return alpha;
+}
+
+
+float Hitbox::findEscapeDisAlongXAxis(const Hitbox& otherHitbox, float soughtDirection) const {
+    float currentLeftmostX = getCurrentLeftmostX();
+    float currentRightmostX = getCurrentRightmostX();
+    float otherCurrentLeftmostX = otherHitbox.getCurrentLeftmostX();
+    float otherCurrentRightmostX = otherHitbox.getCurrentRightmostX();
+
+    return findEscapeDisXAxisForTwoLines(currentLeftmostX, currentRightmostX, otherCurrentLeftmostX, otherCurrentRightmostX, soughtDirection);
 }

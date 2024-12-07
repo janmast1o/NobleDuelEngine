@@ -22,6 +22,7 @@ protected:
     std::function<bool(float, float, float)> shouldIgnoreOutsideMomentumFunction_;
     std::function<bool(float, float, float)> shouldOnlyBeMovedSlightlyByOutsideMomentmFunction_;
     std::function<bool(float, float)> canCarryWeightOnTop_;
+    std::function<bool(float, float)> shouldIgnoreOtherSlidingOffTop_;
 
     Velocity velocity_;
     Acceleration acceleration_;
@@ -47,9 +48,7 @@ protected:
     void applyFriction();
 
     void prepareNextSlideOffTopScheduled();
-
-    // void updateAwaitingMomDictScheduledVelocity(float receivedVelocity);
-    // void updateAwaitingMomDictScheduledExplicitHTransaltion(float receivedExplicitHTranslation);
+    void prepareNextEscapeScheduled(float escapeDirection, MobileObject& escapingFrom);
 
     void horizontalMovementMainBody(Point& svec, const std::list<Object*>& potentiallyColliding, 
                                     float& alpha, float& beta, float& gamma, bool& collisionDetected, bool& groundUnderneathFound, bool& changingSlopes,
@@ -59,7 +58,7 @@ protected:
     void freefallMainBody(Point& svec, const std::list<Object*>& potentiallyUnderneath,
                           float& alpha, float& delta, 
                           bool& groundUnderneathFound,
-                          Object*& alphaTempObjectCurrentlyUnderneath);
+                          Object*& alphaTempObjectCurrentlyUnderneath);                      
     
     void adjustSVecForMaxVReqs(Point& svec) const;   
     bool moveMobileDirectlyAbove(std::list<MobileObject*>& mobileDirectlyAbove, const Point& translationVector);                             
@@ -72,7 +71,6 @@ protected:
     void handleSlideOffTop();
     void handleAirborne(HandleParams handleParams = {0, false});
     void handleFreefall();
-    // void handleForeverFreefall();
     void handleStop();
 
     bool collidesWithAfterVectorTranslation(Object& otherObject, const Point& translationVector) const;
@@ -84,6 +82,7 @@ protected:
     float isCollisionAfterVectorTranslationCausedByGentleSlope(Object& otherObject, const Point& translationVector) const;
     float findSlopeCoefficientDirectlyBelowAfterVectorTranslation(Object& otherObject, const Point& translationVector) const;
     float findSlopeCoefficientDirectlyBelow(Object& otherObject) const;
+    float findEscapeDisAlongXAxis(Object& otherObject, float escapeDirection) const;
 
     virtual void translateObjectByVector(const Point& translationVector);
 

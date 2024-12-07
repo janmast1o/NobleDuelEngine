@@ -95,3 +95,15 @@ const std::vector<Point> StaticHitbox::getTopAfterVectorTranslation(const Point&
 const std::vector<Point> StaticHitbox::getBottomAfterVectorTranslation(const Point& translationVector) const {
     return getCurrentBottom();
 }
+
+
+float StaticHitbox::getCurrentLeftmostX() const {
+    return top_.back().x;
+}
+
+float StaticHitbox::getCurrentRightmostX() const {
+    if (top_.size() == 0) {
+        return 0;
+    }
+    return top_[0].x;
+}

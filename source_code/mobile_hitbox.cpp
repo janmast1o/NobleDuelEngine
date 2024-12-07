@@ -112,3 +112,24 @@ const std::vector<Point> MobileHitbox::getBottomAfterVectorTranslation(const Poi
     }
     return currentBottom;
 }
+
+float MobileHitbox::getCurrentLeftmostX() const {
+    float currentLeftmostX = relativeTop_.back().x;
+    if (ownerCenterPtr_ != nullptr) {
+        return currentLeftmostX + ownerCenterPtr_->x;
+    }
+
+    return currentLeftmostX;
+}
+
+float MobileHitbox::getCurrentRightmostX() const {
+    if (relativeTop_.size() == 0) {
+        return 0;
+    }
+    float currentRightmostX = relativeTop_[0].x;
+    if (ownerCenterPtr_ != nullptr) {
+        return currentRightmostX + ownerCenterPtr_->x;
+    }
+
+    return currentRightmostX;
+}

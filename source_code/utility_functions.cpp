@@ -62,6 +62,33 @@ std::pair<float, float> findLineCoefficients(const Point& A, const Point& B) {
 }
 
 
+float seeIfLinesOverlapAlongXAxis(float firstStartX, float firstEndX, float secondStartX, float secondEndX) {
+    return !(firstStartX > secondEndX || firstEndX < secondStartX);
+}
+
+
+float findEscapeDisXAxisForTwoLines(float firstStartX, float firstEndX, float secondStartX, float secondEndX, float soughtDirection) {
+    if (soughtDirection < 0) {
+        float toTheLeft = 0;
+        if (!seeIfLinesOverlapAlongXAxis(firstStartX, firstEndX, secondStartX, secondEndX)) {;}
+        else {
+            toTheLeft = secondStartX - firstEndX;
+        }
+
+        return toTheLeft;
+    } else {
+        float toTheRight = 0;
+        if (!seeIfLinesOverlapAlongXAxis(firstStartX, firstEndX, secondStartX, secondEndX)) {;}
+        else {
+            toTheRight = secondEndX - firstStartX;
+        }
+
+        return toTheRight;
+    }
+
+}
+
+
 float calculateVelocityAfterCollision(float mass, float hVelocity, float otherMass, float otherHVelocity) {
     return ((mass-otherMass)*hVelocity + 2*otherMass*otherHVelocity) / (mass+otherMass);
 }
@@ -221,16 +248,6 @@ bool gjk(const std::vector<Point>& S, const std::vector<Point>& R) {
     if (S.size() == 0 || R.size() == 0) {
         return false;
     }
-
-    // std::cout << "In GJK" << std::endl;
-    // for (auto& p : S) {
-    //     std::cout << p << ", ";
-    // }
-    // std::cout << std::endl;
-    // for (auto& p : R) {
-    //     std::cout << p << ", ";
-    // }
-    // std::cout << std::endl;
 
     Point d(1, 0);
     Point origin(0, 0);

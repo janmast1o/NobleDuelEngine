@@ -29,6 +29,10 @@ float findSlopeCoefficient(const Point& A, const Point& B);
 
 std::pair<float, float> findLineCoefficients(const Point& A, const Point& B);
 
+float seeIfLinesOverlapAlongXAxis(float firstStartX, float firstEndX, float secondStartX, float secondEndX);
+
+float findEscapeDisXAxisForTwoLines(float firstStartX, float firstEndX, float secondStartX, float secondEndX, float soughtDirection);
+
 float calculateVelocityAfterCollision(float mass, float hVelocity, float otherMass, float otherHVelocity);
 
 std::vector<Point> findGentleSlopeTop(const std::vector<Point>& polygon);

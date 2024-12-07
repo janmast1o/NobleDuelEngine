@@ -78,7 +78,7 @@ void Creature::handleBePushedHorizontally(HandleParams handleParams) {
                 objectCurrentlyUnderneath_ = alphaTempObjectCurrentlyUnderneath;
             }
             
-            if (!objectCurrentlyUnderneath_->canHaveOtherOnTop()) { // added first if
+            if (!objectCurrentlyUnderneath_->canHaveOtherOnTop()) {
                 prepareNextSlideOffTopScheduled();
             }
             else {
@@ -93,7 +93,7 @@ void Creature::handleBePushedHorizontally(HandleParams handleParams) {
             translateObjectByVector(svec+Point(0,-beta));
         }
 
-        if (!objectCurrentlyUnderneath_->canHaveOtherOnTop()) { // added first if
+        if (!objectCurrentlyUnderneath_->canHaveOtherOnTop()) {
             prepareNextSlideOffTopScheduled();
         } else if (std::abs(beta)-MAXIMUM_GENTLE_SLOPE_COEFFICIENT > -ERROR_EPS) {
             removeGroundReactionAcceleration();
@@ -179,7 +179,7 @@ void Creature::handleMoveHorizontally() {
             translateObjectByVector(svec+Point(0,-beta));
         }
 
-        if (!objectCurrentlyUnderneath_->canHaveOtherOnTop()) { // added first if
+        if (!objectCurrentlyUnderneath_->canHaveOtherOnTop()) {
             prepareNextSlideOffTopScheduled();
         } else if (std::abs(gamma)-MAXIMUM_GENTLE_SLOPE_COEFFICIENT > -ERROR_EPS) {
             removeGroundReactionAcceleration();
@@ -323,7 +323,7 @@ void Creature::runScheduled() {
                 handleBePushedHorizontally({0, false});
                 break;     
             case HANDLE_MOVE_HORIZONTALLY:
-                std::cout << "HMH" << std::endl;
+                // std::cout << "HMH" << std::endl;
                 handleMoveHorizontally();
                 break;
             case HANDLE_SLIDE_DOWN_WITH_RETRY:
@@ -333,6 +333,12 @@ void Creature::runScheduled() {
             case HANDLE_SLIDE_DOWN_NO_RETRY:
                 handleSlideDown({0, false});
                 break;
+            case HANDLE_ESCAPE_WITH_RETRY:
+                handleEscapeFromUnderneathObjectOnTop({0, true});
+                break;
+            case HANDLE_ESCAPE_NO_RETRY:
+                handleEscapeFromUnderneathObjectOnTop({0, false});       
+                break;     
             case HANDLE_SLIDE_OFF_TOP:
                 // std::cout << "HSOT" << std::endl; 
                 handleSlideOffTop();
@@ -347,11 +353,7 @@ void Creature::runScheduled() {
             case HANDLE_FREEFALL:
                 // std::cout << "HF" << std::endl;
                 handleFreefall();
-                break;
-            // case HANDLE_FOREVER_FREEFALL:
-            //     // std::cout << "HFF" << std::endl;
-            //     handleForeverFreefall();
-            //     break;    
+                break;   
             case HANDLE_STOP:
                 // std::cout << "HS" << std::endl;
                 handleStop();

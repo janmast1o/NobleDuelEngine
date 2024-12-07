@@ -22,6 +22,9 @@ MobileObject::MobileObject(SDL_Renderer* renderer, Point center, ModelCollection
         canCarryWeightOnTop_ = [](float mass, float cumulativeWeight) {
             return 1.4*mass > cumulativeWeight;
         };
+        shouldIgnoreOtherSlidingOffTop_ = [](float mass, float otherMass) {
+            return 1.5*mass > otherMass;
+        };
     }
 
 
@@ -178,6 +181,25 @@ void MobileObject::prepareNextSlideOffTopScheduled() {
     zeroVelocity();
     velocity_.horizontalVelocity = slideDirAsFloat*objectSpecificPhysicsChar_.slideV;
     setScheduled(HANDLE_SLIDE_OFF_TOP);
+    if (objectCurrentlyUnderneath_->isMobile()) {
+        dynamic_cast<MobileObject*>(objectCurrentlyUnderneath_)->prepareNextEscapeScheduled(-slideDirAsFloat, *this);
+    }
+}
+
+
+void MobileObject::prepareNextEscapeScheduled(float escapeDirection, MobileObject& escapingFrom) {
+    if (scheduled_ == HANDLE_AIRBORNE || scheduled_ == HANDLE_FREEFALL || 
+        scheduled_ == HANDLE_SLIDE_DOWN_NO_RETRY || scheduled_ == HANDLE_SLIDE_DOWN_WITH_RETRY) {
+            return;
+    } else if (shouldIgnoreOtherSlidingOffTop_(mass_, escapingFrom.getMass())) {
+        return;
+    }
+
+    zeroVelocity();
+    velocity_.horizontalVelocity = escapeDirection*objectSpecificPhysicsChar_.slideV;
+    auxDistanceToCover_ = findEscapeDisAlongXAxis(escapingFrom, escapeDirection);
+    auxDistanceCoveredSoFar_ = 0;
+    setScheduled(HANDLE_ESCAPE_WITH_RETRY);    
 }
 
 
@@ -411,7 +433,7 @@ void MobileObject::handleBePushedHorizontally(HandleParams handleParams) {
                 slopeInclineDirectlyUnderneath_ = alpha;
             }
 
-            if (!objectCurrentlyUnderneath_->canHaveOtherOnTop()) { // added first if
+            if (!objectCurrentlyUnderneath_->canHaveOtherOnTop()) {
                 prepareNextSlideOffTopScheduled();
             }
             else {
@@ -486,6 +508,7 @@ void MobileObject::handleEscapeFromUnderneathObjectOnTop(HandleParams handlePara
 
     if (!collisionDetected && !changingSlopes) {
         moveMobileDirectlyAbove(foundMobileDirectlyAbove, svec);
+        auxDistanceCoveredSoFar_ += svec.x;
         translateObjectByVector(svec);
         
         if (!groundUnderneathFound) {
@@ -515,6 +538,7 @@ void MobileObject::handleEscapeFromUnderneathObjectOnTop(HandleParams handlePara
 
         moveMobileDirectlyAbove(foundMobileDirectlyAbove, svec+Point(0,-beta));
         translateObjectByVector(svec+Point(0,-beta));
+        auxDistanceCoveredSoFar_ += svec.x;
         
         if (!objectCurrentlyUnderneath_->canHaveOtherOnTop()) {
             prepareNextSlideOffTopScheduled();
@@ -533,6 +557,12 @@ void MobileObject::handleEscapeFromUnderneathObjectOnTop(HandleParams handlePara
             clearScheduled();
         }
 
+    }
+
+    if (sx < 0) {
+        setNewState(PUSHED_LEFT);
+    } else {
+        setNewState(PUSHED_RIGHT);
     }
 
 }
@@ -751,30 +781,12 @@ void MobileObject::handleSlideOffTop() {
     bool collisionDetected = false;
 
     for (Object* p : potentiallyColliding) {
-        // if (p == objectCurrentlyUnderneath_) {
-        //     std::cout << p << std::endl;
-        // }
         if (p != this && p != objectCurrentlyUnderneath_ && collideableWith(*p)) {
             if (collidesWithAfterVectorTranslation(*p, svec)) {
-                // std::cout << "A: " << p << std::endl;
                 collisionDetected = true;
             }
         }
     }
-
-    // if (collisionDetected) {
-    //     objectCurrentlyUnderneath_ = nullptr;
-    //     slopeInclineDirectlyUnderneath_ = 0;
-    //     acceleration_.horizontalAcceleration = 0;
-    //     removeGroundReactionAcceleration();
-    //     airborneGhostHorizontalVelocity_.horizontalVelocity = velocity_.horizontalVelocity;
-    //     velocity_.horizontalVelocity = 0;
-    //     participatingInMomentum_ = true;
-    //     setScheduled(HANDLE_FOREVER_FREEFALL);
-    // } else {
-    //     translateObjectByVector(svec);
-    //     setScheduled(HANDLE_SLIDE_OFF_TOP);
-    // }
 
     if (!collisionDetected) {
         translateObjectByVector(svec);
@@ -929,76 +941,6 @@ void MobileObject::handleFreefall() {
 }
 
 
-// void MobileObject::handleForeverFreefall() {
-//     ++singleStatePersistenceTimer_.freefallTimer;
-//     singleStatePersistenceTimer_.movingHorizontallyTimer = 0;
-//     singleStatePersistenceTimer_.airborneTimer = 0;
-//     singleStatePersistenceTimer_.slideDownTimer = 0;
-
-//     previouslyScheduled_ = scheduled_;
-
-//     newVelocity();
-//     float sy = velocity_.verticalVelocity*(1.0/FPS);
-//     Point svec(0, sy);
-//     adjustSVecForMaxVReqs(svec);
-//     std::list<Object*> potentiallyUnderneath = objectMap_.getPotentiallyUnderneath(*this);
-//     bool groundUnderneathFound = false;
-//     float alpha = -INFINITY;
-//     float delta = -1;
-//     Object* alphaTempObjectCurrentlyUnderneath;
-
-//     freefallMainBody(svec, potentiallyUnderneath, 
-//                      alpha, delta, groundUnderneathFound,
-//                      alphaTempObjectCurrentlyUnderneath);
-
-//     if (groundUnderneathFound) {
-//         if (alphaTempObjectCurrentlyUnderneath == objectCurrentlyUnderneath_) {
-//             setScheduled(HANDLE_FOREVER_FREEFALL);
-//         } else {
-//             zeroVelocity();
-//             velocity_.horizontalVelocity = airborneGhostHorizontalVelocity_.horizontalVelocity;
-//             zeroAirborneGhostHorizontalVelocity();
-//             addGroundReactionAcceleration();
-//             slopeInclineDirectlyUnderneath_ = alpha;
-//             // objectCurrentlyUnderneath_ = alphaTempObjectCurrentlyUnderneath;
-
-//             if (alphaTempObjectCurrentlyUnderneath != objectCurrentlyUnderneath_) {
-//                 objectCurrentlyUnderneath_ = alphaTempObjectCurrentlyUnderneath;
-
-//                 if (!objectCurrentlyUnderneath_->canHaveOtherOnTop()) {
-//                     prepareNextSlideOffTopScheduled();
-//                 } else if (std::abs(alpha)-MAXIMUM_GENTLE_SLOPE_COEFFICIENT >= -ERROR_EPS) {
-//                     removeGroundReactionAcceleration();
-//                     setScheduled(HANDLE_SLIDE_DOWN_WITH_RETRY);
-//                 } else {
-//                     clearScheduled();
-//                 }
-
-//             } else {
-//                 airborneGhostHorizontalVelocity_.horizontalVelocity = velocity_.horizontalVelocity;
-//                 zeroVelocity();
-//                 removeGroundReactionAcceleration();
-//                 setScheduled(HANDLE_FOREVER_FREEFALL);
-//             }
-//         }
-
-//         if (delta > 0) {
-//             translateObjectByVector({0, -delta});
-//         }
-
-//     } else {
-//         translateObjectByVector(svec);
-//         setScheduled(HANDLE_FREEFALL);
-//     }
-
-//     if (isLeftFacing(getPreviousState())) {
-//         setNewState(FREEFALL_LEFT);
-//     } else {
-//         setNewState(FREEFALL_RIGHT);
-//     }                 
-// }
-
-
 void MobileObject::handleStop() {
     singleStatePersistenceTimer_.movingHorizontallyTimer = 0;
     singleStatePersistenceTimer_.airborneTimer = 0;
@@ -1059,6 +1001,11 @@ float MobileObject::findSlopeCoefficientDirectlyBelowAfterVectorTranslation(Obje
 
 float MobileObject::findSlopeCoefficientDirectlyBelow(Object& otherObject) const {
     return getCurrentCollisionMesh().findSlopeCoefficientDirectlyBelow(otherObject.getCurrentCollisionMesh());
+}
+
+
+float MobileObject::findEscapeDisAlongXAxis(Object& otherObject, float escapeDirection) const {
+    return getCurrentCollisionMesh().findEscapeDisAlongXAxis(otherObject.getCurrentCollisionMesh(), escapeDirection);
 }
 
 
@@ -1164,7 +1111,8 @@ void MobileObject::runScheduled() {
                 handleEscapeFromUnderneathObjectOnTop({0, true});
                 break;
             case HANDLE_ESCAPE_NO_RETRY:
-                handleEscapeFromUnderneathObjectOnTop({0, false});        
+                handleEscapeFromUnderneathObjectOnTop({0, false});       
+                break; 
             case HANDLE_SLIDE_OFF_TOP:
                 // std::cout << "HSOT" << std::endl; 
                 handleSlideOffTop();
@@ -1177,10 +1125,6 @@ void MobileObject::runScheduled() {
                 // std::cout << "HF" << std::endl; 
                 handleFreefall();
                 break;
-            // case HANDLE_FOREVER_FREEFALL:
-            //     std::cout << "HFF" << std::endl;
-            //     handleForeverFreefall();
-            //     break;
             case HANDLE_STOP:
                 // std::cout << "HS" << std::endl;
                 handleStop();
