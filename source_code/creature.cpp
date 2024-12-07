@@ -77,7 +77,13 @@ void Creature::handleBePushedHorizontally(HandleParams handleParams) {
                 slopeInclineDirectlyUnderneath_ = alpha;
                 objectCurrentlyUnderneath_ = alphaTempObjectCurrentlyUnderneath;
             }
-            setScheduled(HANDLE_BE_PUSHED_HORIZONTALLY_WITH_RETRY); // previously no retry
+            
+            if (!objectCurrentlyUnderneath_->canHaveOtherOnTop()) { // added first if
+                prepareNextSlideOffTopScheduled();
+            }
+            else {
+                setScheduled(HANDLE_BE_PUSHED_HORIZONTALLY_WITH_RETRY);
+            }
         }
 
     } else if (!collisionDetected && changingSlopes) {
@@ -87,7 +93,9 @@ void Creature::handleBePushedHorizontally(HandleParams handleParams) {
             translateObjectByVector(svec+Point(0,-beta));
         }
 
-        if (std::abs(beta)-MAXIMUM_GENTLE_SLOPE_COEFFICIENT > -ERROR_EPS) {
+        if (!objectCurrentlyUnderneath_->canHaveOtherOnTop()) { // added first if
+            prepareNextSlideOffTopScheduled();
+        } else if (std::abs(beta)-MAXIMUM_GENTLE_SLOPE_COEFFICIENT > -ERROR_EPS) {
             removeGroundReactionAcceleration();
             setScheduled(HANDLE_SLIDE_DOWN_WITH_RETRY);
         } else {
@@ -156,7 +164,12 @@ void Creature::handleMoveHorizontally() {
                 slopeInclineDirectlyUnderneath_ = alpha;
                 objectCurrentlyUnderneath_ = alphaTempObjectCurrentlyUnderneath;
             }
-            clearScheduled();
+
+            if (!objectCurrentlyUnderneath_->canHaveOtherOnTop()) {
+                prepareNextSlideOffTopScheduled();
+            } else {
+                clearScheduled();
+            }
         }
 
     } else if (!collisionDetected && changingSlopes) {
@@ -166,7 +179,9 @@ void Creature::handleMoveHorizontally() {
             translateObjectByVector(svec+Point(0,-beta));
         }
 
-        if (std::abs(gamma)-MAXIMUM_GENTLE_SLOPE_COEFFICIENT > -ERROR_EPS) {
+        if (!objectCurrentlyUnderneath_->canHaveOtherOnTop()) { // added first if
+            prepareNextSlideOffTopScheduled();
+        } else if (std::abs(gamma)-MAXIMUM_GENTLE_SLOPE_COEFFICIENT > -ERROR_EPS) {
             removeGroundReactionAcceleration();
             setScheduled(HANDLE_SLIDE_DOWN_WITH_RETRY);
         } else {
@@ -308,7 +323,7 @@ void Creature::runScheduled() {
                 handleBePushedHorizontally({0, false});
                 break;     
             case HANDLE_MOVE_HORIZONTALLY:
-                // std::cout << "HMH" << std::endl;
+                std::cout << "HMH" << std::endl;
                 handleMoveHorizontally();
                 break;
             case HANDLE_SLIDE_DOWN_WITH_RETRY:
@@ -317,7 +332,11 @@ void Creature::runScheduled() {
                 break;
             case HANDLE_SLIDE_DOWN_NO_RETRY:
                 handleSlideDown({0, false});
-                break;    
+                break;
+            case HANDLE_SLIDE_OFF_TOP:
+                // std::cout << "HSOT" << std::endl; 
+                handleSlideOffTop();
+                break;        
             case HANDLE_JUMP:
                 handleJump();
                 break;
@@ -326,8 +345,13 @@ void Creature::runScheduled() {
                 handleAirborne();
                 break;
             case HANDLE_FREEFALL:
+                // std::cout << "HF" << std::endl;
                 handleFreefall();
                 break;
+            // case HANDLE_FOREVER_FREEFALL:
+            //     // std::cout << "HFF" << std::endl;
+            //     handleForeverFreefall();
+            //     break;    
             case HANDLE_STOP:
                 // std::cout << "HS" << std::endl;
                 handleStop();

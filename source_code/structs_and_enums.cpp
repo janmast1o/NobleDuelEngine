@@ -115,6 +115,7 @@ ObjectSpecificPhysicsChar::ObjectSpecificPhysicsChar() :
     maxTrueVerticalV(800),
     maxTrueHorizontalV(400),
     horizontalAcc(215),
+    slideV(285),
     maxAirborneAccelerableFrames(150) {}
 
 

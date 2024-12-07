@@ -14,12 +14,8 @@ protected:
     float slopeInclineDirectlyUnderneath_;
     MomentumDictated currentMomentumDictated_;
 
-    float slideOffDirectionAsFloat_;
-    float presetSlideOffTopPFDistance_;
-
-    float presetDistanceToBePushedPF_;
-    float distanceCoveredSoFar_;
-    float presetDistanceToBePushed_;
+    float auxDistanceCoveredSoFar_;
+    float auxDistanceToCover_;
 
     Object* objectCurrentlyUnderneath_;
 
@@ -31,6 +27,7 @@ protected:
     Acceleration acceleration_;
     Velocity airborneGhostHorizontalVelocity_;
     ObjectSpecificPhysicsChar objectSpecificPhysicsChar_;
+    bool participatingInMomentum_;
 
     ObjectMap& objectMap_;
 
@@ -49,18 +46,20 @@ protected:
 
     void applyFriction();
 
+    void prepareNextSlideOffTopScheduled();
+
     // void updateAwaitingMomDictScheduledVelocity(float receivedVelocity);
     // void updateAwaitingMomDictScheduledExplicitHTransaltion(float receivedExplicitHTranslation);
 
     void horizontalMovementMainBody(Point& svec, const std::list<Object*>& potentiallyColliding, 
                                     float& alpha, float& beta, float& gamma, bool& collisionDetected, bool& groundUnderneathFound, bool& changingSlopes,
                                     bool moveHorizontallyCurrentlyHandled, std::list<MobileObject*>& foundMobileDirectlyAbove,
-                                    Object* alphaTempObjectCurrentlyUnderneath, Object* gammaTempObjectCurrentlyUnderneath);
+                                    Object*& alphaTempObjectCurrentlyUnderneath, Object*& gammaTempObjectCurrentlyUnderneath);
 
     void freefallMainBody(Point& svec, const std::list<Object*>& potentiallyUnderneath,
                           float& alpha, float& delta, 
                           bool& groundUnderneathFound,
-                          Object* alphaTempObjectCurrentlyUnderneath);
+                          Object*& alphaTempObjectCurrentlyUnderneath);
     
     void adjustSVecForMaxVReqs(Point& svec) const;   
     bool moveMobileDirectlyAbove(std::list<MobileObject*>& mobileDirectlyAbove, const Point& translationVector);                             
@@ -73,7 +72,7 @@ protected:
     void handleSlideOffTop();
     void handleAirborne(HandleParams handleParams = {0, false});
     void handleFreefall();
-    void handleForeverFreefall();
+    // void handleForeverFreefall();
     void handleStop();
 
     bool collidesWithAfterVectorTranslation(Object& otherObject, const Point& translationVector) const;
@@ -125,7 +124,7 @@ public:
 
     int getFacedSideAsInt() const;
 
-    bool participatingInMomentum() const override;
+    bool isParticipatingInMomentum() const override;
     void registerBeingAffectedByOutsideMomentum(float otherObjectMass, float otherObjectHVelocity, float hTranslation) override; 
 
     bool isAnythingScheduled() const;

@@ -181,7 +181,7 @@ bool Object::canHaveOtherOnTop() const {
 }
 
 
-bool Object::participatingInMomentum() const {
+bool Object::isParticipatingInMomentum() const {
     return false;
 }
 

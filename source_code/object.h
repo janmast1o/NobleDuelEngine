@@ -65,7 +65,7 @@ public:
 
     virtual bool canHaveOtherOnTop() const;
 
-    virtual bool participatingInMomentum() const;
+    virtual bool isParticipatingInMomentum() const;
     virtual void registerBeingAffectedByOutsideMomentum(float otherObjectMass, float otherObjectHVelocity, float hTranslation); 
 
     virtual ~Object() = default;

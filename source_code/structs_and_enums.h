@@ -133,7 +133,9 @@ enum ScheduledInstruction {
     HANDLE_STOP,
     HANDLE_JUMP,
     HANDLE_FOREVER_FREEFALL,
-    HANDLE_SLIDE_OFF_TOP
+    HANDLE_SLIDE_OFF_TOP,
+    HANDLE_ESCAPE_WITH_RETRY,
+    HANDLE_ESCAPE_NO_RETRY
 };
 
 #endif
@@ -179,6 +181,7 @@ struct ObjectSpecificPhysicsChar {
     float maxTrueVerticalV;
     float maxTrueHorizontalV;
     float horizontalAcc;
+    float slideV;
     int maxAirborneAccelerableFrames;
 
     ObjectSpecificPhysicsChar();
