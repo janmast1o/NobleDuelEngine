@@ -55,6 +55,11 @@ bool Point::isUpperRight(const Point& otherPoint) const {
 }
 
 
+float Point::distanceFromOther(const Point& otherPoint) const {
+    return std::sqrt(std::pow(x-otherPoint.x, 2) + std::pow(y-otherPoint.y, 2));
+}
+
+
 std::ostream& operator<<(std::ostream& os, const Point& point) {
     os << "(" << point.x << ", " << point.y << ")";
     return os;

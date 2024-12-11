@@ -27,6 +27,8 @@ struct Point {
     bool isLowerLeft(const Point& otherPoint) const;
     bool isUpperRight(const Point& otherPoint) const;
 
+    float distanceFromOther(const Point& otherPoint) const;
+
     friend std::ostream& operator<<(std::ostream& os, const Point& point);
 };
 
@@ -67,6 +69,7 @@ enum Direction {
 #define MATTER_H
 
 enum Matter {
+    TRUEST_OF_PHANTOMS,
     PHANTOM,
     LIGHT_PHANTOM,
     SOLID,
@@ -135,7 +138,9 @@ enum ScheduledInstruction {
     HANDLE_FOREVER_FREEFALL,
     HANDLE_SLIDE_OFF_TOP,
     HANDLE_ESCAPE_WITH_RETRY,
-    HANDLE_ESCAPE_NO_RETRY
+    HANDLE_ESCAPE_NO_RETRY,
+
+    HANDLE_INTERACT
 };
 
 #endif

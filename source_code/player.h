@@ -25,7 +25,8 @@ private:
 
 public:
 
-    Player(SDL_Renderer* renderer, Point center, ModelCollection modelCollection, ObjectMap& objectMap, float mass, int health);
+    Player(SDL_Renderer* renderer, Point center, ModelCollection modelCollection, const EngineClock& sessionEngineClock, ObjectMap& objectMap, float mass, 
+           int health, InteractableManager& interactableManager);
 
     PlayerSpecificKeyMapping& getKeyMappingRef();
     

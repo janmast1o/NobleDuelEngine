@@ -73,50 +73,106 @@ MobileHitbox* OfflineEngine::makeMobileHitbox(const std::vector<Point>& hull) {
 
 Object* OfflineEngine::makeObject(Point& center, ModelCollection& modelCollection) {
     std::lock_guard<std::mutex> lock(objectCreationMutex_);
-    ObjectCreationArgs newObjectCreationArgs(renderer_, &center, &modelCollection, nullptr, 1, 1);
-    allObjects_.emplace_back(newObjectCreationArgs, OBJECT_TYPE);
-    objectMap_.addNewObject(*allObjects_.back().object);
-    return allObjects_.back().object;
+    Object* newObject = new Object(renderer_, center, modelCollection, sessionEngineClock_);
+    // ObjectCreationArgs newObjectCreationArgs(renderer_, &center, &modelCollection, nullptr, 1, 1);
+    allObjects_.emplace_back(newObject);
+    // objectMap_.addNewObject(*allObjects_.back().object);
+    objectMap_.addNewObject(*newObject);
+    // return allObjects_.back().object;
+    return newObject;
 }
 
 
 MobileObject* OfflineEngine::makeMobileObject(Point& center, ModelCollection& modelCollection, float mass) {
     std::lock_guard<std::mutex> lock(objectCreationMutex_);
-    ObjectCreationArgs newMobileObjectCreationArgs(renderer_, &center, &modelCollection, &objectMap_, mass, 1);
-    allObjects_.emplace_back(newMobileObjectCreationArgs, MOBILE_OBJECT_TYPE);
-    mobileObjectPtrs_.push_back(dynamic_cast<MobileObject*>(allObjects_.back().object));
-    objectMap_.addNewObject(*allObjects_.back().object);
-    return mobileObjectPtrs_.back();
+    // ObjectCreationArgs newMobileObjectCreationArgs(renderer_, &center, &modelCollection, &objectMap_, mass, 1);
+    // allObjects_.emplace_back(newMobileObjectCreationArgs, MOBILE_OBJECT_TYPE);
+    MobileObject* newMobileObject = new MobileObject(renderer_, center, modelCollection, sessionEngineClock_, objectMap_, mass);
+    allObjects_.emplace_back(newMobileObject);
+    // mobileObjectPtrs_.push_back(dynamic_cast<MobileObject*>(allObjects_.back().object));
+    mobileObjectPtrs_.push_back(newMobileObject);
+    objectMap_.addNewObject(*newMobileObject);
+    // objectMap_.addNewObject(*allObjects_.back().object);
+    // return mobileObjectPtrs_.back();
+    return newMobileObject;
+}
+
+
+FloatingPlatform* OfflineEngine::makeFloatingPlatform(Point& center, ModelCollection& modelCollection, float mass,
+                                                      const std::vector<Velocity>& movementModesVs, const std::vector<Point>& movementModesBorders) {
+    std::lock_guard<std::mutex> lock(objectCreationMutex_);
+    FloatingPlatform* newFloatingPlatform = new FloatingPlatform(renderer_, center, modelCollection, sessionEngineClock_, objectMap_, mass,
+                                                                 movementModesVs, movementModesBorders);
+    allObjects_.emplace_back(newFloatingPlatform);
+    mobileObjectPtrs_.push_back(newFloatingPlatform);
+    objectMap_.addNewObject(*newFloatingPlatform);
+    return newFloatingPlatform; 
+}
+
+
+Elevator* OfflineEngine::makeElevator(Point& center, ModelCollection& modelCollection, float mass, 
+                                      const std::vector<Velocity>& movementModesVs, const std::vector<Point>& movementModesBorders) {
+    std::lock_guard<std::mutex> lock(objectCreationMutex_);
+    Elevator* newElevator = new Elevator(renderer_, center, modelCollection, sessionEngineClock_, objectMap_, mass,
+                                         movementModesVs, movementModesBorders);
+    allObjects_.emplace_back(newElevator);
+    mobileObjectPtrs_.push_back(newElevator);
+    objectMap_.addNewObject(*newElevator);
+    return newElevator;                                    
+}
+
+
+Button* OfflineEngine::makeButton(Point& center, ModelCollection& modelCollection, std::function<void()>& buttonCommand) {
+    std::lock_guard<std::mutex> lock(objectCreationMutex_);
+    Button* newButton = new Button(renderer_, center, modelCollection, sessionEngineClock_, buttonCommand);
+    allObjects_.emplace_back(newButton);
+    objectMap_.addNewObject(*newButton);
+    interactableManager_.addNewInteractable(*newButton);
+    return newButton;
 }
 
 
 Creature* OfflineEngine::makeCreature(Point& center, ModelCollection& modelCollection, float mass, int health) {
     std::lock_guard<std::mutex> lock(objectCreationMutex_);
-    ObjectCreationArgs newCreatureCreationArgs(renderer_, &center, &modelCollection, &objectMap_, mass, health);
-    allObjects_.emplace_back(newCreatureCreationArgs, CREATURE_TYPE);
-    mobileObjectPtrs_.push_back(dynamic_cast<MobileObject*>(allObjects_.back().object));
-    objectMap_.addNewObject(*allObjects_.back().object);
-    return dynamic_cast<Creature*>(mobileObjectPtrs_.back());
+    // ObjectCreationArgs newCreatureCreationArgs(renderer_, &center, &modelCollection, &objectMap_, mass, health);
+    // allObjects_.emplace_back(newCreatureCreationArgs, CREATURE_TYPE);
+    Creature* newCreature = new Creature(renderer_, center, modelCollection, sessionEngineClock_, objectMap_, mass, health, interactableManager_);
+    allObjects_.emplace_back(newCreature);
+    // mobileObjectPtrs_.push_back(dynamic_cast<MobileObject*>(allObjects_.back().object));
+    // objectMap_.addNewObject(*allObjects_.back().object);
+    mobileObjectPtrs_.push_back(newCreature);
+    return newCreature;
+    // return dynamic_cast<Creature*>(mobileObjectPtrs_.back());
 }
 
 
 Player* OfflineEngine::makePlayer(Point& center, ModelCollection& modelCollection, float mass, int health) {
     std::lock_guard<std::mutex> lock(objectCreationMutex_);
-    ObjectCreationArgs newPlayerCreationArgs(renderer_, &center, &modelCollection, &objectMap_, mass, health);
-    allObjects_.emplace_back(newPlayerCreationArgs, PLAYER_TYPE);
-    playerPtr_ = dynamic_cast<Player*>(allObjects_.back().object);
-    objectMap_.addNewObject(*allObjects_.back().object);
-    return playerPtr_;
+    // ObjectCreationArgs newPlayerCreationArgs(renderer_, &center, &modelCollection, &objectMap_, mass, health);
+    // allObjects_.emplace_back(newPlayerCreationArgs, PLAYER_TYPE);
+    Player* newPlayer = new Player(renderer_, center, modelCollection, sessionEngineClock_, objectMap_, mass, health, interactableManager_);
+    allObjects_.emplace_back(newPlayer);
+    // playerPtr_ = dynamic_cast<Player*>(allObjects_.back().object);
+    // objectMap_.addNewObject(*allObjects_.back().object);
+    playerPtr_ = newPlayer;
+    objectMap_.addNewObject(*newPlayer);
+    return newPlayer;
+    // return playerPtr_;
 }
 
 
 Player* OfflineEngine::makePlayer2(Point& center, ModelCollection& modelCollection, float mass, int health) {
     std::lock_guard<std::mutex> lock(objectCreationMutex_);
-    ObjectCreationArgs newPlayerCreationArgs(renderer_, &center, &modelCollection, &objectMap_, mass, health);
-    allObjects_.emplace_back(newPlayerCreationArgs, PLAYER_TYPE);
-    player2Ptr_ = dynamic_cast<Player*>(allObjects_.back().object);
-    objectMap_.addNewObject(*allObjects_.back().object);
-    return player2Ptr_;
+    // ObjectCreationArgs newPlayerCreationArgs(renderer_, &center, &modelCollection, &objectMap_, mass, health);
+    // allObjects_.emplace_back(newPlayerCreationArgs, PLAYER_TYPE);
+    Player* newPlayer2 = new Player(renderer_, center, modelCollection, sessionEngineClock_, objectMap_, mass, health, interactableManager_);
+    allObjects_.emplace_back(newPlayer2);
+    // playerPtr_ = dynamic_cast<Player*>(allObjects_.back().object);
+    // objectMap_.addNewObject(*allObjects_.back().object);
+    player2Ptr_ = newPlayer2;
+    objectMap_.addNewObject(*newPlayer2);
+    return newPlayer2;
+    // return playerPtr_;
 }
 
 
@@ -131,6 +187,9 @@ void OfflineEngine::run() {
         framerateCapThread = std::thread([](){
             std::this_thread::sleep_for(std::chrono::milliseconds((int) 1000.0/FPS));
         });
+
+        auto start = std::chrono::high_resolution_clock::now();
+
         SDL_GetMouseState(&mouseX, &mouseY);
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
@@ -198,9 +257,14 @@ void OfflineEngine::run() {
             }
         }
 
+        auto end = std::chrono::high_resolution_clock::now();
+        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end-start);
+        // std::cout << elapsed.count() << "ms" << std::endl;
+
         framerateCapThread.join();
         SDL_SetRenderDrawColor(renderer_, 0xFF, 0xFF, 0xFF, 255);
         SDL_RenderPresent(renderer_);
+        sessionEngineClock_.incrementEngineClock();
     }
 
 }

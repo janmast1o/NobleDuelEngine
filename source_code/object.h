@@ -5,12 +5,14 @@
 #include "structs_and_enums.h"
 #include "model_collection.h"
 #include "static_hitbox.h"
+#include "engine_clock.h"
 
 class Object {
 
 private:
 
     SDL_Renderer* renderer_;
+    const EngineClock& sessionEngineClock_;
 
     int health_;
     Point center_;
@@ -33,7 +35,7 @@ protected:
 
 public:
 
-    Object(SDL_Renderer* renderer, Point center, ModelCollection modelCollection);
+    Object(SDL_Renderer* renderer, Point center, ModelCollection modelCollection, const EngineClock& sessionEngineClock);
 
     virtual bool isMobile() const;
 

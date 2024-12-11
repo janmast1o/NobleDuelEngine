@@ -198,6 +198,56 @@ void prepareGame(int windowWidth, int windowHeight, OfflineEngine& engine) {
     Point obstacle1Center = {270, -285};
     Object* obstacle1 = engine.makeObject(obstacle1Center, obstacle1ModelCollection);
 
+    SDL_Texture* blueFloatingPlatformTexture = engine.createTexture("resources/horizontal_short_block.png");
+    std::pair<float, float> blueFloatingPlatformWAH = engine.readTexturesWidthAndHeight(blueFloatingPlatformTexture);
+    float blueFloatingPlatformW = blueFloatingPlatformWAH.first;
+    float blueFloatingPlatformH = blueFloatingPlatformWAH.second;
+    Model blueFloatingPlatformModel(blueFloatingPlatformTexture, nullptr);
+    MobileHitbox* blueFloatingPlatformCollisionMesh = engine.makeMobileHitbox({{-blueFloatingPlatformW/2, -blueFloatingPlatformH/2}, {blueFloatingPlatformW/2, -blueFloatingPlatformH/2}, {blueFloatingPlatformW/2, blueFloatingPlatformH/2}, {-blueFloatingPlatformW/2, blueFloatingPlatformH/2}});
+    ModelCycle blueFloatingPlatformModelCycle(blueFloatingPlatformCollisionMesh);
+    blueFloatingPlatformModelCycle.addModelAndResetIterator(blueFloatingPlatformModel, 1);
+    ModelCollection blueFloatingPlatformModelCollection;
+    blueFloatingPlatformModelCollection.addModelCycleForState(IDLE, blueFloatingPlatformModelCycle);
+    Point blueFloatingPlatformCenter = {700, -100};
+    const std::vector<Velocity> blueFloatingPlatformVs = {{50, 0}, {0, 20}, {-50, 0}, {0, -20}};
+    const std::vector<Point> blueFloatingPlatformBorders = {{900, -200}, {900, -50}, {500, -50}, {500, -200}};
+    FloatingPlatform* blueFloatingPlatform = engine.makeFloatingPlatform(blueFloatingPlatformCenter, blueFloatingPlatformModelCollection, 500,
+                                                                         blueFloatingPlatformVs, blueFloatingPlatformBorders);
+    blueFloatingPlatform->setStartToSlowDownDistance(30);
+    blueFloatingPlatform->setSlowDownPerSecondRate(10);  
+
+    SDL_Texture* blueElevatorTexture = engine.createTexture("resources/horizontal_short_block.png"); 
+    std::pair<float, float> blueElevatorWAH = engine.readTexturesWidthAndHeight(blueElevatorTexture);
+    float blueElevatorW = blueElevatorWAH.first;
+    float blueElevatorH = blueElevatorWAH.second;
+    Model blueElevatorModel(blueElevatorTexture, nullptr);
+    MobileHitbox* blueElevatorCollisionMesh = engine.makeMobileHitbox({{-blueElevatorW/2, -blueElevatorH/2}, {blueElevatorW/2, -blueElevatorH/2}, {blueElevatorW/2, blueElevatorH/2}, {-blueElevatorW/2, blueElevatorH/2}});
+    ModelCycle blueElevatorModelCycle(blueElevatorCollisionMesh);
+    blueElevatorModelCycle.addModelAndResetIterator(blueElevatorModel, 1);
+    ModelCollection blueElevatorModelCollection;
+    blueElevatorModelCollection.addModelCycleForState(IDLE, blueElevatorModelCycle);
+    Point blueElevatorCenter = {700, -500};
+    const std::vector<Velocity> blueElevatorVs = {{50, 0}, {-50, 0}};
+    const std::vector<Point> blueElevatorBorders = {{900, -500}, {300, -500}};
+    Elevator* blueElevator = engine.makeElevator(blueElevatorCenter, blueElevatorModelCollection, 500,
+                                                                        blueElevatorVs, blueElevatorBorders);
+    blueElevator->setStartToSlowDownDistance(20);
+    blueElevator->setSlowDownPerSecondRate(10);
+
+    SDL_Texture* leverTexture = engine.createTexture("resources/lever.png");
+    std::pair<float, float> leverWAH = engine.readTexturesWidthAndHeight(leverTexture);
+    float leverW = leverWAH.first;
+    float leverH = leverWAH.second;
+    Model leverModel(leverTexture, nullptr);
+    StaticHitbox* leverMesh = engine.makeStaticHitbox({{-leverW/2, -leverH/2}, {leverW/2, -leverH/2}, {leverW/2, leverH/2}, {-leverW/2, leverH/2}});
+    ModelCycle leverModelCycle(leverMesh);
+    leverModelCycle.addModelAndResetIterator(leverModel, 1);
+    ModelCollection leverModelCollection;
+    leverModelCollection.addModelCycleForState(IDLE, leverModelCycle);
+    Point leverCenter = {800, -555};
+    auto leverCommand = std::function<void()>([blueElevator](void){blueElevator->requestNewElevatorMovement(0);});
+    Object* lever = engine.makeButton(leverCenter, leverModelCollection, leverCommand);                             
+
     SDL_Texture* simpleLightCreateTexture = engine.createTexture("resources/simple_crate.png");
     std::pair<float, float> simpleLightCreateWAH = engine.readTexturesWidthAndHeight(simpleLightCreateTexture);
     float simpleLightCreateW = simpleLightCreateWAH.first;

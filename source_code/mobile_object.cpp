@@ -5,8 +5,8 @@
 #include <cmath>
 #include <unordered_set>
 
-MobileObject::MobileObject(SDL_Renderer* renderer, Point center, ModelCollection modelCollection, ObjectMap& objectMap, float mass) :
-    Object(renderer, center, modelCollection), objectMap_(objectMap), mass_(mass) {
+MobileObject::MobileObject(SDL_Renderer* renderer, Point center, ModelCollection modelCollection, const EngineClock& sessionEngineClock, ObjectMap& objectMap, float mass) :
+    Object(renderer, center, modelCollection, sessionEngineClock), objectMap_(objectMap), mass_(mass) {
         acceleration_.verticalAcceleration = -GRAVITATIONAL_PULL;
         slopeInclineDirectlyUnderneath_ = 0;
         participatingInMomentum_ = true;
@@ -321,7 +321,7 @@ void MobileObject::freefallMainBody(Point& svec, const std::list<Object*>& poten
 }
 
 
-void MobileObject::adjustSVecForMaxVReqs(Point& svec) const {
+void MobileObject::adjustSVec(Point& svec) {
     float currentHSign, currentVSign;
     currentHSign = getSign(svec.x);
     currentVSign = getSign(svec.y);
@@ -399,7 +399,7 @@ void MobileObject::handleBePushedHorizontally(HandleParams handleParams) {
     }
     float sy = sx*slopeInclineDirectlyUnderneath_;
     Point svec(sx, sy);
-    adjustSVecForMaxVReqs(svec);
+    adjustSVec(svec);
     std::list<Object*> potentiallyColliding = objectMap_.getPotentiallyColliding(*this);
     bool collisionDetected = false;
     bool groundUnderneathFound = false;
@@ -488,7 +488,7 @@ void MobileObject::handleEscapeFromUnderneathObjectOnTop(HandleParams handlePara
     float sx = velocity_.horizontalVelocity*(1.0/FPS);
     float sy = sx*slopeInclineDirectlyUnderneath_;
     Point svec(sx, sy);
-    adjustSVecForMaxVReqs(svec);
+    adjustSVec(svec);
     std::list<Object*> potentiallyColliding = objectMap_.getPotentiallyColliding(*this);
     bool collisionDetected = false;
     bool groundUnderneathFound = false;
@@ -580,7 +580,7 @@ void MobileObject::handleMoveHorizontally() {
     float sx = velocity_.horizontalVelocity*(1.0/FPS);
     float sy = sx*slopeInclineDirectlyUnderneath_;
     Point svec(sx, sy);
-    adjustSVecForMaxVReqs(svec);
+    adjustSVec(svec);
     std::list<Object*> potentiallyColliding = objectMap_.getPotentiallyColliding(*this);
     bool collisionDetected = false;
     bool groundUnderneathFound = false;
@@ -672,7 +672,7 @@ void MobileObject::handleSlideDown(HandleParams handleParams) {
     float sx = getSign(-a)*std::abs(b*std::sin(gamma)*std::cos(gamma));
     float sy = -std::abs(b*std::pow(std::sin(gamma), 2));
     Point svec(sx, sy);
-    adjustSVecForMaxVReqs(svec);
+    adjustSVec(svec);
     std::list<Object*> potentiallyCollding = objectMap_.getPotentiallyColliding(*this);
     bool collisionDetected = false;
     bool groundUnderneathFound = false;
@@ -776,7 +776,7 @@ void MobileObject::handleSlideOffTop() {
     float sx = velocity_.horizontalVelocity*(1.0/FPS);
     float sy = -std::abs(alpha*sx);
     Point svec(sx, sy);
-    adjustSVecForMaxVReqs(svec);
+    adjustSVec(svec);
     std::list<Object*> potentiallyColliding = objectMap_.getPotentiallyColliding(*this);
     bool collisionDetected = false;
 
@@ -816,7 +816,7 @@ void MobileObject::handleAirborne(HandleParams handleParams) {
     float sx = velocity_.horizontalVelocity*(1.0/FPS) + handleParams.paramSx;
     float sy = velocity_.verticalVelocity*(1.0/FPS);
     Point svec(sx, sy);
-    adjustSVecForMaxVReqs(svec);
+    adjustSVec(svec);
     std::list<Object*> potentiallyColliding = objectMap_.getPotentiallyColliding(*this);
     bool collisionDetected = false;
     bool groundUnderneathFound = false;
@@ -894,7 +894,7 @@ void MobileObject::handleFreefall() {
     newVelocity();
     float sy = velocity_.verticalVelocity*(1.0/FPS);
     Point svec(0, sy);
-    adjustSVecForMaxVReqs(svec);
+    adjustSVec(svec);
     std::list<Object*> potentiallyUnderneath = objectMap_.getPotentiallyUnderneath(*this);
     bool groundUnderneathFound = false;
     float tempAlpha;
@@ -1086,8 +1086,7 @@ void MobileObject::runScheduled() {
     if (!currentMomentumDictated_.isEmpty() && 
         !shouldIgnoreOutsideMomentumFunction_(mass_, objectSpecificPhysicsChar_.maxTrueHorizontalV, std::abs(currentMomentumDictated_.cumultativeReceivedMomentum))) {
             runScheduledForNonEmptyMomentum();
-    }
-    else if (isAnythingScheduled()) {
+    } else if (isAnythingScheduled()) {
         currentMomentumDictated_.clear();
         switch (scheduled_) {
             case HANDLE_BE_PUSHED_HORIZONTALLY_WITH_RETRY:

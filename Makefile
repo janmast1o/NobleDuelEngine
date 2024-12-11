@@ -5,8 +5,13 @@ SOURCES = main.cpp \
           source_code/offline_engine.cpp \
 		  source_code/player.cpp \
 		  source_code/creature.cpp \
+		  source_code/interactable_manager.cpp \
+		  source_code/elevator.cpp \
+		  source_code/floating_platform.cpp \
 		  source_code/mobile_object.cpp \
 		  source_code/object_map.cpp \
+		  source_code/button.cpp \
+		  source_code/interactable.cpp \
 		  source_code/object.cpp \
 		  source_code/model_collection.cpp \
 		  source_code/model_cycle.cpp \
@@ -17,6 +22,7 @@ SOURCES = main.cpp \
 		  source_code/hitbox.cpp \
 		  source_code/utility_functions.cpp \
 		  source_code/structs_and_enums.cpp \
+		  source_code/engine_clock.cpp \
 		  source_code/constants.h
 
 

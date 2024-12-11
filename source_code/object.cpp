@@ -6,8 +6,8 @@
 #include <vector>
 #include <unordered_set>
 
-Object::Object(SDL_Renderer* renderer, Point center, ModelCollection modelCollection) :
-    renderer_(renderer), center_(center), modelCollection_(modelCollection) {
+Object::Object(SDL_Renderer* renderer, Point center, ModelCollection modelCollection, const EngineClock& sessionEngineClock) :
+    renderer_(renderer), center_(center), modelCollection_(modelCollection), sessionEngineClock_(sessionEngineClock) {
         health_ = INFINITY;
         matter_ = SOLID;
         state_ = IDLE;
@@ -147,31 +147,28 @@ void Object::redrawObject(bool drawHitboxes, float pointSize) {
 bool Object::collideableWith(const Object& otherObject) {
     if (matter_ == PHANTOM_SOLID || otherObject.matter_ == PHANTOM) {
         return true;
-    }
-    else if (matter_ == SOLID) {
+    } else if (matter_ == TRUEST_OF_PHANTOMS || otherObject.matter_ == TRUEST_OF_PHANTOMS) {
+        return false;
+    } else if (matter_ == SOLID) {
         if (otherObject.matter_ == SOLID) {
             return true;
-        }
-        else {
+        } else {
             return false;
         }
-    }
-    else if (matter_ == PHANTOM) {
+    } else if (matter_ == PHANTOM) {
         if (otherObject.matter_ == PHANTOM) {
             return true;
-        }
-        else {
+        } else {
             return false;
         }
-    }
-    else if (matter_ == LIGHT_PHANTOM) {
+    } else if (matter_ == LIGHT_PHANTOM) {
         if (otherObject.matter_ == PHANTOM) {
             return false;
-        }
-        else {
+        } else {
             return true;
         }
     }
+
     return true;
 }
 

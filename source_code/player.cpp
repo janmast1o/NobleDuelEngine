@@ -1,8 +1,9 @@
 #include "player.h"
 #include "constants.h"
 
-Player::Player(SDL_Renderer* renderer, Point center, ModelCollection modelCollection, ObjectMap& objectMap, float mass, int health) : 
-    Creature(renderer, center, modelCollection, objectMap, mass, health) {
+Player::Player(SDL_Renderer* renderer, Point center, ModelCollection modelCollection, const EngineClock& sessionEngineClock, ObjectMap& objectMap, float mass, 
+               int health, InteractableManager& interactableManager) : 
+               Creature(renderer, center, modelCollection, sessionEngineClock, objectMap, mass, health, interactableManager) {
         previousKeyboardState_[keyMapping_.interactMapped] = 0;
         previousKeyboardState_[keyMapping_.switchToNextItemMapped] = 0;
         previousKeyboardState_[keyMapping_.dropItemMapped] = 0;
@@ -101,6 +102,12 @@ PlayerSpecificKeyMapping& Player::getKeyMappingRef() {
 
 void Player::readInputs(const Uint8* newKeyboardState) {
     if (!isAnythingScheduled()) {
+        if (!isAnythingInteractionLikeScheduled()) {
+            if (isOnReleaseRequested(keyMapping_.interactMapped, newKeyboardState)) {
+                setInteractionScheduled(HANDLE_INTERACT);
+            }
+        }
+
         if (isOnPressRequested(keyMapping_.moveLeftMapped, newKeyboardState)) {
             if (!isOnPressRequested(keyMapping_.moveRightMapped, newKeyboardState)) {
                 adjustAccAndVForRegular();

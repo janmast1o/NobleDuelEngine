@@ -1,10 +1,15 @@
 #include "creature.h"
 #include "constants.h"
+#include "interactable_manager.h"
 
 
-Creature::Creature(SDL_Renderer* renderer, Point center, ModelCollection modelCollection, ObjectMap& objectMap, float mass, int health) :
-    MobileObject(renderer, center, modelCollection, objectMap, mass) {
+Creature::Creature(SDL_Renderer* renderer, Point center, ModelCollection modelCollection, const EngineClock& sessionEngineClock, ObjectMap& objectMap, float mass, 
+                   int health, InteractableManager& interactableManager) :
+                   MobileObject(renderer, center, modelCollection, sessionEngineClock, objectMap, mass),
+                   interactableManager_(interactableManager) {
         setHealth(health);
+        interactionScheduled_ = NOTHING;
+        previousInteractionScheduled_ = NOTHING;
     }
 
 
@@ -43,7 +48,7 @@ void Creature::handleBePushedHorizontally(HandleParams handleParams) {
     }
     float sy = sx*slopeInclineDirectlyUnderneath_;
     Point svec(sx, sy);
-    adjustSVecForMaxVReqs(svec);
+    adjustSVec(svec);
     std::list<Object*> potentiallyColliding = objectMap_.getPotentiallyColliding(*this);
     bool collisionDetected = false;
     bool groundUnderneathFound = false;
@@ -130,7 +135,7 @@ void Creature::handleMoveHorizontally() {
     float sx = velocity_.horizontalVelocity*(1.0/FPS);
     float sy = sx*slopeInclineDirectlyUnderneath_;
     Point svec(sx, sy);
-    adjustSVecForMaxVReqs(svec);
+    adjustSVec(svec);
     std::list<Object*> potentiallyColliding = objectMap_.getPotentiallyColliding(*this);
     bool collisionDetected = false;
     bool groundUnderneathFound = false;
@@ -226,6 +231,38 @@ void Creature::handleJump() {
 }
 
 
+void Creature::handleInteract() {
+    std::cout << targetedPoint_ << std::endl;
+    previousInteractionScheduled_ = interactionScheduled_;
+    std::list<Interactable*> availableInteractables = interactableManager_.getAllAvailableInteractables(targetedPoint_, *this);
+    if (availableInteractables.size() != 0) {
+        std::cout << "?" << std::endl;
+        availableInteractables.front()->performOnInteraction((void*) this);
+    }
+    clearInteractionScheduled();
+}
+
+
+ScheduledInstruction Creature::getInteractionScheduled() const {
+    return interactionScheduled_; 
+}
+
+
+ScheduledInstruction Creature::getPreviousInteractionScheduled() const {
+    return previousInteractionScheduled_;
+}
+
+
+void Creature::setInteractionScheduled(ScheduledInstruction newInteractionScheduled) {
+    interactionScheduled_ = newInteractionScheduled;
+}
+    
+    
+void Creature::clearInteractionScheduled() {
+    interactionScheduled_ = NOTHING;
+}
+
+
 void Creature::updateTargetedPoint(const Point& newTargetedPoint) {
     targetedPoint_.x = newTargetedPoint.x;
     targetedPoint_.y = newTargetedPoint.y;
@@ -308,12 +345,32 @@ bool Creature::canHaveOtherOnTop() const {
 }
 
 
+bool Creature::isAnythingInteractionLikeScheduled() const {
+    return interactionScheduled_ != NOTHING;
+}
+
+
+void Creature::runInteractionScheduled() {
+    if (isAnythingInteractionLikeScheduled()) {
+        switch (interactionScheduled_) {
+            case HANDLE_INTERACT:
+                handleInteract();
+                break;
+            default:
+                clearInteractionScheduled();
+                break;    
+        }
+    }   
+}
+
+
 void Creature::runScheduled() {
+    runInteractionScheduled();
+    
     if (!currentMomentumDictated_.isEmpty() && 
         !shouldIgnoreOutsideMomentumFunction_(mass_, objectSpecificPhysicsChar_.maxTrueHorizontalV, std::abs(currentMomentumDictated_.cumultativeReceivedMomentum))) {
             runScheduledForNonEmptyMomentum();
-    }
-    else if (isAnythingScheduled()) {
+    } else if (isAnythingScheduled()) {
         currentMomentumDictated_.clear();
         switch (scheduled_) {
             case HANDLE_BE_PUSHED_HORIZONTALLY_WITH_RETRY:

@@ -60,7 +60,7 @@ protected:
                           bool& groundUnderneathFound,
                           Object*& alphaTempObjectCurrentlyUnderneath);                      
     
-    void adjustSVecForMaxVReqs(Point& svec) const;   
+    virtual void adjustSVec(Point& svec);   
     bool moveMobileDirectlyAbove(std::list<MobileObject*>& mobileDirectlyAbove, const Point& translationVector);                             
 
     void handleCheckForGroundDirectlyUnderneath();
@@ -73,27 +73,16 @@ protected:
     void handleFreefall();
     void handleStop();
 
-    bool collidesWithAfterVectorTranslation(Object& otherObject, const Point& translationVector) const;
-    bool isDirectlyAbove(Object& otherObject) const;
-    bool isDirectlyAboveAfterVectorTranslation(Object& otherObject, const Point& translationVector) const;
-    bool collidesWithTopAfterVectorTranslation(Object& otherObject, const Point& translationVector) const;
-    float findMinVertDistanceFromTop(Object& otherObject) const;
-    float findMinVertDistanceFromTopAfterVectorTranslation(Object& otherObject, const Point& translationVector) const;
-    float isCollisionAfterVectorTranslationCausedByGentleSlope(Object& otherObject, const Point& translationVector) const;
-    float findSlopeCoefficientDirectlyBelowAfterVectorTranslation(Object& otherObject, const Point& translationVector) const;
-    float findSlopeCoefficientDirectlyBelow(Object& otherObject) const;
-    float findEscapeDisAlongXAxis(Object& otherObject, float escapeDirection) const;
-
     virtual void translateObjectByVector(const Point& translationVector);
 
     ScheduledInstruction getScheduled() const;
     ScheduledInstruction getPreviouslyScheduled() const;
-    void setScheduled(ScheduledInstruction newScheduled);
+    void setScheduled(ScheduledInstruction newInteractionScheduled);
     void clearScheduled();
 
 public:
 
-    MobileObject(SDL_Renderer* renderer, Point center, ModelCollection modelCollection, ObjectMap& objectMap, float mass);
+    MobileObject(SDL_Renderer* renderer, Point center, ModelCollection modelCollection, const EngineClock& sessionEngineClock, ObjectMap& objectMap, float mass);
 
     bool isMobile() const override;
 
@@ -120,6 +109,17 @@ public:
 
     void newHorizontalAcceleration(Direction direction);
     void newVelocity();
+
+    bool collidesWithAfterVectorTranslation(Object& otherObject, const Point& translationVector) const;
+    bool isDirectlyAbove(Object& otherObject) const;
+    bool isDirectlyAboveAfterVectorTranslation(Object& otherObject, const Point& translationVector) const;
+    bool collidesWithTopAfterVectorTranslation(Object& otherObject, const Point& translationVector) const;
+    float findMinVertDistanceFromTop(Object& otherObject) const;
+    float findMinVertDistanceFromTopAfterVectorTranslation(Object& otherObject, const Point& translationVector) const;
+    float isCollisionAfterVectorTranslationCausedByGentleSlope(Object& otherObject, const Point& translationVector) const;
+    float findSlopeCoefficientDirectlyBelowAfterVectorTranslation(Object& otherObject, const Point& translationVector) const;
+    float findSlopeCoefficientDirectlyBelow(Object& otherObject) const;
+    float findEscapeDisAlongXAxis(Object& otherObject, float escapeDirection) const;
 
     int getFacedSideAsInt() const;
 

@@ -16,6 +16,9 @@ const float SLIGHT_RAISE = 2.5;
 const float SLIGHT_HORIZONTAL_PUSH = 2.5;
 const float MAXIMUM_GENTLE_SLOPE_COEFFICIENT = 0.8;
 
+const float MAX_INTERACTION_POINT_DIS = 10;
+const float MAX_INTERACTOR_DIS = 35; 
+
 const int BUF_FRAME_TIME = 30;
 
 const int FPS = 60;

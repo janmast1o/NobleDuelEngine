@@ -3,6 +3,8 @@
 
 #include "mobile_object.h"
 
+class InteractableManager;
+
 class Creature : public MobileObject {
 
 private:
@@ -13,6 +15,11 @@ private:
 
 protected:
 
+    ScheduledInstruction interactionScheduled_;
+    ScheduledInstruction previousInteractionScheduled_;
+
+    InteractableManager& interactableManager_;
+    
     // std::vector<Item*> itemLoadout_; // implement when implementing items
     // int itemLoadoutIndex_;
     // int chargeUpFramesAccumulated_;
@@ -25,13 +32,20 @@ protected:
     void handleMoveHorizontally() override;
     void handleJump();
 
+    void handleInteract();
     // void handlePickUpItem();
     // void handleDropItem();
     // void handleSwitchToNextItem();
 
+    ScheduledInstruction getInteractionScheduled() const;
+    ScheduledInstruction getPreviousInteractionScheduled() const;
+    void setInteractionScheduled(ScheduledInstruction newScheduled);
+    void clearInteractionScheduled();
+
 public:
 
-    Creature(SDL_Renderer* renderer, Point center, ModelCollection modelCollection, ObjectMap& objectMap, float mass, int health);
+    Creature(SDL_Renderer* renderer, Point center, ModelCollection modelCollection, const EngineClock& sessionEngineClock, ObjectMap& objectMap, float mass, 
+             int health, InteractableManager& interactableManager);
 
     void updateTargetedPoint(const Point& newTargtedPoint);
 
@@ -59,6 +73,9 @@ public:
 
     bool canHaveOtherOnTop() const override;
 
+    bool isAnythingInteractionLikeScheduled() const;
+
+    void runInteractionScheduled();
     void runScheduled() override;
 
     virtual ~Creature() = default;
