@@ -132,6 +132,21 @@ Button* OfflineEngine::makeButton(Point& center, ModelCollection& modelCollectio
 }
 
 
+ThrustingWeapon* OfflineEngine::makeThrustingWeapon(Point& center, ModelCollection& modelCollection, float mass, 
+                                                    int damage, int poiseDamage,
+                                                    unsigned short attackFrames, unsigned short recoveryFrames, 
+                                                    float attackExtendRange) {
+    std::lock_guard<std::mutex> lock(objectCreationMutex_);
+    ThrustingWeapon* newThrustingWeapon = new ThrustingWeapon(renderer_, center, modelCollection, sessionEngineClock_, objectMap_,
+                                                              mass, damage, poiseDamage, attackFrames, recoveryFrames, attackExtendRange);
+    allObjects_.emplace_back(newThrustingWeapon);
+    mobileObjectPtrs_.push_back(newThrustingWeapon);
+    objectMap_.addNewObject(*newThrustingWeapon);
+    interactableManager_.addNewInteractable(*newThrustingWeapon);
+    return newThrustingWeapon;
+}
+
+
 Creature* OfflineEngine::makeCreature(Point& center, ModelCollection& modelCollection, float mass, int health) {
     std::lock_guard<std::mutex> lock(objectCreationMutex_);
     // ObjectCreationArgs newCreatureCreationArgs(renderer_, &center, &modelCollection, &objectMap_, mass, health);

@@ -105,8 +105,10 @@ enum State {
     OWNED_RIGHT,
     IN_USE_LEFT,
     IN_USE_RIGHT,
-    IN_CHARGED_USE_LEFT,
-    IN_CHARGED_USE_RIGHT
+    IN_RECOVERY_LEFT,
+    IN_RECOVERY_RIGHT,
+    IN_WIND_UP_LEFT,
+    IN_WIND_UP_RIGHT
 };
 
 #endif
@@ -140,7 +142,11 @@ enum ScheduledInstruction {
     HANDLE_ESCAPE_WITH_RETRY,
     HANDLE_ESCAPE_NO_RETRY,
 
-    HANDLE_INTERACT
+    HANDLE_INTERACT,
+
+    HANDLE_ATTACK,
+    HANDLE_WIND_UP,
+    HANDLE_RECOVER
 };
 
 #endif
@@ -292,6 +298,16 @@ struct MomentumDictated {
 struct HandleParams {
     float paramSx = 0;
     bool retry = false;
+};
+
+#endif
+
+#ifndef ITEM_DEPENDENCY_STATE
+#define ITEM_DEPENDENCY_STATE
+
+enum ItemDependencyState {
+    DEPENDENT,
+    INDEPENDENT
 };
 
 #endif

@@ -6,6 +6,10 @@
 #include <vector>
 #include <unordered_set>
 
+const EngineClock Object::dummyEngineClock_ = EngineClock();
+
+Object::Object() : sessionEngineClock_(dummyEngineClock_) {}
+
 Object::Object(SDL_Renderer* renderer, Point center, ModelCollection modelCollection, const EngineClock& sessionEngineClock) :
     renderer_(renderer), center_(center), modelCollection_(modelCollection), sessionEngineClock_(sessionEngineClock) {
         health_ = INFINITY;
@@ -38,6 +42,11 @@ Model* Object::getNextModelPtr() {
 
 Hitbox& Object::getCurrentCollisionMesh() const {
     return modelCollection_.getCurrentCollisionMesh(state_);
+}
+
+
+Hitbox& Object::getCurrentHitbox() const {
+    return modelCollection_.getCurrentHitbox(state_);
 }
 
 
@@ -145,7 +154,7 @@ void Object::redrawObject(bool drawHitboxes, float pointSize) {
 
 
 bool Object::collideableWith(const Object& otherObject) {
-    if (matter_ == PHANTOM_SOLID || otherObject.matter_ == PHANTOM) {
+    if (matter_ == PHANTOM_SOLID || otherObject.matter_ == PHANTOM_SOLID) {
         return true;
     } else if (matter_ == TRUEST_OF_PHANTOMS || otherObject.matter_ == TRUEST_OF_PHANTOMS) {
         return false;

@@ -6,7 +6,7 @@
 #include "mobile_hitbox.h"
 #include <functional>
 
-class MobileObject : public Object {
+class MobileObject : virtual public Object {
 
 protected:
 
@@ -46,6 +46,7 @@ protected:
     void zeroAirborneGhostHorizontalVelocity();
 
     void applyFriction();
+    void fixReceivedVelocityIfNeccessary(float& receivedHVelocity, float& receivedHTranslation) const;
 
     void prepareNextSlideOffTopScheduled();
     void prepareNextEscapeScheduled(float escapeDirection, MobileObject& escapingFrom);
@@ -72,8 +73,6 @@ protected:
     void handleAirborne(HandleParams handleParams = {0, false});
     void handleFreefall();
     void handleStop();
-
-    virtual void translateObjectByVector(const Point& translationVector);
 
     ScheduledInstruction getScheduled() const;
     ScheduledInstruction getPreviouslyScheduled() const;
@@ -110,6 +109,8 @@ public:
     void newHorizontalAcceleration(Direction direction);
     void newVelocity();
 
+    virtual void translateObjectByVector(const Point& translationVector);
+
     bool collidesWithAfterVectorTranslation(Object& otherObject, const Point& translationVector) const;
     bool isDirectlyAbove(Object& otherObject) const;
     bool isDirectlyAboveAfterVectorTranslation(Object& otherObject, const Point& translationVector) const;
@@ -120,6 +121,8 @@ public:
     float findSlopeCoefficientDirectlyBelowAfterVectorTranslation(Object& otherObject, const Point& translationVector) const;
     float findSlopeCoefficientDirectlyBelow(Object& otherObject) const;
     float findEscapeDisAlongXAxis(Object& otherObject, float escapeDirection) const;
+
+    bool collidesWithHitboxAfterVectorTranslation(Object& otherObject, const Point& translationVector) const;
 
     int getFacedSideAsInt() const;
 

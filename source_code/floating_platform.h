@@ -11,8 +11,6 @@ protected:
     std::vector<Point> bordersForMovementModes_;
     int movementModeIndex_;
 
-    Velocity currentVelocity_;
-
     float startToSlowDownDistance_;
     float slowDownPerSecondRate_;
 

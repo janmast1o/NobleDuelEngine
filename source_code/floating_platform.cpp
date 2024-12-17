@@ -5,6 +5,7 @@
 FloatingPlatform::FloatingPlatform(SDL_Renderer* renderer, Point center, ModelCollection modelCollection, const EngineClock& sessionEngineClock, 
                                    ObjectMap& objectMap, float mass, 
                                    const std::vector<Velocity>& velocitiesForMovementModes, const std::vector<Point>& bordersForMovementModes) : 
+                                   Object(renderer, center, modelCollection, sessionEngineClock),
                                    MobileObject(renderer, center, modelCollection, sessionEngineClock, objectMap, mass), 
                                    velocitiesForMovementModes_(velocitiesForMovementModes),
                                    bordersForMovementModes_(bordersForMovementModes) {
@@ -110,11 +111,11 @@ void FloatingPlatform::adjustVelocity() {
         float horizontalSign = getSign(velocitiesForMovementModes_[movementModeIndex_].horizontalVelocity);
         float verticalSign = getSign(velocitiesForMovementModes_[movementModeIndex_].verticalVelocity);
 
-        if (std::abs(currentVelocity_.horizontalVelocity-horizontalSign*slowDownPerSecondRate_*(1.0/FPS)) >= minVeloctiesForMovementModes_[movementModeIndex_].horizontalVelocity) {
-            currentVelocity_.horizontalVelocity -= horizontalSign*slowDownPerSecondRate_*(1.0/FPS);
+        if (std::abs(velocity_.horizontalVelocity-horizontalSign*slowDownPerSecondRate_*(1.0/FPS)) >= minVeloctiesForMovementModes_[movementModeIndex_].horizontalVelocity) {
+            velocity_.horizontalVelocity -= horizontalSign*slowDownPerSecondRate_*(1.0/FPS);
         }
-        if (std::abs(currentVelocity_.verticalVelocity-verticalSign*slowDownPerSecondRate_*(1.0/FPS)) >=  minVeloctiesForMovementModes_[movementModeIndex_].verticalVelocity) {
-            currentVelocity_.verticalVelocity -= verticalSign*slowDownPerSecondRate_*(1.0/FPS);
+        if (std::abs(velocity_.verticalVelocity-verticalSign*slowDownPerSecondRate_*(1.0/FPS)) >=  minVeloctiesForMovementModes_[movementModeIndex_].verticalVelocity) {
+            velocity_.verticalVelocity -= verticalSign*slowDownPerSecondRate_*(1.0/FPS);
         }
     }
 }
@@ -130,12 +131,10 @@ void FloatingPlatform::handleMoveAccordingToMode() {
     previouslyScheduled_ = scheduled_;
 
     bool incrementMovementModeIndex = false;
-    // float sx = velocitiesForMovementModes_[movementModeIndex_].horizontalVelocity*(1.0/FPS);
-    // float sy = velocitiesForMovementModes_[movementModeIndex_].verticalVelocity*(1.0/FPS);
     
     adjustVelocity();
-    float sx = currentVelocity_.horizontalVelocity*(1.0/FPS);
-    float sy = currentVelocity_.verticalVelocity*(1.0/FPS);
+    float sx = velocity_.horizontalVelocity*(1.0/FPS);
+    float sy = velocity_.verticalVelocity*(1.0/FPS);
     Point svec(sx, sy);
     if (willBorderBeBreached(svec)) {
         adjustSVec(svec);
@@ -152,15 +151,13 @@ void FloatingPlatform::handleMoveAccordingToMode() {
             if (collidesWithAfterVectorTranslation(*p, svec)) {
                 collisionDetected = true;
                 if (p->isMobile()) {
-                    collisionDetected = false;
                     mop = dynamic_cast<MobileObject*>(p);
                     if (mop->isDirectlyAbove(*this)) {
+                        collisionDetected = false;
                         foundMobileDirectlyAbove.push_back(mop);
                     } else if (mop->isParticipatingInMomentum()) {
                         mop->registerBeingAffectedByOutsideMomentum(mass_, velocity_.horizontalVelocity, svec.x);
-                    } else {
-                        collisionDetected = true;
-                    }
+                    }    
                 }    
             } else if (p->isMobile() && (mop = dynamic_cast<MobileObject*>(p))->isDirectlyAbove(*this)) {
                 foundMobileDirectlyAbove.push_back(mop);
@@ -176,7 +173,7 @@ void FloatingPlatform::handleMoveAccordingToMode() {
         translateObjectByVector(svec);
         if (incrementMovementModeIndex) {
             movementModeIndex_ = (movementModeIndex_+1)%velocitiesForMovementModes_.size();
-            currentVelocity_ = velocitiesForMovementModes_[movementModeIndex_];
+            velocity_ = velocitiesForMovementModes_[movementModeIndex_];
         }
     };
 

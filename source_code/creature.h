@@ -4,14 +4,19 @@
 #include "mobile_object.h"
 
 class InteractableManager;
+class Item;
 
 class Creature : public MobileObject {
 
 private:
 
+    static int defaultInitialItemListSize_;
+
     Point targetedPoint_;
     CreatureSpecificPhysicsChar creatureSpecificPhysicsChar_;
-    // ItemManager& itemManager_;
+
+    std::vector<Item*> itemList_;
+    size_t itemListIndex_;
 
 protected:
 
@@ -33,6 +38,8 @@ protected:
     void handleJump();
 
     void handleInteract();
+    void handleDropItem();
+
     // void handlePickUpItem();
     // void handleDropItem();
     // void handleSwitchToNextItem();
@@ -71,9 +78,17 @@ public:
     void setSlowWalkHorizontalAcc(float newSlowWalkHorizontalAcc);
     void setSlowWalkMaxHorizontalV(float newSlowWalkMaxHorizontalV);
 
+    void translateObjectByVector(const Point& translationVector) override;
+
+    // bool isLeftFacing() const;
+    // bool isRightFacing() const;
+
     bool canHaveOtherOnTop() const override;
 
+    void placeItemInItemList(Item& pickedUpItem);
+
     bool isAnythingInteractionLikeScheduled() const;
+    bool isAnythingScheduledForItem() const;
 
     void runInteractionScheduled();
     void runScheduled() override;

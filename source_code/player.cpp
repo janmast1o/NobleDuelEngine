@@ -3,6 +3,7 @@
 
 Player::Player(SDL_Renderer* renderer, Point center, ModelCollection modelCollection, const EngineClock& sessionEngineClock, ObjectMap& objectMap, float mass, 
                int health, InteractableManager& interactableManager) : 
+               Object(renderer, center, modelCollection, sessionEngineClock),
                Creature(renderer, center, modelCollection, sessionEngineClock, objectMap, mass, health, interactableManager) {
         previousKeyboardState_[keyMapping_.interactMapped] = 0;
         previousKeyboardState_[keyMapping_.switchToNextItemMapped] = 0;
@@ -101,6 +102,7 @@ PlayerSpecificKeyMapping& Player::getKeyMappingRef() {
 
 
 void Player::readInputs(const Uint8* newKeyboardState) {
+    // std::cout << this << " " << getScheduled() << std::endl;
     if (!isAnythingScheduled()) {
         if (!isAnythingInteractionLikeScheduled()) {
             if (isOnReleaseRequested(keyMapping_.interactMapped, newKeyboardState)) {

@@ -1,15 +1,22 @@
 #include "creature.h"
 #include "constants.h"
 #include "interactable_manager.h"
+#include "item.h"
+
+
+int Creature::defaultInitialItemListSize_ = 3;
 
 
 Creature::Creature(SDL_Renderer* renderer, Point center, ModelCollection modelCollection, const EngineClock& sessionEngineClock, ObjectMap& objectMap, float mass, 
                    int health, InteractableManager& interactableManager) :
+                   Object(renderer, center, modelCollection, sessionEngineClock),
                    MobileObject(renderer, center, modelCollection, sessionEngineClock, objectMap, mass),
-                   interactableManager_(interactableManager) {
+                   interactableManager_(interactableManager),
+                   itemListIndex_(0) {
         setHealth(health);
         interactionScheduled_ = NOTHING;
         previousInteractionScheduled_ = NOTHING;
+        itemList_ = std::vector<Item*>(defaultInitialItemListSize_, nullptr);
     }
 
 
@@ -232,14 +239,37 @@ void Creature::handleJump() {
 
 
 void Creature::handleInteract() {
-    std::cout << targetedPoint_ << std::endl;
     previousInteractionScheduled_ = interactionScheduled_;
     std::list<Interactable*> availableInteractables = interactableManager_.getAllAvailableInteractables(targetedPoint_, *this);
     if (availableInteractables.size() != 0) {
-        std::cout << "?" << std::endl;
         availableInteractables.front()->performOnInteraction((void*) this);
     }
     clearInteractionScheduled();
+}
+
+
+void Creature::handleDropItem() {
+    previousInteractionScheduled_ = interactionScheduled_;
+    if (itemList_[itemListIndex_] != nullptr) {
+        itemList_[itemListIndex_]->ridOfOwner();
+        itemList_[itemListIndex_] = nullptr;
+    }
+    clearInteractionScheduled();
+}
+
+
+void Creature::translateObjectByVector(const Point& translationVector) {
+    setCenter(getCenter()+translationVector);
+    if (itemList_[itemListIndex_] != nullptr) {
+        itemList_[itemListIndex_]->translateObjectByVector(translationVector);
+        if (!isAnythingScheduledForItem()) {
+            if (translationVector.x < 0) {
+                itemList_[itemListIndex_]->setNewState(OWNED_LEFT);
+            } else {
+                itemList_[itemListIndex_]->setNewState(OWNED_RIGHT);
+            }
+        }
+    }
 }
 
 
@@ -340,13 +370,32 @@ void Creature::setSlowWalkMaxHorizontalV(float newSlowWalkMaxHorizontalV) {
 }
 
 
+// bool Creature::isLeftFacing() const {
+//     return isLeftFacing
+// }
+
+
 bool Creature::canHaveOtherOnTop() const {
     return false;
 }
 
 
+void Creature::placeItemInItemList(Item& pickedUpItem) {
+    if (itemList_[itemListIndex_] != nullptr) {
+        // drop item 
+        ;
+    }
+    itemList_[itemListIndex_] = &pickedUpItem;
+}
+
+
 bool Creature::isAnythingInteractionLikeScheduled() const {
     return interactionScheduled_ != NOTHING;
+}
+
+
+bool Creature::isAnythingScheduledForItem() const {
+    return itemList_[itemListIndex_] != nullptr && itemList_[itemListIndex_]->isAnythingScheduled();
 }
 
 

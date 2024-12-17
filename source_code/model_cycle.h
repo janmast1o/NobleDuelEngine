@@ -43,6 +43,7 @@ public:
     void addModelAndResetIterator(Model model, int lingerOn);
 
     Hitbox& getCurrentCollisionMesh() const;
+    Hitbox& getCurrentHitbox() const;
 
     Model& getCurrentModel() const;
     void moveToNextModel();

@@ -1,5 +1,6 @@
 #include "source_code/offline_engine.h"
 #include "source_code/utility_functions.h"
+#include "source_code/thrusting_weapon.h"
 #include <thread>
 
 void prepareGame(int windowWidth, int windowHeight, OfflineEngine& engine) {
@@ -246,21 +247,80 @@ void prepareGame(int windowWidth, int windowHeight, OfflineEngine& engine) {
     leverModelCollection.addModelCycleForState(IDLE, leverModelCycle);
     Point leverCenter = {800, -555};
     auto leverCommand = std::function<void()>([blueElevator](void){blueElevator->requestNewElevatorMovement(0);});
+    // auto leverCommand = std::function<void()>([](void){;});
     Object* lever = engine.makeButton(leverCenter, leverModelCollection, leverCommand);                             
 
-    SDL_Texture* simpleLightCreateTexture = engine.createTexture("resources/simple_crate.png");
-    std::pair<float, float> simpleLightCreateWAH = engine.readTexturesWidthAndHeight(simpleLightCreateTexture);
-    float simpleLightCreateW = simpleLightCreateWAH.first;
-    float simpleLightCreateH = simpleLightCreateWAH.second;
-    MobileHitbox* simpleLightCreateHitbox = engine.makeMobileHitbox({{-simpleLightCreateW/2, -simpleLightCreateH/2}, {simpleLightCreateW/2, -simpleLightCreateH/2}, {simpleLightCreateW/2, simpleLightCreateH/2}, {-simpleLightCreateW/2, simpleLightCreateH/2}});
-    Model simpleLightCreateModel(simpleLightCreateTexture, simpleLightCreateHitbox);
-    MobileHitbox* simpleLightCreateMesh = engine.makeMobileHitbox({{-simpleLightCreateW/2, -simpleLightCreateH/2}, {simpleLightCreateW/2, -simpleLightCreateH/2}, {simpleLightCreateW/2, simpleLightCreateH/2}, {-simpleLightCreateW/2, simpleLightCreateH/2}});
-    ModelCycle simpleLightCreateModelCycle(simpleLightCreateMesh);
-    simpleLightCreateModelCycle.addModelAndResetIterator(simpleLightCreateModel, 1);
-    ModelCollection simpleLightCreateModelCollection;
-    simpleLightCreateModelCollection.addModelCycleForState(IDLE, simpleLightCreateModelCycle);
-    Point simpleLightCreateCenter = {650, 0};
-    MobileObject* simpleLightCreate = engine.makeMobileObject(simpleLightCreateCenter, simpleLightCreateModelCollection, 25);
+    SDL_Texture* simpleLightCrateTexture = engine.createTexture("resources/simple_crate.png");
+    std::pair<float, float> simpleLightCrateWAH = engine.readTexturesWidthAndHeight(simpleLightCrateTexture);
+    float simpleLightCrateW = simpleLightCrateWAH.first;
+    float simpleLightCrateH = simpleLightCrateWAH.second;
+    MobileHitbox* simpleLightCrateHitbox = engine.makeMobileHitbox({{-simpleLightCrateW/2, -simpleLightCrateH/2}, {simpleLightCrateW/2, -simpleLightCrateH/2}, {simpleLightCrateW/2, simpleLightCrateH/2}, {-simpleLightCrateW/2, simpleLightCrateH/2}});
+    Model simpleLightCrateModel(simpleLightCrateTexture, simpleLightCrateHitbox);
+    MobileHitbox* simpleLightCrateMesh = engine.makeMobileHitbox({{-simpleLightCrateW/2, -simpleLightCrateH/2}, {simpleLightCrateW/2, -simpleLightCrateH/2}, {simpleLightCrateW/2, simpleLightCrateH/2}, {-simpleLightCrateW/2, simpleLightCrateH/2}});
+    ModelCycle simpleLightCrateModelCycle(simpleLightCrateMesh);
+    simpleLightCrateModelCycle.addModelAndResetIterator(simpleLightCrateModel, 1);
+    ModelCollection simpleLightCrateModelCollection;
+    simpleLightCrateModelCollection.addModelCycleForState(IDLE, simpleLightCrateModelCycle);
+    Point simpleLightCrateCenter = {650, 0};
+    MobileObject* simpleLightCrate = engine.makeMobileObject(simpleLightCrateCenter, simpleLightCrateModelCollection, 45);
+
+    SDL_Texture* simpleLightCrate2Texture = engine.createTexture("resources/simple_crate.png");
+    std::pair<float, float> simpleLightCrate2WAH = engine.readTexturesWidthAndHeight(simpleLightCrate2Texture);
+    float simpleLightCrate2W = simpleLightCrate2WAH.first;
+    float simpleLightCrate2H = simpleLightCrate2WAH.second;
+    MobileHitbox* simpleLightCrate2Hitbox = engine.makeMobileHitbox({{-simpleLightCrate2W/2, -simpleLightCrate2H/2}, {simpleLightCrate2W/2, -simpleLightCrate2H/2}, {simpleLightCrate2W/2, simpleLightCrate2H/2}, {-simpleLightCrate2W/2, simpleLightCrate2H/2}});
+    Model simpleLightCrate2Model(simpleLightCrate2Texture, simpleLightCrate2Hitbox);
+    MobileHitbox* simpleLightCrate2Mesh = engine.makeMobileHitbox({{-simpleLightCrate2W/2, -simpleLightCrate2H/2}, {simpleLightCrate2W/2, -simpleLightCrate2H/2}, {simpleLightCrate2W/2, simpleLightCrate2H/2}, {-simpleLightCrate2W/2, simpleLightCrate2H/2}});
+    ModelCycle simpleLightCrate2ModelCycle(simpleLightCrate2Mesh);
+    simpleLightCrate2ModelCycle.addModelAndResetIterator(simpleLightCrate2Model, 1);
+    ModelCollection simpleLightCrate2ModelCollection;
+    simpleLightCrate2ModelCollection.addModelCycleForState(IDLE, simpleLightCrate2ModelCycle);
+    Point simpleLightCrate2Center = {550, 0};
+    MobileObject* simpleLightCrate2 = engine.makeMobileObject(simpleLightCrate2Center, simpleLightCrate2ModelCollection, 45);
+
+    SDL_Texture* rapierUnowndedTexture = engine.createTexture("resources/golden_icon.png");
+    std::pair<float, float> rapierUnowndedWAH = engine.readTexturesWidthAndHeight(rapierUnowndedTexture);
+    float rapierUnowndedW = rapierUnowndedWAH.first;
+    float rapierUnowndedH = rapierUnowndedWAH.second;
+    MobileHitbox* rapierUnowndedHitbox = engine.makeMobileHitbox({{-rapierUnowndedW/2, -rapierUnowndedH/2}, {rapierUnowndedW/2, -rapierUnowndedH/2}, {rapierUnowndedW/2, rapierUnowndedH/2}, {-rapierUnowndedW/2, rapierUnowndedH/2}});
+    Model rapierUnowndedModel(rapierUnowndedTexture, rapierUnowndedHitbox);
+    MobileHitbox* rapierUnowndedMesh = engine.makeMobileHitbox({{-rapierUnowndedW/2, -rapierUnowndedH/2}, {rapierUnowndedW/2, -rapierUnowndedH/2}, {rapierUnowndedW/2, rapierUnowndedH/2}, {-rapierUnowndedW/2, rapierUnowndedH/2}});
+    ModelCycle rapierUnowndedModelCycle(rapierUnowndedMesh);
+    rapierUnowndedModelCycle.addModelAndResetIterator(rapierUnowndedModel, 1);
+
+    SDL_Texture* rapierLeftTexture = engine.createTexture("resources/nobles_rapier_left.png");
+    std::pair<float, float> rapierLeftWAH = engine.readTexturesWidthAndHeight(rapierLeftTexture);
+    float rapierLeftW = rapierLeftWAH.first;
+    float rapierLeftH = rapierLeftWAH.second;
+    MobileHitbox* rapierLeftHitbox = engine.makeMobileHitbox({{-rapierLeftW/2, -rapierLeftH/2}, {rapierLeftW/2, -rapierLeftH/2}, {rapierLeftW/2, rapierLeftH/2}, {-rapierLeftW/2, rapierLeftH/2}});
+    Model rapierLeftModel(rapierLeftTexture, rapierLeftHitbox);
+    MobileHitbox* rapierLeftMesh = engine.makeMobileHitbox({{-rapierLeftW/2, -rapierLeftH/2}, {rapierLeftW/2, -rapierLeftH/2}, {rapierLeftW/2, rapierLeftH/2}, {-rapierLeftW/2, rapierLeftH/2}});
+    ModelCycle rapierLeftModelCycle(rapierLeftMesh);
+    rapierLeftModelCycle.addModelAndResetIterator(rapierLeftModel, 1);
+
+    SDL_Texture* rapierRightTexture = engine.createTexture("resources/nobles_rapier_right.png");
+    std::pair<float, float> rapierRightWAH = engine.readTexturesWidthAndHeight(rapierRightTexture);
+    float rapierRightW = rapierRightWAH.first;
+    float rapierRightH = rapierRightWAH.second;
+    MobileHitbox* rapierRightHitbox = engine.makeMobileHitbox({{-rapierRightW/2, -rapierRightH/2}, {rapierRightW/2, -rapierRightH/2}, {rapierRightW/2, rapierRightH/2}, {-rapierRightW/2, rapierRightH/2}});
+    Model rapierRightModel(rapierRightTexture, rapierRightHitbox);
+    MobileHitbox* rapierRightMesh = engine.makeMobileHitbox({{-rapierRightW/2, -rapierRightH/2}, {rapierRightW/2, -rapierRightH/2}, {rapierRightW/2, rapierRightH/2}, {-rapierRightW/2, rapierRightH/2}});
+    ModelCycle rapierRightModelCycle(rapierRightMesh);
+    rapierRightModelCycle.addModelAndResetIterator(rapierRightModel, 1);
+
+    ModelCollection rapierModelCollection;
+    rapierModelCollection.addModelCycleForState(IDLE, rapierUnowndedModelCycle);
+    
+    rapierModelCollection.addModelCycleForState(OWNED_LEFT, rapierLeftModelCycle);
+    rapierModelCollection.addModelCycleForState(IN_USE_LEFT, rapierLeftModelCycle);
+    rapierModelCollection.addModelCycleForState(IN_RECOVERY_LEFT, rapierLeftModelCycle);
+
+    rapierModelCollection.addModelCycleForState(OWNED_RIGHT, rapierRightModelCycle);
+    rapierModelCollection.addModelCycleForState(IN_USE_RIGHT, rapierRightModelCycle);
+    rapierModelCollection.addModelCycleForState(IN_RECOVERY_RIGHT, rapierRightModelCycle);
+
+    Point rapierCenter = {80, 0};
+    ThrustingWeapon* rapier = engine.makeThrustingWeapon(rapierCenter, rapierModelCollection, 45, 10, 10, 5, 4, 8);
     
     SDL_Texture* playerTexture = engine.createTexture("resources/first_sprite_tbg_2.png");
     std::pair<float, float> playerWAH = engine.readTexturesWidthAndHeight(playerTexture);

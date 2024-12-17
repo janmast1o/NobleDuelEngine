@@ -4,6 +4,7 @@
 Elevator::Elevator(SDL_Renderer* renderer, Point center, ModelCollection modelCollection, const EngineClock& sessionEngineClock,
                    ObjectMap& objectMap, float mass, 
                    const std::vector<Velocity>& velocitiesForMovementModes, const std::vector<Point>& bordersForMovementModes) :
+                   Object(renderer, center, modelCollection, sessionEngineClock),
                    FloatingPlatform(renderer, center, modelCollection, sessionEngineClock, objectMap, mass, velocitiesForMovementModes, bordersForMovementModes),
                    stopped_(true) {
     maxQueueSize_ = 2;
@@ -36,7 +37,7 @@ bool Elevator::requestNewElevatorMovement(int requestedElevatorMoveIndex) {
         return false;
     } else if (requestedElevatorMoveIndex < 0 || requestedElevatorMoveIndex >= velocitiesForMovementModes_.size()) {
         return false;
-    } else if (elevatorReqs_.back() == requestedElevatorMoveIndex) {
+    } else if (elevatorReqs_.size() > 0 && elevatorReqs_.back() == requestedElevatorMoveIndex) {
         return false;
     } else {
         elevatorReqs_.emplace(requestedElevatorMoveIndex);
@@ -50,8 +51,8 @@ void Elevator::handleMoveAccordingToMode() {
 
     bool destReached = false;
     adjustVelocity();
-    float sx = currentVelocity_.horizontalVelocity*(1.0/FPS);
-    float sy = currentVelocity_.verticalVelocity*(1.0/FPS);
+    float sx = velocity_.horizontalVelocity*(1.0/FPS);
+    float sy = velocity_.verticalVelocity*(1.0/FPS);
     Point svec(sx, sy);
     if (willBorderBeBreached(svec)) {
         adjustSVec(svec);
@@ -68,15 +69,17 @@ void Elevator::handleMoveAccordingToMode() {
             if (collidesWithAfterVectorTranslation(*p, svec)) {
                 collisionDetected = true;
                 if (p->isMobile()) {
-                    collisionDetected = false;
+                    // collisionDetected = false;
                     mop = dynamic_cast<MobileObject*>(p);
                     if (mop->isDirectlyAbove(*this)) {
+                        collisionDetected = false;
                         foundMobileDirectlyAbove.push_back(mop);
                     } else if (mop->isParticipatingInMomentum()) {
                         mop->registerBeingAffectedByOutsideMomentum(mass_, velocity_.horizontalVelocity, svec.x);
-                    } else {
-                        collisionDetected = true;
-                    }
+                    }    
+                    // } else {
+                    //     collisionDetected = true;
+                    // }
                 }    
             } else if (p->isMobile() && (mop = dynamic_cast<MobileObject*>(p))->isDirectlyAbove(*this)) {
                 foundMobileDirectlyAbove.push_back(mop);
@@ -102,8 +105,8 @@ void Elevator::handleMoveAccordingToMode() {
 void Elevator::runScheduled() {
     // add clock and perFloorRemain
     if (stopped_ && !elevatorReqs_.empty()) {
-        // std::cout << "A" << std::endl;
         movementModeIndex_ = elevatorReqs_.front();
+        velocity_ = velocitiesForMovementModes_[movementModeIndex_];
         elevatorReqs_.pop();
         stopped_ = false;
     } else if (!stopped_) {

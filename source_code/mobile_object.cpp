@@ -167,6 +167,13 @@ void MobileObject::applyFriction() {
 }
 
 
+void MobileObject::fixReceivedVelocityIfNeccessary(float& receivedHVelocity, float& receivedHTranslation) const {
+    if (std::abs(receivedHVelocity*(1.0/FPS)) < std::abs(receivedHTranslation)) {
+        receivedHVelocity = receivedHTranslation*FPS;
+    }
+}
+
+
 void MobileObject::prepareNextSlideOffTopScheduled() {
     float slideDirAsFloat;
     if (objectCurrentlyUnderneath_->getCenter().x < getCenter().x) {
@@ -203,7 +210,7 @@ void MobileObject::prepareNextEscapeScheduled(float escapeDirection, MobileObjec
 }
 
 
-int MobileObject::getFacedSideAsInt() const {
+int MobileObject::getFacedSideAsInt() const { // TODO: move to creature, idk why its here
     if (isLeftFacing(getState())) {
         return -1;
     } else {
@@ -1009,6 +1016,11 @@ float MobileObject::findEscapeDisAlongXAxis(Object& otherObject, float escapeDir
 }
 
 
+bool MobileObject::collidesWithHitboxAfterVectorTranslation(Object& otherObject, const Point& translationVector) const {
+    return getCurrentHitbox().collidesWithAfterVectorTranslation(otherObject.getCurrentHitbox(), translationVector);
+}
+
+
 void MobileObject::translateObjectByVector(const Point& translationVector) {
     setCenter(getCenter()+translationVector);
 }
@@ -1040,6 +1052,7 @@ bool MobileObject::isParticipatingInMomentum() const {
 
 
 void MobileObject::registerBeingAffectedByOutsideMomentum(float otherObjectMass, float otherObjectHVelocity, float hTranslation) {
+    fixReceivedVelocityIfNeccessary(otherObjectHVelocity, hTranslation);
     currentMomentumDictated_.receivedExplicitHTranslation += hTranslation*(otherObjectMass/mass_);
     currentMomentumDictated_.receivedHVelocity += calculateVelocityAfterCollision(mass_, velocity_.horizontalVelocity, otherObjectMass, otherObjectHVelocity);
     currentMomentumDictated_.cumultativeReceivedMomentum += otherObjectMass*otherObjectHVelocity;

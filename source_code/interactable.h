@@ -3,19 +3,21 @@
 
 #include "object.h"
 
-class Interactable : public Object {
+class Interactable : virtual public Object {
 
 private:
 
     bool currentlyAvailable_;
     int cooldown_;
-    std::pair<int, int> lastUse_;
+    std::pair<unsigned int, unsigned int> lastInteraction_;
 
 public:
 
     Interactable(SDL_Renderer* renderer, Point center, ModelCollection modelCollection, const EngineClock& sessionEngineClock);
 
-    bool getCurrentlyAvailable() const;
+    virtual void updateLastInteraction();
+    
+    virtual bool getCurrentlyAvailable() const;
     void setCurrentlyAvailable(bool newCurrentlyAvailable);
 
     int getCooldown() const;

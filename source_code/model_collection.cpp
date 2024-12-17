@@ -45,6 +45,19 @@ Hitbox& ModelCollection::getCurrentCollisionMesh(State state) const {
 }
 
 
+Hitbox& ModelCollection::getCurrentHitbox(State state) const {
+    auto x = cyclesForStates_.find(state);
+    if (x != cyclesForStates_.end()) {
+        return x->second.getCurrentHitbox();
+    } else {
+        x = cyclesForStates_.find(IDLE);
+        if (x != cyclesForStates_.end()) {
+            return x->second.getCurrentHitbox();
+        }
+    }
+} 
+
+
 Model* ModelCollection::getCurrentModelPtrForState(State state) {
     auto x = cyclesForStates_.find(state);
     if (x != cyclesForStates_.end()) {

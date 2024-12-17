@@ -23,6 +23,7 @@ public:
     void addModelCycleForState(State state, ModelCycle newModelCycle);
 
     Hitbox& getCurrentCollisionMesh(State state) const;
+    Hitbox& getCurrentHitbox(State state) const;
 
     Model* getCurrentModelPtrForState(State state);
     Model* getNewModelPtrForState(State state);

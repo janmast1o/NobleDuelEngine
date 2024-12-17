@@ -5,6 +5,7 @@
 #include "elevator.h"
 #include "engine_clock.h"
 #include "interactable_manager.h"
+#include "thrusting_weapon.h"
 #include "button.h"
 #include <mutex>
 #include <functional>
@@ -72,6 +73,11 @@ public:
                                            const std::vector<Velocity>& movementModesVs, const std::vector<Point>& movementModesBorders);
 
     Button* makeButton(Point& center, ModelCollection& modelCollection, std::function<void()>& buttonCommand);
+
+    ThrustingWeapon* makeThrustingWeapon(Point& center, ModelCollection& modelCollection, float mass, 
+                                         int damage, int poiseDamage,
+                                         unsigned short attackFrames, unsigned short recoveryFrames, 
+                                         float attackExtendRange);
 
     Creature* makeCreature(Point& center, ModelCollection& modelCollection, float mass, int health);
     Player* makePlayer(Point& center, ModelCollection& modelCollection, float mass, int health);

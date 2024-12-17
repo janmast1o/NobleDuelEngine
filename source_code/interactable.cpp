@@ -5,8 +5,14 @@ Interactable::Interactable(SDL_Renderer* renderer, Point center, ModelCollection
         currentlyAvailable_ = true;
         setMatter(TRUEST_OF_PHANTOMS);
         cooldown_ = 120;
-        lastUse_ = {0, 0};
+        lastInteraction_ = {0, 0};
     }
+
+
+void Interactable::updateLastInteraction() {
+    lastInteraction_.first = sessionEngineClock_.cycles;
+    lastInteraction_.second = sessionEngineClock_.framesInCycle;
+}
 
 
 bool Interactable::getCurrentlyAvailable() const {

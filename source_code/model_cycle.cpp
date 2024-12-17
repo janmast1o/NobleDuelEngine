@@ -30,6 +30,11 @@ Hitbox& ModelCycle::getCurrentCollisionMesh() const {
 }
 
 
+Hitbox& ModelCycle::getCurrentHitbox() const {
+    return *(*it_).model.getHitboxPtr();
+}
+
+
 Model& ModelCycle::getCurrentModel() const {
     return (*it_).model;
 }

@@ -11,8 +11,9 @@ class Object {
 
 private:
 
+    static const EngineClock dummyEngineClock_;
+
     SDL_Renderer* renderer_;
-    const EngineClock& sessionEngineClock_;
 
     int health_;
     Point center_;
@@ -27,6 +28,8 @@ private:
 
 protected:
 
+    const EngineClock& sessionEngineClock_;
+    
     Model* getNextModelPtr();
 
     // Hitbox& getCurrentCollisionMesh() const;
@@ -35,6 +38,8 @@ protected:
 
 public:
 
+    Object();
+
     Object(SDL_Renderer* renderer, Point center, ModelCollection modelCollection, const EngineClock& sessionEngineClock);
 
     virtual bool isMobile() const;
@@ -42,6 +47,7 @@ public:
     SDL_Renderer* getRenderer() const;
 
     Hitbox& getCurrentCollisionMesh() const;
+    Hitbox& getCurrentHitbox() const;
  
     int getHealth() const;
     void setHealth(int newHealth);
@@ -60,10 +66,10 @@ public:
 
     std::list<int> getAllTiedHitboxes() const;
 
-    void redrawObject();
-    void redrawObject(bool drawHitboxes, float pointSize);
+    virtual void redrawObject();
+    virtual void redrawObject(bool drawHitboxes, float pointSize);
 
-    bool collideableWith(const Object& otherObject);
+    virtual bool collideableWith(const Object& otherObject);
 
     virtual bool canHaveOtherOnTop() const;
 
