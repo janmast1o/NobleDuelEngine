@@ -210,15 +210,6 @@ void MobileObject::prepareNextEscapeScheduled(float escapeDirection, MobileObjec
 }
 
 
-int MobileObject::getFacedSideAsInt() const { // TODO: move to creature, idk why its here
-    if (isLeftFacing(getState())) {
-        return -1;
-    } else {
-        return 1;
-    }
-} 
-
-
 void MobileObject::removeGroundReactionAcceleration() {
     acceleration_.verticalAcceleration = -GRAVITATIONAL_PULL;
 }
@@ -959,7 +950,7 @@ void MobileObject::handleStop() {
     previouslyScheduled_ = scheduled_;
     clearScheduled();
 
-    if (isLeftFacing(getPreviousState())) {
+    if (isLeftFacing(getState())) {
         setNewState(IDLE_LEFT);
     } else {
         setNewState(IDLE_RIGHT);

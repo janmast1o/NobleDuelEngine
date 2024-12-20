@@ -31,7 +31,14 @@ Hitbox& ModelCycle::getCurrentCollisionMesh() const {
 
 
 Hitbox& ModelCycle::getCurrentHitbox() const {
-    return *(*it_).model.getHitboxPtr();
+    Hitbox* currentHitboxPtr = (*it_).model.getHitboxPtr();
+    if (currentHitboxPtr == nullptr) return *collisionMeshPtr_;
+    return *currentHitboxPtr;
+}
+
+
+Point ModelCycle::getItemGripPointRelativeToCenter() const {
+    return (*it_).model.getItemGripPointRelativeToCenter();
 }
 
 

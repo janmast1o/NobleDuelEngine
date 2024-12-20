@@ -16,6 +16,7 @@ private:
     SDL_Texture* texture_;
     Hitbox* hitboxPtr_;
     Rectangle relativeRectangle_;
+    Point itemGripPointRelativeToCenter_;
 
 public:
 
@@ -26,6 +27,8 @@ public:
     SDL_Texture* getTexture() const;
     float getModelTextureWidth() const;
     float getModelTextureHeight() const;
+    Point getItemGripPointRelativeToCenter() const;
+    void setItemGripPointRelativeToCenter(Point newItemGripPointRelativeToCenter);
     Point& getTextureRelativeUL();
     Hitbox* getHitboxPtr() const;
 

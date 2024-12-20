@@ -25,6 +25,8 @@ public:
     Hitbox& getCurrentCollisionMesh(State state) const;
     Hitbox& getCurrentHitbox(State state) const;
 
+    Point getItemGripPointRelativeToCenter(State state) const;
+
     Model* getCurrentModelPtrForState(State state);
     Model* getNewModelPtrForState(State state);
     Model* getFirstModelPtrForState(State state);

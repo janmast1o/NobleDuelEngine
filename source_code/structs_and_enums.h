@@ -82,34 +82,36 @@ enum Matter {
 #define STATE_H
 
 enum State {
-    IDLE, 
-    IDLE_LEFT,
-    IDLE_RIGHT,
-    MOVING_LEFT,
-    MOVING_RIGHT,
-    QUICKLY_M_LEFT,
-    QUICKLY_M_RIGHT,
-    SLOWLY_M_LEFT,
-    SLOWLY_M_RIGHT,
-    AIRBORNE_LEFT,
-    AIRBORNE_RIGHT,
-    FREEFALL_LEFT,
-    FREEFALL_RIGHT,
-    SLIDE_DOWN_LEFT,
-    SLIDE_DOWN_RIGHT,
-    PUSHED_LEFT,
-    PUSHED_RIGHT,
+    IDLE = 1, 
+    IDLE_LEFT = 3,
+    IDLE_RIGHT = 2,
+    MOVING_LEFT = 6,
+    MOVING_RIGHT = 5,
+    QUICKLY_M_LEFT = 9,
+    QUICKLY_M_RIGHT = 8,
+    SLOWLY_M_LEFT = 12,
+    SLOWLY_M_RIGHT = 11,
+    AIRBORNE_LEFT = 15,
+    AIRBORNE_RIGHT = 14,
+    FREEFALL_LEFT = 18,
+    FREEFALL_RIGHT = 17,
+    SLIDE_DOWN_LEFT = 21,
+    SLIDE_DOWN_RIGHT = 20,
+    PUSHED_LEFT = 24,
+    PUSHED_RIGHT = 23,
 
-    OWNED,
-    OWNED_LEFT,
-    OWNED_RIGHT,
-    IN_USE_LEFT,
-    IN_USE_RIGHT,
-    IN_RECOVERY_LEFT,
-    IN_RECOVERY_RIGHT,
-    IN_WIND_UP_LEFT,
-    IN_WIND_UP_RIGHT
+    OWNED = 4,
+    OWNED_LEFT = 27,
+    OWNED_RIGHT = 26,
+    IN_USE_LEFT = 30,
+    IN_USE_RIGHT = 29,
+    IN_RECOVERY_LEFT = 33,
+    IN_RECOVERY_RIGHT = 32,
+    IN_WIND_UP_LEFT = 36,
+    IN_WIND_UP_RIGHT = 35
 };
+
+std::ostream& operator<<(std::ostream& os, State state);
 
 #endif
 
@@ -146,7 +148,12 @@ enum ScheduledInstruction {
 
     HANDLE_ATTACK,
     HANDLE_WIND_UP,
-    HANDLE_RECOVER
+    HANDLE_RECOVER,
+
+    HANDLE_USE,
+    HANDLE_ALT_USE,
+    HANDLE_DROP_ITEM,
+    HANDLE_SWITCH_TO_NEXT_ITEM
 };
 
 #endif

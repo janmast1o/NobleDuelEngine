@@ -42,12 +42,14 @@ public:
 
     Object(SDL_Renderer* renderer, Point center, ModelCollection modelCollection, const EngineClock& sessionEngineClock);
 
+    virtual bool isParticipatingInCollisions() const;
     virtual bool isMobile() const;
 
     SDL_Renderer* getRenderer() const;
 
     Hitbox& getCurrentCollisionMesh() const;
     Hitbox& getCurrentHitbox() const;
+    Point getCurrentItemGripPoint() const;
  
     int getHealth() const;
     void setHealth(int newHealth);
@@ -62,13 +64,14 @@ public:
 
     State getState() const;
     State getPreviousState() const;
-    void setNewState(State newState);
+    virtual void setNewState(State newState);
 
     std::list<int> getAllTiedHitboxes() const;
 
     virtual void redrawObject();
     virtual void redrawObject(bool drawHitboxes, float pointSize);
 
+    virtual bool collideableWith(const Object& otherObject) const;
     virtual bool collideableWith(const Object& otherObject);
 
     virtual bool canHaveOtherOnTop() const;

@@ -1,6 +1,7 @@
 #include "item.h"
 #include "creature.h"
 #include "constants.h"
+#include "utility_functions.h"
 
 Item::Item(SDL_Renderer* renderer, Point center, ModelCollection modelCollection, const EngineClock& sessionEngineClock, ObjectMap& objectMap, float mass, 
            ItemDependencyState initialDependencyState, Creature* initialOwner) :
@@ -14,6 +15,17 @@ Item::Item(SDL_Renderer* renderer, Point center, ModelCollection modelCollection
         owner_ = initialOwner;
         setMatter(PHANTOM);
     } 
+}
+
+
+bool Item::isParticipatingInCollisions() const {
+    return dependencyState_ == INDEPENDENT;
+}
+
+
+void Item::setNewState(State newState) {
+    if (dependencyState_ == DEPENDENT && isAnythingScheduled()) return;
+    Object::setNewState(newState);
 }
 
 
@@ -54,13 +66,17 @@ Creature* Item::getOwner() const {
 void Item::performOnInteraction(void* interactionArgsVoidPtr) {
     if (dependencyState_ == INDEPENDENT) {
         Creature* creaturePtr = (Creature*) interactionArgsVoidPtr;
-        // std::cout << creaturePtr << std::endl;
         dependencyState_ = DEPENDENT;
         owner_ = creaturePtr; 
         setMatter(PHANTOM);
         if (creaturePtr != nullptr) {
             creaturePtr->placeItemInItemList(*this);
-            // add proper state setting based on owners faced side
+            setCenter(creaturePtr->getCurrentItemGripPoint());
+            if (isLeftFacing(creaturePtr->getState())) {
+                setNewState(OWNED_LEFT);
+            } else {
+                setNewState(OWNED_RIGHT);
+            }
         }
     }
 }
@@ -73,12 +89,14 @@ void Item::ridOfOwner() {
 }
 
 
+bool Item::collideableWith(const Object& otherObject) const {
+    if (!isParticipatingInCollisions()) return false;
+    return Object::collideableWith(otherObject);
+}
+
+
 bool Item::collideableWith(const Object& otherObject) {
-    if (dependencyState_ == DEPENDENT) {
-        return false;
-    } else {
-        return Object::collideableWith(otherObject);
-    }
+    return static_cast<const Item*>(this)->collideableWith(otherObject);
 }
 
 

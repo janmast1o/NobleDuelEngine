@@ -32,11 +32,6 @@ OfflineEngine::OfflineEngine(int windowWidth, int windowHeight) : hitboxIdCounte
 }
 
 
-// PlayerActionReq OfflineEngine::updatePlayerReqs() const {
-//     return playerKeyMapping_.buildPlayerActionReq(SDL_GetKeyboardState(NULL));
-// }
-
-
 SDL_Texture* OfflineEngine::createTexture(const char* filepath) {
     SDL_Texture* newTexture = IMG_LoadTexture(renderer_, filepath);
     if (!newTexture) {
@@ -74,26 +69,18 @@ MobileHitbox* OfflineEngine::makeMobileHitbox(const std::vector<Point>& hull) {
 Object* OfflineEngine::makeObject(Point& center, ModelCollection& modelCollection) {
     std::lock_guard<std::mutex> lock(objectCreationMutex_);
     Object* newObject = new Object(renderer_, center, modelCollection, sessionEngineClock_);
-    // ObjectCreationArgs newObjectCreationArgs(renderer_, &center, &modelCollection, nullptr, 1, 1);
     allObjects_.emplace_back(newObject);
-    // objectMap_.addNewObject(*allObjects_.back().object);
     objectMap_.addNewObject(*newObject);
-    // return allObjects_.back().object;
     return newObject;
 }
 
 
 MobileObject* OfflineEngine::makeMobileObject(Point& center, ModelCollection& modelCollection, float mass) {
     std::lock_guard<std::mutex> lock(objectCreationMutex_);
-    // ObjectCreationArgs newMobileObjectCreationArgs(renderer_, &center, &modelCollection, &objectMap_, mass, 1);
-    // allObjects_.emplace_back(newMobileObjectCreationArgs, MOBILE_OBJECT_TYPE);
     MobileObject* newMobileObject = new MobileObject(renderer_, center, modelCollection, sessionEngineClock_, objectMap_, mass);
     allObjects_.emplace_back(newMobileObject);
-    // mobileObjectPtrs_.push_back(dynamic_cast<MobileObject*>(allObjects_.back().object));
     mobileObjectPtrs_.push_back(newMobileObject);
     objectMap_.addNewObject(*newMobileObject);
-    // objectMap_.addNewObject(*allObjects_.back().object);
-    // return mobileObjectPtrs_.back();
     return newMobileObject;
 }
 
@@ -149,45 +136,30 @@ ThrustingWeapon* OfflineEngine::makeThrustingWeapon(Point& center, ModelCollecti
 
 Creature* OfflineEngine::makeCreature(Point& center, ModelCollection& modelCollection, float mass, int health) {
     std::lock_guard<std::mutex> lock(objectCreationMutex_);
-    // ObjectCreationArgs newCreatureCreationArgs(renderer_, &center, &modelCollection, &objectMap_, mass, health);
-    // allObjects_.emplace_back(newCreatureCreationArgs, CREATURE_TYPE);
     Creature* newCreature = new Creature(renderer_, center, modelCollection, sessionEngineClock_, objectMap_, mass, health, interactableManager_);
     allObjects_.emplace_back(newCreature);
-    // mobileObjectPtrs_.push_back(dynamic_cast<MobileObject*>(allObjects_.back().object));
-    // objectMap_.addNewObject(*allObjects_.back().object);
     mobileObjectPtrs_.push_back(newCreature);
     return newCreature;
-    // return dynamic_cast<Creature*>(mobileObjectPtrs_.back());
 }
 
 
 Player* OfflineEngine::makePlayer(Point& center, ModelCollection& modelCollection, float mass, int health) {
     std::lock_guard<std::mutex> lock(objectCreationMutex_);
-    // ObjectCreationArgs newPlayerCreationArgs(renderer_, &center, &modelCollection, &objectMap_, mass, health);
-    // allObjects_.emplace_back(newPlayerCreationArgs, PLAYER_TYPE);
     Player* newPlayer = new Player(renderer_, center, modelCollection, sessionEngineClock_, objectMap_, mass, health, interactableManager_);
     allObjects_.emplace_back(newPlayer);
-    // playerPtr_ = dynamic_cast<Player*>(allObjects_.back().object);
-    // objectMap_.addNewObject(*allObjects_.back().object);
     playerPtr_ = newPlayer;
     objectMap_.addNewObject(*newPlayer);
     return newPlayer;
-    // return playerPtr_;
 }
 
 
 Player* OfflineEngine::makePlayer2(Point& center, ModelCollection& modelCollection, float mass, int health) {
     std::lock_guard<std::mutex> lock(objectCreationMutex_);
-    // ObjectCreationArgs newPlayerCreationArgs(renderer_, &center, &modelCollection, &objectMap_, mass, health);
-    // allObjects_.emplace_back(newPlayerCreationArgs, PLAYER_TYPE);
     Player* newPlayer2 = new Player(renderer_, center, modelCollection, sessionEngineClock_, objectMap_, mass, health, interactableManager_);
     allObjects_.emplace_back(newPlayer2);
-    // playerPtr_ = dynamic_cast<Player*>(allObjects_.back().object);
-    // objectMap_.addNewObject(*allObjects_.back().object);
     player2Ptr_ = newPlayer2;
     objectMap_.addNewObject(*newPlayer2);
     return newPlayer2;
-    // return playerPtr_;
 }
 
 
@@ -205,7 +177,7 @@ void OfflineEngine::run() {
 
         auto start = std::chrono::high_resolution_clock::now();
 
-        SDL_GetMouseState(&mouseX, &mouseY);
+        Uint32 mouseButtonEvent = SDL_GetMouseState(&mouseX, &mouseY);
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
                 running = false;
@@ -213,15 +185,13 @@ void OfflineEngine::run() {
         }
 
         SDL_RenderClear(renderer_);
-        
-        // PlayerActionReq newPlayerActionReq = updatePlayerReqs();
 
         if (playerPtr_ != nullptr) {
             if (!playerPtr_->isAlive()) {
                 playerPtr_ = nullptr;
             } else {
                 playerPtr_->updateTargetedPoint(Point((float) mouseX, (float) -mouseY));
-                playerPtr_->readInputs(SDL_GetKeyboardState(NULL));
+                playerPtr_->readInputs(SDL_GetKeyboardState(NULL), mouseButtonEvent & SDL_BUTTON(SDL_BUTTON_LEFT), mouseButtonEvent & SDL_BUTTON(SDL_BUTTON_RIGHT));
             }
         }
 
@@ -230,7 +200,7 @@ void OfflineEngine::run() {
                 player2Ptr_ = nullptr;
             } else {
                 player2Ptr_->updateTargetedPoint(Point((float) mouseX, (float) -mouseY));
-                player2Ptr_->readInputs(SDL_GetKeyboardState(NULL));
+                player2Ptr_->readInputs(SDL_GetKeyboardState(NULL), false, false);
             }
         }
 
@@ -264,6 +234,7 @@ void OfflineEngine::run() {
                             allHitboxes_.erase(h);
                         } 
                     }
+                    objectMap_.removeObject(*(*it).object);
                     it = allObjects_.erase(it);
                 }
             } else {

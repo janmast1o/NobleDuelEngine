@@ -124,8 +124,6 @@ public:
 
     bool collidesWithHitboxAfterVectorTranslation(Object& otherObject, const Point& translationVector) const;
 
-    int getFacedSideAsInt() const;
-
     bool isParticipatingInMomentum() const override;
     void registerBeingAffectedByOutsideMomentum(float otherObjectMass, float otherObjectHVelocity, float hTranslation) override; 
 

@@ -320,7 +320,7 @@ void prepareGame(int windowWidth, int windowHeight, OfflineEngine& engine) {
     rapierModelCollection.addModelCycleForState(IN_RECOVERY_RIGHT, rapierRightModelCycle);
 
     Point rapierCenter = {80, 0};
-    ThrustingWeapon* rapier = engine.makeThrustingWeapon(rapierCenter, rapierModelCollection, 45, 10, 10, 5, 4, 8);
+    ThrustingWeapon* rapier = engine.makeThrustingWeapon(rapierCenter, rapierModelCollection, 45, 10, 10, 16, 12, 26);
     
     SDL_Texture* playerTexture = engine.createTexture("resources/first_sprite_tbg_2.png");
     std::pair<float, float> playerWAH = engine.readTexturesWidthAndHeight(playerTexture);

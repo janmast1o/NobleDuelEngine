@@ -45,6 +45,8 @@ public:
     Hitbox& getCurrentCollisionMesh() const;
     Hitbox& getCurrentHitbox() const;
 
+    Point getItemGripPointRelativeToCenter() const;
+
     Model& getCurrentModel() const;
     void moveToNextModel();
     Model& moveAndGetModel();

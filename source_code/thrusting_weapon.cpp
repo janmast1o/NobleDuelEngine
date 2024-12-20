@@ -108,18 +108,22 @@ void ThrustingWeapon::handleAttack() {
 
     float sx = sideFacedDuringAttackStartUpAsInt_*(attackExtendRange_/ (float) attackFrames_);
     Point svec(sx, 0);
+    dependencyState_ = INDEPENDENT;
     std::list<Object*> potentiallyColliding = objectMap_.getPotentiallyColliding(*this);
+    // std::cout << potentiallyColliding.size() << std::endl;
+    dependencyState_ = DEPENDENT;
     setMatter(LIGHT_PHANTOM);
     bool bouncedOffDetected = false;
 
     for (Object* p : potentiallyColliding) {
-        if (p != this && p != getOwner() && collideableWith(*p) && hitRegistry_.find(p) != hitRegistry_.end()) {
+        if (p != this && p != getOwner() && hitRegistry_.find(p) == hitRegistry_.end()) {
             if (collidesWithHitboxAfterVectorTranslation(*p, svec)) {
                 hitRegistry_.emplace(p);
+                std::cout << p << std::endl;
                 p->subtractFromHealth(damage_);
                 // p->subtractFromPoiseHealth(poiseDamage_); // <- TODO: implement
                 setMatter(PHANTOM);
-                if (collideableWith(*p)) {
+                if (Object::collideableWith(*p)) {
                     bouncedOffDetected = true;
                 }
                 setMatter(LIGHT_PHANTOM);
@@ -148,11 +152,12 @@ void ThrustingWeapon::handleAttack() {
 
 void ThrustingWeapon::handleRecoverToNeutral() {
     previouslyScheduled_ = scheduled_;
-    float sx = -sideFacedDuringAttackStartUpAsInt_*(recoveryFrames_/(float) (attackExtendRange_ - windUpExtendRange_));
+    float sx = -sideFacedDuringAttackStartUpAsInt_*((float) (attackExtendRange_ - windUpExtendRange_) / recoveryFrames_);
     Point svec(sx, 0);
     translateObjectByVector(svec);
     currentFrameCounter_++;
     if (currentFrameCounter_ == recoveryFrames_) {
+        setCenter(owner_->getCurrentItemGripPoint());
         currentFrameCounter_ = 0;
         clearScheduled();
     } else {

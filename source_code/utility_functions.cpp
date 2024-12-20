@@ -449,18 +449,10 @@ float minVertDistance(const std::vector<Point>& S, const std::vector<Point>& R) 
 
 
 bool isLeftFacing(State state) {
-    return state == IDLE_LEFT || 
-           state == MOVING_LEFT ||
-           state == AIRBORNE_LEFT ||
-           state == FREEFALL_LEFT || 
-           state == QUICKLY_M_LEFT;
+    return state%3 == 0;
 }
 
 
 bool isRightFacing(State state) {
-    return state == IDLE_RIGHT || 
-           state == MOVING_RIGHT ||
-           state == AIRBORNE_RIGHT ||
-           state == FREEFALL_RIGHT || 
-           state == QUICKLY_M_RIGHT;
+    return state%3 == 2;
 }

@@ -2,6 +2,7 @@
 #include "constants.h"
 #include "interactable_manager.h"
 #include "item.h"
+#include "utility_functions.h"
 
 
 int Creature::defaultInitialItemListSize_ = 3;
@@ -18,6 +19,18 @@ Creature::Creature(SDL_Renderer* renderer, Point center, ModelCollection modelCo
         previousInteractionScheduled_ = NOTHING;
         itemList_ = std::vector<Item*>(defaultInitialItemListSize_, nullptr);
     }
+
+
+void Creature::setNewState(State newState) {
+    Object::setNewState(newState);
+    if (itemList_[itemListIndex_] != nullptr) {
+        if (isLeftFacing(newState)) {
+            itemList_[itemListIndex_]->setNewState(OWNED_LEFT);
+        } else {
+            itemList_[itemListIndex_]->setNewState(OWNED_RIGHT);
+        }
+    }
+}
 
 
 void Creature::adjustAccAndVForRegular() {
@@ -205,13 +218,13 @@ void Creature::handleMoveHorizontally() {
     }
 
     if (svec.x < 0) {
-        if (std::abs(acceleration_.horizontalAcceleration-creatureSpecificPhysicsChar_.slowWalkHorizontalAcc) <= ERROR_EPS) {
+        if (std::abs(-acceleration_.horizontalAcceleration-creatureSpecificPhysicsChar_.slowWalkHorizontalAcc) <= ERROR_EPS) {
             setNewState(SLOWLY_M_LEFT);
         }
-        else if (std::abs(acceleration_.horizontalAcceleration-creatureSpecificPhysicsChar_.regularHorizontalAcc) <= ERROR_EPS) {
+        else if (std::abs(-acceleration_.horizontalAcceleration-creatureSpecificPhysicsChar_.regularHorizontalAcc) <= ERROR_EPS) {
             setNewState(MOVING_LEFT);
         }
-        else if (std::abs(acceleration_.horizontalAcceleration-creatureSpecificPhysicsChar_.sprintHorizontalAcc) <= ERROR_EPS) {
+        else if (std::abs(-acceleration_.horizontalAcceleration-creatureSpecificPhysicsChar_.sprintHorizontalAcc) <= ERROR_EPS) {
             setNewState(QUICKLY_M_LEFT);
         }
     }
@@ -248,6 +261,24 @@ void Creature::handleInteract() {
 }
 
 
+void Creature::handleUseItem() {
+    previousInteractionScheduled_ = interactionScheduled_;
+    if (itemList_[itemListIndex_] != nullptr) {
+        itemList_[itemListIndex_]->use();
+    } 
+    clearInteractionScheduled();
+}
+
+
+void Creature::handleAltUseItem() {
+    previousInteractionScheduled_ = interactionScheduled_;
+    if (itemList_[itemListIndex_] != nullptr) {
+        itemList_[itemListIndex_]->alternativeUse();
+    } 
+    clearInteractionScheduled();
+}
+
+
 void Creature::handleDropItem() {
     previousInteractionScheduled_ = interactionScheduled_;
     if (itemList_[itemListIndex_] != nullptr) {
@@ -258,17 +289,17 @@ void Creature::handleDropItem() {
 }
 
 
+void Creature::handleSwitchToNextItem() {
+    previousInteractionScheduled_ = interactionScheduled_;
+    itemListIndex_ = (itemListIndex_+1)%itemList_.size();
+    clearInteractionScheduled();
+}
+
+
 void Creature::translateObjectByVector(const Point& translationVector) {
     setCenter(getCenter()+translationVector);
     if (itemList_[itemListIndex_] != nullptr) {
         itemList_[itemListIndex_]->translateObjectByVector(translationVector);
-        if (!isAnythingScheduledForItem()) {
-            if (translationVector.x < 0) {
-                itemList_[itemListIndex_]->setNewState(OWNED_LEFT);
-            } else {
-                itemList_[itemListIndex_]->setNewState(OWNED_RIGHT);
-            }
-        }
     }
 }
 
@@ -370,9 +401,13 @@ void Creature::setSlowWalkMaxHorizontalV(float newSlowWalkMaxHorizontalV) {
 }
 
 
-// bool Creature::isLeftFacing() const {
-//     return isLeftFacing
-// }
+int Creature::getFacedSideAsInt() const {
+    if (isLeftFacing(getState())) {
+        return -1;
+    } else {
+        return 1;
+    }
+}
 
 
 bool Creature::canHaveOtherOnTop() const {
@@ -382,14 +417,14 @@ bool Creature::canHaveOtherOnTop() const {
 
 void Creature::placeItemInItemList(Item& pickedUpItem) {
     if (itemList_[itemListIndex_] != nullptr) {
-        // drop item 
-        ;
+        itemList_[itemListIndex_]->ridOfOwner();
     }
     itemList_[itemListIndex_] = &pickedUpItem;
 }
 
 
 bool Creature::isAnythingInteractionLikeScheduled() const {
+    if (itemList_[itemListIndex_] != nullptr && itemList_[itemListIndex_]->isAnythingScheduled()) return true; 
     return interactionScheduled_ != NOTHING;
 }
 
@@ -399,12 +434,40 @@ bool Creature::isAnythingScheduledForItem() const {
 }
 
 
+void Creature::redrawObject() {
+    Object::redrawObject();
+    if (itemList_[itemListIndex_] != nullptr) {
+        itemList_[itemListIndex_]->Object::redrawObject();
+    }
+}
+    
+    
+void Creature::redrawObject(bool drawHitboxes, float pointSize) {
+    Object::redrawObject();
+    if (itemList_[itemListIndex_] != nullptr) {
+        itemList_[itemListIndex_]->Object::redrawObject(drawHitboxes, pointSize);
+    }
+}
+
+
 void Creature::runInteractionScheduled() {
     if (isAnythingInteractionLikeScheduled()) {
         switch (interactionScheduled_) {
             case HANDLE_INTERACT:
                 handleInteract();
                 break;
+            case HANDLE_USE:
+                handleUseItem();
+                break;
+            case HANDLE_ALT_USE:
+                handleAltUseItem();
+                break;
+            case HANDLE_DROP_ITEM:
+                handleDropItem();
+                break;
+            case HANDLE_SWITCH_TO_NEXT_ITEM:
+                handleSwitchToNextItem();
+                break;               
             default:
                 clearInteractionScheduled();
                 break;    

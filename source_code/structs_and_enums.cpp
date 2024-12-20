@@ -114,6 +114,42 @@ bool Rectangle::collidesWith(const Rectangle& otherRectangle) const {
 }
 
 
+std::ostream& operator<<(std::ostream& os, State state) {
+    switch (state) {
+        case IDLE: os << "IDLE"; break;
+        case IDLE_LEFT: os << "IDLE_LEFT"; break;
+        case IDLE_RIGHT: os << "IDLE_RIGHT"; break;
+        case MOVING_LEFT: os << "MOVING_LEFT"; break;
+        case MOVING_RIGHT: os << "MOVING_RIGHT"; break;
+        case QUICKLY_M_LEFT: os << "QUICKLY_M_LEFT"; break;
+        case QUICKLY_M_RIGHT: os << "QUICKLY_M_RIGHT"; break;
+        case SLOWLY_M_LEFT: os << "SLOWLY_M_LEFT"; break;
+        case SLOWLY_M_RIGHT: os << "SLOWLY_M_RIGHT"; break;
+        case AIRBORNE_LEFT: os << "AIRBORNE_LEFT"; break;
+        case AIRBORNE_RIGHT: os << "AIRBORNE_RIGHT"; break;
+        case FREEFALL_LEFT: os << "FREEFALL_LEFT"; break;
+        case FREEFALL_RIGHT: os << "FREEFALL_RIGHT"; break;
+        case SLIDE_DOWN_LEFT: os << "SLIDE_DOWN_LEFT"; break;
+        case SLIDE_DOWN_RIGHT: os << "SLIDE_DOWN_RIGHT"; break;
+        case PUSHED_LEFT: os << "PUSHED_LEFT"; break;
+        case PUSHED_RIGHT: os << "PUSHED_RIGHT"; break;
+
+        case OWNED: os << "OWNED"; break;
+        case OWNED_LEFT: os << "OWNED_LEFT"; break;
+        case OWNED_RIGHT: os << "OWNED_RIGHT"; break;
+        case IN_USE_LEFT: os << "IN_USE_LEFT"; break;
+        case IN_USE_RIGHT: os << "IN_USE_RIGHT"; break;
+        case IN_RECOVERY_LEFT: os << "IN_RECOVERY_LEFT"; break;
+        case IN_RECOVERY_RIGHT: os << "IN_RECOVERY_RIGHT"; break;
+        case IN_WIND_UP_LEFT: os << "IN_WIND_UP_LEFT"; break;
+        case IN_WIND_UP_RIGHT: os << "IN_WIND_UP_RIGHT"; break;
+
+        default: os << "UNKNOWN_STATE"; break;
+    }
+    return os;   
+}
+
+
 ObjectSpecificPhysicsChar::ObjectSpecificPhysicsChar() :
     maxSRVerticalV(780),
     maxSRHorizontalV(225),

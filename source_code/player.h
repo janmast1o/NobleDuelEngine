@@ -11,17 +11,21 @@ private:
     std::unordered_map<int, Uint8> previousKeyboardState_;
     std::unordered_map<int, int> bufferedInputs_;
 
-    // PlayerActionReq previousPlayerReqs_;
-    // PlayerActionReq bufferedInputs_;
+    bool leftMouseButtonPreviouslyPressed_;
+    bool rightMouseButtonPreviouslyPressed_;
+    int leftMouseButtonBuffer_;
+    int rightMouseButtonBuffer_;
 
-    void rememberPreviousKeyboardState(const Uint8* keyboardState);
-    // void rememberPreviousPlayerReqs(const PlayerActionReq playerActionReq);
-    void bufferInputs(const Uint8* keyboardState);
+    void rememberPreviousKeyboardState(const Uint8* keyboardState, bool leftMouseButtonPressed, bool rightMouseButtonPressed);
+    void bufferInputs(const Uint8* keyboardState, bool leftMouseButtonPressed, bool rightMouseButtonPressed);
     void decrementBufferTimers();
     void zeroBuffers();
 
     bool isOnPressRequested(const int action, const Uint8* currentKeybaordState);
     bool isOnReleaseRequested(const int action, const Uint8* currentKeyboardState);
+
+    bool isLMBOnReleaseRequested(bool leftMouseButtonPressed);
+    bool isRMBOnReleaseRequested(bool rightMouseButtonPressed);
 
 public:
 
@@ -34,7 +38,7 @@ public:
     void removeBufferable(const int bufferable);
     void clearBufferables();
 
-    void readInputs(const Uint8* newKeyboardState);
+    void readInputs(const Uint8* newKeyboardState, bool leftMouseButtonPressed, bool rightMouseButtonPressed);
 
     virtual ~Player() = default;
 

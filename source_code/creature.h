@@ -38,12 +38,11 @@ protected:
     void handleJump();
 
     void handleInteract();
+    void handleUseItem();
+    void handleAltUseItem();
     void handleDropItem();
-
-    // void handlePickUpItem();
-    // void handleDropItem();
-    // void handleSwitchToNextItem();
-
+    void handleSwitchToNextItem();
+    
     ScheduledInstruction getInteractionScheduled() const;
     ScheduledInstruction getPreviousInteractionScheduled() const;
     void setInteractionScheduled(ScheduledInstruction newScheduled);
@@ -54,6 +53,8 @@ public:
     Creature(SDL_Renderer* renderer, Point center, ModelCollection modelCollection, const EngineClock& sessionEngineClock, ObjectMap& objectMap, float mass, 
              int health, InteractableManager& interactableManager);
 
+    void setNewState(State newState) override;
+    
     void updateTargetedPoint(const Point& newTargtedPoint);
 
     float getJumpingV() const;
@@ -83,12 +84,17 @@ public:
     // bool isLeftFacing() const;
     // bool isRightFacing() const;
 
+    int getFacedSideAsInt() const;
+    
     bool canHaveOtherOnTop() const override;
 
     void placeItemInItemList(Item& pickedUpItem);
 
     bool isAnythingInteractionLikeScheduled() const;
     bool isAnythingScheduledForItem() const;
+
+    void redrawObject() override;
+    void redrawObject(bool drawHitboxes, float pointSize) override;
 
     void runInteractionScheduled();
     void runScheduled() override;

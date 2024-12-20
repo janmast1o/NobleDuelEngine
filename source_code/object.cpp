@@ -26,6 +26,11 @@ void Object::registerOwnerCenterPtrForHitboxes() {
 }
 
 
+bool Object::isParticipatingInCollisions() const {
+    return true;
+}
+
+
 bool Object::isMobile() const {
     return false;
 }
@@ -50,6 +55,11 @@ Hitbox& Object::getCurrentHitbox() const {
 }
 
 
+Point Object::getCurrentItemGripPoint() const {
+    return modelCollection_.getItemGripPointRelativeToCenter(state_) + center_;
+}
+
+
 SDL_Renderer* Object::getRenderer() const {
     return renderer_;
 }    
@@ -70,6 +80,7 @@ void Object::subtractFromHealth(int subtractAmount) {
     if (health_ < 0) {
         health_ = 0;
     }
+    std::cout << health_ << std::endl;
 }
 
 
@@ -153,8 +164,10 @@ void Object::redrawObject(bool drawHitboxes, float pointSize) {
 }
 
 
-bool Object::collideableWith(const Object& otherObject) {
-    if (matter_ == PHANTOM_SOLID || otherObject.matter_ == PHANTOM_SOLID) {
+bool Object::collideableWith(const Object& otherObject) const {
+    if (!otherObject.isParticipatingInCollisions()) {
+        return false;
+    } else if (matter_ == PHANTOM_SOLID || otherObject.matter_ == PHANTOM_SOLID) {
         return true;
     } else if (matter_ == TRUEST_OF_PHANTOMS || otherObject.matter_ == TRUEST_OF_PHANTOMS) {
         return false;
@@ -179,6 +192,11 @@ bool Object::collideableWith(const Object& otherObject) {
     }
 
     return true;
+}
+
+
+bool Object::collideableWith(const Object& otherObject) {
+    return static_cast<const Object*>(this)->collideableWith(otherObject);
 }
 
 

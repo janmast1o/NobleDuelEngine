@@ -55,7 +55,20 @@ Hitbox& ModelCollection::getCurrentHitbox(State state) const {
             return x->second.getCurrentHitbox();
         }
     }
-} 
+}
+
+
+Point ModelCollection::getItemGripPointRelativeToCenter(State state) const {
+    auto x = cyclesForStates_.find(state);
+    if (x != cyclesForStates_.end()) {
+        return x->second.getItemGripPointRelativeToCenter();
+    } else {
+        x = cyclesForStates_.find(IDLE);
+        if (x != cyclesForStates_.end()) {
+            return x->second.getItemGripPointRelativeToCenter();
+        }
+    }
+}
 
 
 Model* ModelCollection::getCurrentModelPtrForState(State state) {
