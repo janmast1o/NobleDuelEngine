@@ -6,6 +6,7 @@ SOURCES = main.cpp \
 		  source_code/player.cpp \
 		  source_code/creature.cpp \
 		  source_code/interactable_manager.cpp \
+		  source_code/consumable.cpp \
 		  source_code/thrusting_weapon.cpp \
 		  source_code/item.cpp \
 		  source_code/elevator.cpp \

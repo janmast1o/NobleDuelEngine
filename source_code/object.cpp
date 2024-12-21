@@ -13,6 +13,7 @@ Object::Object() : sessionEngineClock_(dummyEngineClock_) {}
 Object::Object(SDL_Renderer* renderer, Point center, ModelCollection modelCollection, const EngineClock& sessionEngineClock) :
     renderer_(renderer), center_(center), modelCollection_(modelCollection), sessionEngineClock_(sessionEngineClock) {
         health_ = INFINITY;
+        maxHealth_ = INFINITY;
         matter_ = SOLID;
         state_ = IDLE;
         previousState_ = IDLE;
@@ -80,7 +81,12 @@ void Object::subtractFromHealth(int subtractAmount) {
     if (health_ < 0) {
         health_ = 0;
     }
-    std::cout << health_ << std::endl;
+    // std::cout << health_ << std::endl;
+}
+
+
+void Object::addToHealth(int addAmount) {
+    health_ += addAmount;
 }
 
 

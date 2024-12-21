@@ -15,6 +15,7 @@ Creature::Creature(SDL_Renderer* renderer, Point center, ModelCollection modelCo
                    interactableManager_(interactableManager),
                    itemListIndex_(0) {
         setHealth(health);
+        // setMaxHealth(health);
         interactionScheduled_ = NOTHING;
         previousInteractionScheduled_ = NOTHING;
         itemList_ = std::vector<Item*>(defaultInitialItemListSize_, nullptr);

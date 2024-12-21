@@ -119,7 +119,7 @@ void ThrustingWeapon::handleAttack() {
         if (p != this && p != getOwner() && hitRegistry_.find(p) == hitRegistry_.end()) {
             if (collidesWithHitboxAfterVectorTranslation(*p, svec)) {
                 hitRegistry_.emplace(p);
-                std::cout << p << std::endl;
+                // std::cout << p << std::endl;
                 p->subtractFromHealth(damage_);
                 // p->subtractFromPoiseHealth(poiseDamage_); // <- TODO: implement
                 setMatter(PHANTOM);

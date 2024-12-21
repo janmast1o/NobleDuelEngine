@@ -16,6 +16,7 @@ private:
     SDL_Renderer* renderer_;
 
     int health_;
+    int maxHealth_;
     Point center_;
     ModelCollection modelCollection_;
     Matter matter_;
@@ -53,7 +54,10 @@ public:
  
     int getHealth() const;
     void setHealth(int newHealth);
+    int getMaxHealth() const;
+    void setMaxHealth(int newMaxHealth);
     void subtractFromHealth(int subtractAmount);
+    void addToHealth(int addAmount);
     bool isAlive() const;
 
     Point& getCenter();

@@ -103,6 +103,7 @@ enum State {
     OWNED = 4,
     OWNED_LEFT = 27,
     OWNED_RIGHT = 26,
+    IN_USE = 7,
     IN_USE_LEFT = 30,
     IN_USE_RIGHT = 29,
     IN_RECOVERY_LEFT = 33,
