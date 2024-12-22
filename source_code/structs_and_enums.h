@@ -1,6 +1,10 @@
 #include <iostream>
 #include <SDL2/SDL.h>
 #include <optional>
+#include <functional>
+#include <list>
+#include <memory>
+#include "engine_clock.h"
 
 #ifndef POINT_H
 #define POINT_H
@@ -316,6 +320,81 @@ struct HandleParams {
 enum ItemDependencyState {
     DEPENDENT,
     INDEPENDENT
+};
+
+#endif
+
+#ifndef CREATURE_GAME_STATS
+#define CREATURE_GAME_STATS
+
+using PassiveEffect = std::function<bool(void*)>;
+
+struct CreatureGameStats {
+    std::pair<unsigned int, unsigned int> lastPoiseSubtraction;
+    std::pair<unsigned int, unsigned int> lastPoiseRegen;
+    unsigned int waitSinceLastSubPoise; // in frames
+    int currentPoiseHealth;
+    int maxPoiseHealth;
+    int poiseRegenAmount;
+    int poiseRegenTick;
+
+    std::pair<unsigned int, unsigned int> lastStaminaSubtraction;
+    std::pair<unsigned int, unsigned int> lastStaminaRegen;
+    unsigned int waitSinceLastSubStamina; // in frames
+    int currentStamina;
+    int maxStamina;
+    int staminaRegenAmount;
+    int staminaRegenTick;
+
+    std::list<PassiveEffect> passiveEffects;
+    std::list<std::unique_ptr<void>> auxForPassiveEffects;
+
+    CreatureGameStats(int maxPoiseHealth = 100, int maxStamina = 100);
+
+    // returns true if poise broken
+    bool subtractFromPoiseHealth(int subtractAmount);
+    void addToPoiseHealth(int addAmount);
+
+    // returns true if depletes stamina
+    bool subtractFromStamina(int subtractAmount);
+    void addToStamina(int addAmount);
+
+    void runPoiseAndStaminaRegening(const EngineClock& sessionClock);
+    
+    void addPassiveEffect(PassiveEffect& newPassiveEffect);
+    void runPassiveEffects(const EngineClock& sessionEngine);
+
+};
+
+#endif
+
+#ifndef STAMINA_DRAIN_PROTOCOL
+#define STAMINA_DRAIN_PROTOCOL
+
+struct StaminaDrainProtocol {
+    int slowWalkStaminaDrainAmount;
+    int slowWalkStaminaDrainTick;
+
+    int regularWalkStaminaDrainAmount;
+    int regularWalkStaminaDrainTick;
+
+    int sprintStaminaDrainAmount;
+    int sprintStaminaDrainTick;
+
+    int jumpStaminaDrainAmount;
+    // int staminaDodgeAmount;
+
+    StaminaDrainProtocol(int sprintStaminaDrainAmount = 5, int sprintStaminaDrainTick = 15,
+                         int jumpStaminaDrainAmount = 15);
+
+    // returns true if action would deplete stamina
+    bool drainStaminaForSlowWalk(CreatureGameStats& creatureGameStats, const EngineClock& sessionClock);     
+    bool drainStaminaForRegularWalk(CreatureGameStats& creatureGameStats, const EngineClock& sessionClock);
+    // bool drainStaminaForSprint(CreatureGameStats& )
+    bool drainStaminaForJump(CreatureGameStats& creatureGameStats, const EngineClock& sessionClock);                
+
+
+
 };
 
 #endif

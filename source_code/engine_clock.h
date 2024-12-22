@@ -8,6 +8,7 @@ struct EngineClock {
 
     EngineClock();
 
+    unsigned int getCurrentTimeInFrames() const;
     void incrementEngineClock();
 
 };

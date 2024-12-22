@@ -4,6 +4,11 @@
 EngineClock::EngineClock() {}
 
 
+unsigned int EngineClock::getCurrentTimeInFrames() const {
+    return cycles*FPS+framesInCycle;
+}
+
+
 void EngineClock::incrementEngineClock() {
     framesInCycle++;
     if (framesInCycle == FPS) {

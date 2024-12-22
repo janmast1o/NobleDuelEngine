@@ -218,3 +218,93 @@ bool MomentumDictated::isEmpty() const {
            std::abs(receivedExplicitHTranslation) < ERROR_EPS && 
            std::abs(cumultativeReceivedMomentum) < ERROR_EPS;
 }
+
+
+CreatureGameStats::CreatureGameStats(int maxPoiseHealth, int maxStamina) :
+    lastPoiseSubtraction({0,0}), lastPoiseRegen({0,0}), waitSinceLastSubPoise(120),
+    maxPoiseHealth(maxPoiseHealth), currentPoiseHealth(maxPoiseHealth),
+    poiseRegenAmount(5), poiseRegenTick(15),
+    lastStaminaSubtraction({0,0}), lastStaminaRegen({0,0}), waitSinceLastSubStamina(30),
+    maxStamina(maxStamina), currentStamina(maxStamina),
+    staminaRegenAmount(15), staminaRegenTick(10) {}
+
+
+
+bool CreatureGameStats::subtractFromPoiseHealth(int subtractAmount) {
+    currentPoiseHealth -= subtractAmount;
+    if (currentPoiseHealth < 0) {
+        currentPoiseHealth = 0;
+        return true;
+    }
+    return false;
+}
+
+
+void CreatureGameStats::addToPoiseHealth(int addAmount) {
+    currentPoiseHealth += addAmount;
+    if (currentPoiseHealth > maxPoiseHealth) {
+        currentPoiseHealth = maxPoiseHealth;
+    }
+}
+
+    
+bool CreatureGameStats::subtractFromStamina(int subtractAmount) {
+    currentStamina -= subtractAmount;
+    if (currentStamina < 0) {
+        currentStamina = 0;
+        return true;
+    }
+    return false;
+}
+
+
+void CreatureGameStats::addToStamina(int addAmount) {
+    currentStamina += addAmount;
+    if (currentStamina > maxStamina) {
+        currentStamina = maxStamina;
+    }
+}
+    
+
+void CreatureGameStats::addPassiveEffect(PassiveEffect& newPassiveEffect) {
+    passiveEffects.emplace_back(newPassiveEffect);
+}
+
+
+void CreatureGameStats::runPoiseAndStaminaRegening(const EngineClock& sessionClock) {
+    if (currentPoiseHealth < maxPoiseHealth) {
+        if (sessionClock.getCurrentTimeInFrames() > lastPoiseSubtraction.first*FPS+lastPoiseSubtraction.second+waitSinceLastSubPoise) {
+            if (sessionClock.getCurrentTimeInFrames() > lastPoiseRegen.first*FPS+lastPoiseRegen.second+poiseRegenTick) {
+                addToPoiseHealth(poiseRegenAmount);
+            }
+        } else {
+            lastPoiseRegen = {0,0};
+        }
+    }
+
+    if (currentStamina < maxStamina) {
+        if (sessionClock.getCurrentTimeInFrames() > lastStaminaSubtraction.first*FPS+lastStaminaSubtraction.second+waitSinceLastSubStamina) {
+            if (sessionClock.getCurrentTimeInFrames() > lastStaminaRegen.first*FPS+lastStaminaRegen.second+staminaRegenTick) {
+                addToStamina(staminaRegenAmount);
+            }
+        } else {
+            lastStaminaRegen = {0,0};
+        }
+    }
+}
+
+
+void CreatureGameStats::runPassiveEffects(const EngineClock& sessionClock) {
+    auto runPassiveIt = passiveEffects.begin();
+    auto runPassiveAuxIt = auxForPassiveEffects.begin();
+    while (runPassiveIt != passiveEffects.end() && runPassiveAuxIt != auxForPassiveEffects.end()) {
+        bool shouldTerminateEffect = (*runPassiveIt)((*runPassiveAuxIt).get());
+        if (shouldTerminateEffect) {
+            runPassiveIt = passiveEffects.erase(runPassiveIt);
+            runPassiveAuxIt = auxForPassiveEffects.erase(runPassiveAuxIt);
+        } else {
+            ++runPassiveIt;
+            ++runPassiveAuxIt;
+        }
+    }
+} 
