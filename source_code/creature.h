@@ -18,23 +18,24 @@ private:
     std::vector<Item*> itemList_;
     size_t itemListIndex_;
 
+    CreatureGameStats creatureGameStats_;
+    StaminaDrainProtocol staminaDrainProtocol_;
+
+    bool isStaminaRegeningPossible() const;
+
 protected:
 
     ScheduledInstruction interactionScheduled_;
     ScheduledInstruction previousInteractionScheduled_;
 
     InteractableManager& interactableManager_;
-    
-    // std::vector<Item*> itemLoadout_; // implement when implementing items
-    // int itemLoadoutIndex_;
-    // int chargeUpFramesAccumulated_;
 
     void adjustAccAndVForRegular();
     void adjustAccAndVForSprint();
     void adjustAccAndVForSlowWalk();
     
     void handleBePushedHorizontally(HandleParams handleParams = {0, true}) override;
-    void handleMoveHorizontally() override;
+    void handleMoveHorizontally();
     void handleJump();
 
     void handleInteract();
@@ -78,6 +79,11 @@ public:
 
     void setSlowWalkHorizontalAcc(float newSlowWalkHorizontalAcc);
     void setSlowWalkMaxHorizontalV(float newSlowWalkMaxHorizontalV);
+
+    CreatureGameStats* getCreatureGameStatsAsPtr();
+    CreatureGameStats* getCreatureGameStatsAsPtr() const;
+    StaminaDrainProtocol* getStaminaDrainProtocolAsPtr();
+    StaminaDrainProtocol* getStaminaDrainProtocolAsPtr() const;
 
     void translateObjectByVector(const Point& translationVector) override;
 

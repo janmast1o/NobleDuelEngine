@@ -566,95 +566,6 @@ void MobileObject::handleEscapeFromUnderneathObjectOnTop(HandleParams handlePara
 }
 
 
-void MobileObject::handleMoveHorizontally() {
-    ++singleStatePersistenceTimer_.movingHorizontallyTimer;
-    singleStatePersistenceTimer_.airborneTimer = 0;
-    singleStatePersistenceTimer_.freefallTimer = 0;
-    singleStatePersistenceTimer_.slideDownTimer = 0;
-
-    previouslyScheduled_ = scheduled_;
-
-    newVelocity();
-    float sx = velocity_.horizontalVelocity*(1.0/FPS);
-    float sy = sx*slopeInclineDirectlyUnderneath_;
-    Point svec(sx, sy);
-    adjustSVec(svec);
-    std::list<Object*> potentiallyColliding = objectMap_.getPotentiallyColliding(*this);
-    bool collisionDetected = false;
-    bool groundUnderneathFound = false;
-    bool changingSlopes = false;
-    float alpha = -INFINITY;
-    float beta = INFINITY;
-    float gamma = -INFINITY;
-    std::list<MobileObject*> foundMobileDirectlyAbove;
-    Object* alphaTempObjectCurrentlyUnderneath;
-    Object* gammaTempObjectCurrentlyUnderneath;
-
-    horizontalMovementMainBody(svec, potentiallyColliding, alpha, beta, gamma, 
-                               collisionDetected, groundUnderneathFound, changingSlopes, 
-                               true, foundMobileDirectlyAbove,
-                               alphaTempObjectCurrentlyUnderneath,
-                               gammaTempObjectCurrentlyUnderneath);
-
-    if (!collisionDetected && !changingSlopes) {
-        if (moveMobileDirectlyAbove(foundMobileDirectlyAbove, svec)) {
-            translateObjectByVector(svec);
-        } else {
-            clearScheduled();
-            return;
-        }
-
-        if (!groundUnderneathFound) {
-            acceleration_.horizontalAcceleration = 0;
-            airborneGhostHorizontalVelocity_.horizontalVelocity = velocity_.horizontalVelocity;
-            velocity_.horizontalVelocity = 0;
-            removeGroundReactionAcceleration();
-            setScheduled(HANDLE_FREEFALL);
-        } else {
-            if (std::abs(alpha)-MAXIMUM_GENTLE_SLOPE_COEFFICIENT <= ERROR_EPS) {
-                slopeInclineDirectlyUnderneath_ = alpha;
-                objectCurrentlyUnderneath_ = alphaTempObjectCurrentlyUnderneath;
-            }
-
-            if (!objectCurrentlyUnderneath_->canHaveOtherOnTop()) { // added first if
-                prepareNextSlideOffTopScheduled();
-            } else {
-                clearScheduled();
-            }
-        }
-
-    } else if (!collisionDetected && changingSlopes) {
-        slopeInclineDirectlyUnderneath_ = gamma;
-        objectCurrentlyUnderneath_ = gammaTempObjectCurrentlyUnderneath;
-        
-        if (!objectCurrentlyUnderneath_->canHaveOtherOnTop()) { // added first if
-            prepareNextSlideOffTopScheduled();
-        } else if (moveMobileDirectlyAbove(foundMobileDirectlyAbove, svec+Point(0,-beta))) {
-            translateObjectByVector(svec+Point(0,-beta));
-        } else {
-            clearScheduled();
-            return;
-        }
-
-        if (std::abs(gamma)-MAXIMUM_GENTLE_SLOPE_COEFFICIENT > -ERROR_EPS) {
-            removeGroundReactionAcceleration();
-            setScheduled(HANDLE_SLIDE_DOWN_WITH_RETRY);
-        } else {
-            clearScheduled();
-        }
-
-    } else {
-        clearScheduled();
-    }
-
-    if (svec.x < 0) {
-        setNewState(MOVING_LEFT);
-    } else if (svec.x > 0) {
-        setNewState(MOVING_RIGHT);
-    }
-}
-
-
 void MobileObject::handleSlideDown(HandleParams handleParams) {
     ++singleStatePersistenceTimer_.slideDownTimer;
     singleStatePersistenceTimer_.movingHorizontallyTimer = 0;
@@ -1099,10 +1010,10 @@ void MobileObject::runScheduled() {
             case HANDLE_BE_PUSHED_HORIZONTALLY_NO_RETRY:
                 handleBePushedHorizontally({0, false});
                 break;     
-            case HANDLE_MOVE_HORIZONTALLY:
-                // std::cout << "HMH" << std::endl;
-                handleMoveHorizontally();
-                break;
+            // case HANDLE_MOVE_HORIZONTALLY:
+            //     // std::cout << "HMH" << std::endl;
+            //     handleMoveHorizontally();
+            //     break;
             case HANDLE_SLIDE_DOWN_WITH_RETRY:
                 // std::cout << "HSD" << std::endl;
                 handleSlideDown();

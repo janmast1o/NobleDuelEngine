@@ -12,6 +12,8 @@ protected:
 
     std::pair<unsigned int, unsigned int> lastUse_;
 
+    int staminaDrainedOnUse_;
+    int staminaDrainedOnAlternativeUse_;
     unsigned int cooldown_;
     
     ItemDependencyState dependencyState_;
@@ -31,6 +33,12 @@ public:
     void updateLastUse();
     bool isAvailableForNextUse() const;
 
+    int getStaminaDrainedOnUse() const;
+    void setStaminaDrainedOnUse(int newStaminaDrainedOnUse);
+
+    int getStaminaDrainedOnAlternativeUse() const;
+    void setStaminaDrainedOnAlternativeUse(int newStaminaDrainedOnAlternativeUse);
+    
     unsigned int getCooldown() const;
     void setCooldown(unsigned int newCooldown);
     
@@ -43,8 +51,8 @@ public:
     bool collideableWith(const Object& otherObject) const;
     bool collideableWith(const Object& otherObject);
 
-    virtual void redrawObject() override;
-    virtual void redrawObject(bool drawHitboxes, float pointSize) override;
+    void redrawObject() override;
+    void redrawObject(bool drawHitboxes, float pointSize) override;
 
     void runScheduled() override = 0;
 

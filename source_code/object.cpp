@@ -87,6 +87,19 @@ void Object::subtractFromHealth(int subtractAmount) {
 
 void Object::addToHealth(int addAmount) {
     health_ += addAmount;
+    if (health_ > maxHealth_) {
+        health_ = maxHealth_;
+    }
+}
+
+
+int Object::getMaxHealth() const {
+    return maxHealth_;
+}
+
+
+void Object::setMaxHealth(int newMaxHealth) {
+    maxHealth_ = newMaxHealth;
 }
 
 

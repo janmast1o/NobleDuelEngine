@@ -29,6 +29,9 @@ OfflineEngine::OfflineEngine(int windowWidth, int windowHeight) : hitboxIdCounte
         std::cerr << "IMG_Init failed" << std::endl;
         return;
     } 
+
+    playerUi_ = {renderer_, playerPtr_, {10, 10}, 400, 25, 3, {10, 40}, 400, 25, 3};
+
 }
 
 
@@ -149,6 +152,7 @@ Player* OfflineEngine::makePlayer(Point& center, ModelCollection& modelCollectio
     allObjects_.emplace_back(newPlayer);
     playerPtr_ = newPlayer;
     objectMap_.addNewObject(*newPlayer);
+    playerUi_.setPlayerPtr(playerPtr_);
     return newPlayer;
 }
 
@@ -189,6 +193,7 @@ void OfflineEngine::run() {
         if (playerPtr_ != nullptr) {
             if (!playerPtr_->isAlive()) {
                 playerPtr_ = nullptr;
+                playerUi_.setPlayerPtr(nullptr);
             } else {
                 playerPtr_->updateTargetedPoint(Point((float) mouseX, (float) -mouseY));
                 playerPtr_->readInputs(SDL_GetKeyboardState(NULL), mouseButtonEvent & SDL_BUTTON(SDL_BUTTON_LEFT), mouseButtonEvent & SDL_BUTTON(SDL_BUTTON_RIGHT));
@@ -242,6 +247,8 @@ void OfflineEngine::run() {
                 ++it;
             }
         }
+
+        playerUi_.redrawBars();
 
         auto end = std::chrono::high_resolution_clock::now();
         auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end-start);

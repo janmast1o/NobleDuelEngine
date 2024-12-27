@@ -15,11 +15,27 @@ Creature::Creature(SDL_Renderer* renderer, Point center, ModelCollection modelCo
                    interactableManager_(interactableManager),
                    itemListIndex_(0) {
         setHealth(health);
-        // setMaxHealth(health);
+        setMaxHealth(health);
         interactionScheduled_ = NOTHING;
         previousInteractionScheduled_ = NOTHING;
         itemList_ = std::vector<Item*>(defaultInitialItemListSize_, nullptr);
+        staminaDrainProtocol_ = {1, 20, 10};
     }
+
+
+bool Creature::isStaminaRegeningPossible() const {
+    Item* currentlyHeldItem = itemList_[itemListIndex_];
+    if (currentlyHeldItem != nullptr && 
+        (currentlyHeldItem->getStaminaDrainedOnUse() > 0 || currentlyHeldItem->getStaminaDrainedOnAlternativeUse() > 0) &&
+        currentlyHeldItem->isAnythingScheduled()) return false;
+    else if (scheduled_ == HANDLE_AIRBORNE || scheduled_ == HANDLE_FREEFALL || 
+             scheduled_ == HANDLE_BE_PUSHED_HORIZONTALLY_WITH_RETRY || scheduled_ == HANDLE_BE_PUSHED_HORIZONTALLY_NO_RETRY ||
+             (scheduled_ == HANDLE_MOVE_HORIZONTALLY && 
+             std::abs(std::abs(acceleration_.horizontalAcceleration)-creatureSpecificPhysicsChar_.slowWalkHorizontalAcc) <= ERROR_EPS)) return false;
+
+    return true;             
+}
+
 
 
 void Creature::setNewState(State newState) {
@@ -152,6 +168,35 @@ void Creature::handleMoveHorizontally() {
 
     previouslyScheduled_ = scheduled_;
 
+    if (std::abs(std::abs(acceleration_.horizontalAcceleration)-creatureSpecificPhysicsChar_.slowWalkHorizontalAcc) <= ERROR_EPS &&
+        staminaDrainProtocol_.drainStaminaForSlowWalk(creatureGameStats_, sessionEngineClock_)) {
+            
+        clearScheduled();
+        return;
+    }
+    else if (std::abs(std::abs(acceleration_.horizontalAcceleration)-creatureSpecificPhysicsChar_.regularHorizontalAcc) <= ERROR_EPS &&
+             staminaDrainProtocol_.drainStaminaForRegularWalk(creatureGameStats_, sessionEngineClock_)) {
+        
+        if (!staminaDrainProtocol_.drainStaminaForSlowWalk(creatureGameStats_, sessionEngineClock_)) {
+            adjustAccAndVForSlowWalk();
+        } else {
+            clearScheduled();
+            return;
+        }
+    }
+    else if (std::abs(std::abs(acceleration_.horizontalAcceleration)-creatureSpecificPhysicsChar_.sprintHorizontalAcc) <= ERROR_EPS &&
+             staminaDrainProtocol_.drainStaminaForSprint(creatureGameStats_, sessionEngineClock_)) {
+        
+        if (!staminaDrainProtocol_.drainStaminaForRegularWalk(creatureGameStats_, sessionEngineClock_)) {
+            adjustAccAndVForRegular();
+        } else if (!staminaDrainProtocol_.drainStaminaForSlowWalk(creatureGameStats_, sessionEngineClock_)) {
+            adjustAccAndVForSlowWalk();
+        } else {
+            clearScheduled();
+            return;
+        }
+    }
+
     newVelocity();
     float sx = velocity_.horizontalVelocity*(1.0/FPS);
     float sy = sx*slopeInclineDirectlyUnderneath_;
@@ -245,6 +290,11 @@ void Creature::handleMoveHorizontally() {
 
 void Creature::handleJump() {
     previouslyScheduled_ = scheduled_;
+    if (staminaDrainProtocol_.drainStaminaForJump(creatureGameStats_, sessionEngineClock_)) {
+        clearScheduled();
+        return;
+    }
+    
     velocity_.verticalVelocity = creatureSpecificPhysicsChar_.jumpingV;
     removeGroundReactionAcceleration();
     airborneGhostHorizontalVelocity_.horizontalVelocity = velocity_.horizontalVelocity;
@@ -402,6 +452,26 @@ void Creature::setSlowWalkMaxHorizontalV(float newSlowWalkMaxHorizontalV) {
 }
 
 
+CreatureGameStats* Creature::getCreatureGameStatsAsPtr() {
+    return &creatureGameStats_;
+}
+
+
+CreatureGameStats* Creature::getCreatureGameStatsAsPtr() const {
+    return const_cast<CreatureGameStats*>(&creatureGameStats_);
+}
+
+
+StaminaDrainProtocol* Creature::getStaminaDrainProtocolAsPtr() {
+    return &staminaDrainProtocol_;
+}
+
+
+StaminaDrainProtocol* Creature::getStaminaDrainProtocolAsPtr() const {
+    return const_cast<StaminaDrainProtocol*>(&staminaDrainProtocol_);
+}
+
+
 int Creature::getFacedSideAsInt() const {
     if (isLeftFacing(getState())) {
         return -1;
@@ -478,6 +548,14 @@ void Creature::runInteractionScheduled() {
 
 
 void Creature::runScheduled() {
+    if (isStaminaRegeningPossible()) {
+        creatureGameStats_.runStaminaRegening(sessionEngineClock_);
+    } else {
+        creatureGameStats_.subtractFromStamina(0, sessionEngineClock_);
+    }
+    creatureGameStats_.runPoiseRegening(sessionEngineClock_);
+    creatureGameStats_.runPassiveEffects(sessionEngineClock_);
+
     runInteractionScheduled();
     
     if (!currentMomentumDictated_.isEmpty() && 
@@ -536,4 +614,8 @@ void Creature::runScheduled() {
         handleCheckForGroundDirectlyUnderneath();
         currentMomentumDictated_.clear();
     }
+
+    // creatureGameStats_.runStaminaRegening(sessionEngineClock_);
+    // creatureGameStats_.runPassiveEffects(sessionEngineClock_);
+
 }

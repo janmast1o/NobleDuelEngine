@@ -67,7 +67,7 @@ protected:
     void handleCheckForGroundDirectlyUnderneath();
     virtual void handleBePushedHorizontally(HandleParams handleParams = {0, true});
     void handleEscapeFromUnderneathObjectOnTop(HandleParams handleParams = {0, true});
-    virtual void handleMoveHorizontally();
+    // virtual void handleMoveHorizontally();
     void handleSlideDown(HandleParams handleParams = {0, true});
     void handleSlideOffTop();
     void handleAirborne(HandleParams handleParams = {0, false});

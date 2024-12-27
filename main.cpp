@@ -321,6 +321,9 @@ void prepareGame(int windowWidth, int windowHeight, OfflineEngine& engine) {
 
     Point rapierCenter = {80, 0};
     ThrustingWeapon* rapier = engine.makeThrustingWeapon(rapierCenter, rapierModelCollection, 45, 10, 10, 16, 12, 26);
+    rapier->setHasWindUp(true);
+    rapier->setWindUpExtendRange(10);
+    rapier->setWindUpFrames(5);
     
     SDL_Texture* playerTexture = engine.createTexture("resources/first_sprite_tbg_2.png");
     std::pair<float, float> playerWAH = engine.readTexturesWidthAndHeight(playerTexture);

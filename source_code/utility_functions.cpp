@@ -62,6 +62,11 @@ std::pair<float, float> findLineCoefficients(const Point& A, const Point& B) {
 }
 
 
+unsigned int convertPairToFrames(std::pair<unsigned int, unsigned int>& P, int framesInCycle) {
+    return P.first*framesInCycle+P.second;
+}
+
+
 float seeIfLinesOverlapAlongXAxis(float firstStartX, float firstEndX, float secondStartX, float secondEndX) {
     return !(firstStartX > secondEndX || firstEndX < secondStartX);
 }

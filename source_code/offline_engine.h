@@ -7,6 +7,7 @@
 #include "interactable_manager.h"
 #include "thrusting_weapon.h"
 #include "button.h"
+#include "player_ui.h"
 #include <mutex>
 #include <functional>
 
@@ -44,6 +45,7 @@ private:
     std::list<MobileObject*> mobileObjectPtrs_;
 
     Player* playerPtr_;
+    PlayerUi playerUi_;
 
     Player* player2Ptr_;
     

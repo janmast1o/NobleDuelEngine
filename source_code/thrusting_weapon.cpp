@@ -3,18 +3,22 @@
 
 
 ThrustingWeapon::ThrustingWeapon(SDL_Renderer* renderer, Point center, ModelCollection modelCollection, 
-                    const EngineClock& sessionEngineClock, ObjectMap& objectMap, float mass,
-                    int damage, int poiseDamage, unsigned short attackFrames, 
-                    unsigned short recoveryFrames, float attackExtendRange,
-                    ItemDependencyState initialDependencyState, Creature* initialOwner) :
-                    Object(renderer, center, modelCollection, sessionEngineClock),
-                    Item(renderer, center, modelCollection, sessionEngineClock, objectMap, mass, initialDependencyState, initialOwner),
-                    damage_(damage), poiseDamage_(poiseDamage), 
-                    attackFrames_(attackFrames), recoveryFrames_(recoveryFrames),
-                    attackExtendRange_(attackExtendRange),
-                    hasWindUp_(false), windUpFrames_(0), windUpExtendRange_(0),
-                    currentFrameCounter_(0),
-                    sideFacedDuringAttackStartUpAsInt_(0) {}
+                                const EngineClock& sessionEngineClock, ObjectMap& objectMap, float mass,
+                                int damage, int poiseDamage, unsigned short attackFrames, 
+                                unsigned short recoveryFrames, float attackExtendRange,
+                                ItemDependencyState initialDependencyState, Creature* initialOwner) :
+                                Object(renderer, center, modelCollection, sessionEngineClock),
+                                Item(renderer, center, modelCollection, sessionEngineClock, objectMap, mass, initialDependencyState, initialOwner),
+                                damage_(damage), poiseDamage_(poiseDamage), 
+                                attackFrames_(attackFrames), recoveryFrames_(recoveryFrames),
+                                attackExtendRange_(attackExtendRange),
+                                hasWindUp_(false), windUpFrames_(0), windUpExtendRange_(0),
+                                currentFrameCounter_(0),
+                                sideFacedDuringAttackStartUpAsInt_(0) {
+
+    staminaDrainedOnUse_ = 10;
+
+}
 
 
 int ThrustingWeapon::getDamage() const {
@@ -200,7 +204,7 @@ void ThrustingWeapon::handleWindUp() {
 
 
 void ThrustingWeapon::use() {
-    if (isAvailableForNextUse()) {
+    if (isAvailableForNextUse() && !owner_->getCreatureGameStatsAsPtr()->subtractFromStamina(staminaDrainedOnUse_, sessionEngineClock_)) {
         sideFacedDuringAttackStartUpAsInt_ = owner_->getFacedSideAsInt();
         updateLastUse();
         hitRegistry_.clear();

@@ -8,7 +8,9 @@ Item::Item(SDL_Renderer* renderer, Point center, ModelCollection modelCollection
            Object(renderer, center, modelCollection, sessionEngineClock),
            MobileObject(renderer, center, modelCollection, sessionEngineClock, objectMap, mass),
            Interactable(renderer, center, modelCollection, sessionEngineClock),
-           cooldown_(FPS) {
+           cooldown_(FPS/2),
+           staminaDrainedOnUse_(0),
+           staminaDrainedOnAlternativeUse_(0) {
     setMatter(LIGHT_PHANTOM);
     dependencyState_ = initialDependencyState;
     if (dependencyState_ == DEPENDENT && initialOwner != nullptr) {
@@ -39,12 +41,32 @@ bool Item::getCurrentlyAvailable() const {
 
 void Item::updateLastUse() {
     lastUse_.first = sessionEngineClock_.cycles;
-    lastUse_.second = sessionEngineClock_.framesInCycle;
+    lastUse_.second = sessionEngineClock_.framesInCurrentCycle;
 }
 
 
 bool Item::isAvailableForNextUse() const {
-    return (sessionEngineClock_.cycles*FPS + sessionEngineClock_.framesInCycle - (lastUse_.first*FPS + lastUse_.second) > cooldown_);
+    return (sessionEngineClock_.cycles*FPS + sessionEngineClock_.framesInCurrentCycle - (lastUse_.first*FPS + lastUse_.second) > cooldown_);
+}
+
+
+int Item::getStaminaDrainedOnUse() const {
+    return staminaDrainedOnUse_;
+}
+
+
+void Item::setStaminaDrainedOnUse(int newStaminaDrainedOnUse) {
+    staminaDrainedOnUse_ = newStaminaDrainedOnUse;
+}
+
+
+int Item::getStaminaDrainedOnAlternativeUse() const {
+    return staminaDrainedOnAlternativeUse_;
+}
+
+
+void Item::setStaminaDrainedOnAlternativeUse(int newStaminaDrainedOnAlternativeUse) {
+    staminaDrainedOnAlternativeUse_ = newStaminaDrainedOnAlternativeUse;
 }
 
 

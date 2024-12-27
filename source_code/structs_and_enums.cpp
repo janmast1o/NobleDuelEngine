@@ -1,5 +1,6 @@
 #include "structs_and_enums.h"
 #include "constants.h"
+#include "utility_functions.h"
 
 Point::Point() : x(0), y(0) {}
 Point::Point(float x, float y) : x(x), y(y) {}
@@ -223,19 +224,21 @@ bool MomentumDictated::isEmpty() const {
 CreatureGameStats::CreatureGameStats(int maxPoiseHealth, int maxStamina) :
     lastPoiseSubtraction({0,0}), lastPoiseRegen({0,0}), waitSinceLastSubPoise(120),
     maxPoiseHealth(maxPoiseHealth), currentPoiseHealth(maxPoiseHealth),
-    poiseRegenAmount(5), poiseRegenTick(15),
+    poiseRegenAmount(1), poiseRegenTick(4),
     lastStaminaSubtraction({0,0}), lastStaminaRegen({0,0}), waitSinceLastSubStamina(30),
     maxStamina(maxStamina), currentStamina(maxStamina),
-    staminaRegenAmount(15), staminaRegenTick(10) {}
+    staminaRegenAmount(2), staminaRegenTick(2) {}
 
 
+CreatureGameStats::CreatureGameStats(const CreatureGameStats& otherCreatureGameStats) = default;
 
-bool CreatureGameStats::subtractFromPoiseHealth(int subtractAmount) {
-    currentPoiseHealth -= subtractAmount;
-    if (currentPoiseHealth < 0) {
-        currentPoiseHealth = 0;
+
+bool CreatureGameStats::subtractFromPoiseHealth(int subtractAmount, const EngineClock& sessionClock) {
+    if (currentPoiseHealth < subtractAmount) {
         return true;
     }
+    currentPoiseHealth -= subtractAmount;
+    lastPoiseSubtraction = {sessionClock.cycles, sessionClock.framesInCurrentCycle};
     return false;
 }
 
@@ -248,12 +251,12 @@ void CreatureGameStats::addToPoiseHealth(int addAmount) {
 }
 
     
-bool CreatureGameStats::subtractFromStamina(int subtractAmount) {
-    currentStamina -= subtractAmount;
-    if (currentStamina < 0) {
-        currentStamina = 0;
+bool CreatureGameStats::subtractFromStamina(int subtractAmount, const EngineClock& sessionClock) {
+    if (currentStamina < subtractAmount) {
         return true;
     }
+    currentStamina -= subtractAmount;
+    lastStaminaSubtraction = {sessionClock.cycles, sessionClock.framesInCurrentCycle};
     return false;
 }
 
@@ -271,10 +274,11 @@ void CreatureGameStats::addPassiveEffect(PassiveEffect& newPassiveEffect) {
 }
 
 
-void CreatureGameStats::runPoiseAndStaminaRegening(const EngineClock& sessionClock) {
+void CreatureGameStats::runPoiseRegening(const EngineClock& sessionClock) {
     if (currentPoiseHealth < maxPoiseHealth) {
-        if (sessionClock.getCurrentTimeInFrames() > lastPoiseSubtraction.first*FPS+lastPoiseSubtraction.second+waitSinceLastSubPoise) {
-            if (sessionClock.getCurrentTimeInFrames() > lastPoiseRegen.first*FPS+lastPoiseRegen.second+poiseRegenTick) {
+        if (sessionClock.getCurrentTimeInFrames() > convertPairToFrames(lastPoiseSubtraction, FPS)+waitSinceLastSubPoise) {
+            if (sessionClock.getCurrentTimeInFrames() > convertPairToFrames(lastPoiseRegen, FPS)+poiseRegenTick) {
+                lastPoiseRegen = {sessionClock.cycles, sessionClock.framesInCurrentCycle};
                 addToPoiseHealth(poiseRegenAmount);
             }
         } else {
@@ -282,9 +286,14 @@ void CreatureGameStats::runPoiseAndStaminaRegening(const EngineClock& sessionClo
         }
     }
 
+}
+
+
+void CreatureGameStats::runStaminaRegening(const EngineClock& sessionClock) {
     if (currentStamina < maxStamina) {
-        if (sessionClock.getCurrentTimeInFrames() > lastStaminaSubtraction.first*FPS+lastStaminaSubtraction.second+waitSinceLastSubStamina) {
-            if (sessionClock.getCurrentTimeInFrames() > lastStaminaRegen.first*FPS+lastStaminaRegen.second+staminaRegenTick) {
+        if (sessionClock.getCurrentTimeInFrames() > convertPairToFrames(lastStaminaSubtraction, FPS)+waitSinceLastSubStamina) {
+            if (sessionClock.getCurrentTimeInFrames() > convertPairToFrames(lastStaminaRegen, FPS)+staminaRegenTick) {
+                lastStaminaRegen = {sessionClock.cycles, sessionClock.framesInCurrentCycle};
                 addToStamina(staminaRegenAmount);
             }
         } else {
@@ -296,15 +305,91 @@ void CreatureGameStats::runPoiseAndStaminaRegening(const EngineClock& sessionClo
 
 void CreatureGameStats::runPassiveEffects(const EngineClock& sessionClock) {
     auto runPassiveIt = passiveEffects.begin();
-    auto runPassiveAuxIt = auxForPassiveEffects.begin();
-    while (runPassiveIt != passiveEffects.end() && runPassiveAuxIt != auxForPassiveEffects.end()) {
-        bool shouldTerminateEffect = (*runPassiveIt)((*runPassiveAuxIt).get());
+    // auto runPassiveAuxIt = auxForPassiveEffects.begin();
+    while (runPassiveIt != passiveEffects.end()) {
+        bool shouldTerminateEffect = (*runPassiveIt)(nullptr);
         if (shouldTerminateEffect) {
             runPassiveIt = passiveEffects.erase(runPassiveIt);
-            runPassiveAuxIt = auxForPassiveEffects.erase(runPassiveAuxIt);
+            // runPassiveAuxIt = auxForPassiveEffects.erase(runPassiveAuxIt);
         } else {
             ++runPassiveIt;
-            ++runPassiveAuxIt;
+            // ++runPassiveAuxIt;
         }
     }
 } 
+
+
+StaminaDrainProtocol::StaminaDrainProtocol(int sprintStaminaDrainAmount, int sprintStaminaDrainTick,
+                                           int jumpStaminaDrainAmount) :
+                                           slowWalkStaminaDrainAmount(0), slowWalkStaminaDrainTick(0),
+                                           regularWalkStaminaDrainAmount(0), regularWalkStaminaDrainTick(0),
+                                           sprintStaminaDrainAmount(sprintStaminaDrainAmount),
+                                           sprintStaminaDrainTick(sprintStaminaDrainTick),
+                                           jumpStaminaDrainAmount(jumpStaminaDrainAmount) {}
+
+
+StaminaDrainProtocol::StaminaDrainProtocol(const StaminaDrainProtocol& otherStaminaDrainProtocol) = default;                                           
+
+
+bool StaminaDrainProtocol::drainStaminaForSlowWalk(CreatureGameStats& creatureGameStats, const EngineClock& sessionClock) {
+    if (slowWalkStaminaDrainAmount == 0) return false;
+    else if (sessionClock.getCurrentTimeInFrames() > convertPairToFrames(lastSlowWalkStaminaSubtraction, FPS)+slowWalkStaminaDrainTick &&
+             creatureGameStats.subtractFromStamina(slowWalkStaminaDrainAmount, sessionClock)) {
+                lastSlowWalkStaminaSubtraction = {sessionClock.cycles, sessionClock.framesInCurrentCycle};
+                return true;
+    }
+    return false;
+}
+
+
+bool StaminaDrainProtocol::drainStaminaForRegularWalk(CreatureGameStats& creatureGameStats, const EngineClock& sessionClock) {
+    if (regularWalkStaminaDrainAmount == 0) return false;
+    else if (sessionClock.getCurrentTimeInFrames() > convertPairToFrames(lastRegularWalkStaminaSubtraction, FPS)+regularWalkStaminaDrainTick &&
+             creatureGameStats.subtractFromStamina(regularWalkStaminaDrainAmount, sessionClock)) {
+                lastRegularWalkStaminaSubtraction = {sessionClock.cycles, sessionClock.framesInCurrentCycle};
+                return true;
+             }
+    return false;
+}
+
+
+bool StaminaDrainProtocol::drainStaminaForSprint(CreatureGameStats& creatureGameStats, const EngineClock& sessionClock) {
+    if (sprintStaminaDrainAmount == 0) return false;
+    else if (sessionClock.getCurrentTimeInFrames() > convertPairToFrames(lastSprintStaminaSubtracion, FPS)+sprintStaminaDrainTick &&
+             creatureGameStats.subtractFromStamina(sprintStaminaDrainAmount, sessionClock)) {
+                lastSprintStaminaSubtracion = {sessionClock.cycles, sessionClock.framesInCurrentCycle};
+                return true;
+             }
+    return false;         
+}
+
+
+bool StaminaDrainProtocol::drainStaminaForJump(CreatureGameStats& creatureGameStats, const EngineClock& sessionClock) {
+    if (jumpStaminaDrainAmount == 0) return false;
+    else return creatureGameStats.subtractFromStamina(jumpStaminaDrainAmount, sessionClock); 
+}
+
+
+CreatureGameStatsRetWrapper::CreatureGameStatsRetWrapper(const CreatureGameStats& creatureGameStats) :
+    lastPoiseSubtraction(creatureGameStats.lastPoiseSubtraction),
+    lastPoiseRegen(creatureGameStats.lastPoiseRegen),
+    waitSinceLastSubPoise(const_cast<unsigned int&>(creatureGameStats.waitSinceLastSubPoise)),
+    currentPoiseHealth(const_cast<const int&>(creatureGameStats.currentPoiseHealth)),
+    maxPoiseHealth(const_cast<int&>(creatureGameStats.maxPoiseHealth)),
+    poiseRegenAmount(const_cast<int&>(creatureGameStats.poiseRegenAmount)),
+    poiseRegenTick(const_cast<int&>(creatureGameStats.poiseRegenTick)),
+    lastStaminaSubtraction(creatureGameStats.lastStaminaSubtraction),
+    lastStaminaRegen(creatureGameStats.lastStaminaRegen),
+    waitSinceLastSubStamina(const_cast<unsigned int&>(creatureGameStats.waitSinceLastSubStamina)),
+    currentStamina(const_cast<const int&>(creatureGameStats.currentStamina)),
+    maxStamina(const_cast<int&>(creatureGameStats.maxStamina)),
+    staminaRegenAmount(const_cast<int&>(creatureGameStats.staminaRegenAmount)),
+    staminaRegenTick(const_cast<int&>(creatureGameStats.staminaRegenTick)),
+    passiveEffects(const_cast<const std::list<PassiveEffect>&>(creatureGameStats.passiveEffects)) {}
+
+
+FirearmFireSpecs::FirearmFireSpecs(int numberOfBullets, int perBulletDamage, std::vector<int> bulletSpreadFromCenter, 
+                                   int bulletTravelDistance, bool bulletPierce) :
+                                   numberOfBullets(numberOfBullets), perBulletDamage(perBulletDamage),
+                                   bulletSpreadFromCenter(bulletSpreadFromCenter), bulletTravelDistance(bulletTravelDistance),
+                                   bulletPierce(bulletPierce) {}

@@ -4,6 +4,7 @@
 #include <functional>
 #include <list>
 #include <memory>
+#include <variant>
 #include "engine_clock.h"
 
 #ifndef POINT_H
@@ -347,19 +348,20 @@ struct CreatureGameStats {
     int staminaRegenTick;
 
     std::list<PassiveEffect> passiveEffects;
-    std::list<std::unique_ptr<void>> auxForPassiveEffects;
 
     CreatureGameStats(int maxPoiseHealth = 100, int maxStamina = 100);
+    CreatureGameStats(const CreatureGameStats& otherCreatureGameStats);
 
     // returns true if poise broken
-    bool subtractFromPoiseHealth(int subtractAmount);
+    bool subtractFromPoiseHealth(int subtractAmount, const EngineClock& sessionClock);
     void addToPoiseHealth(int addAmount);
 
     // returns true if depletes stamina
-    bool subtractFromStamina(int subtractAmount);
+    bool subtractFromStamina(int subtractAmount, const EngineClock& sessionClock);
     void addToStamina(int addAmount);
 
-    void runPoiseAndStaminaRegening(const EngineClock& sessionClock);
+    void runPoiseRegening(const EngineClock& sessionClock);
+    void runStaminaRegening(const EngineClock& sessionClock);
     
     void addPassiveEffect(PassiveEffect& newPassiveEffect);
     void runPassiveEffects(const EngineClock& sessionEngine);
@@ -374,26 +376,73 @@ struct CreatureGameStats {
 struct StaminaDrainProtocol {
     int slowWalkStaminaDrainAmount;
     int slowWalkStaminaDrainTick;
+    std::pair<unsigned int, unsigned int> lastSlowWalkStaminaSubtraction;
 
     int regularWalkStaminaDrainAmount;
     int regularWalkStaminaDrainTick;
+    std::pair<unsigned int, unsigned int> lastRegularWalkStaminaSubtraction;
 
     int sprintStaminaDrainAmount;
     int sprintStaminaDrainTick;
+    std::pair<unsigned int, unsigned int> lastSprintStaminaSubtracion;
 
     int jumpStaminaDrainAmount;
     // int staminaDodgeAmount;
 
     StaminaDrainProtocol(int sprintStaminaDrainAmount = 5, int sprintStaminaDrainTick = 15,
                          int jumpStaminaDrainAmount = 15);
+    StaminaDrainProtocol(const StaminaDrainProtocol& otherStaminaDrainProtocol);                     
 
     // returns true if action would deplete stamina
     bool drainStaminaForSlowWalk(CreatureGameStats& creatureGameStats, const EngineClock& sessionClock);     
     bool drainStaminaForRegularWalk(CreatureGameStats& creatureGameStats, const EngineClock& sessionClock);
-    // bool drainStaminaForSprint(CreatureGameStats& )
+    bool drainStaminaForSprint(CreatureGameStats& cretureGameStats, const EngineClock& sessionClock);
     bool drainStaminaForJump(CreatureGameStats& creatureGameStats, const EngineClock& sessionClock);                
 
+};
 
+#endif
+
+#ifndef CREATURE_GAME_STATS_RET_WRAPPER
+#define CREATURE_GAME_STATS_RET_WRAPPER
+
+struct CreatureGameStatsRetWrapper {
+    const std::pair<unsigned int, unsigned int>& lastPoiseSubtraction;
+    const std::pair<unsigned int, unsigned int>& lastPoiseRegen;
+    unsigned int& waitSinceLastSubPoise; // in frames
+    const int& currentPoiseHealth;
+    int& maxPoiseHealth;
+    int& poiseRegenAmount;
+    int& poiseRegenTick;
+
+    const std::pair<unsigned int, unsigned int>& lastStaminaSubtraction;
+    const std::pair<unsigned int, unsigned int>& lastStaminaRegen;
+    unsigned int& waitSinceLastSubStamina; // in frames
+    const int& currentStamina;
+    int& maxStamina;
+    int& staminaRegenAmount;
+    int& staminaRegenTick;
+
+    const std::list<PassiveEffect>& passiveEffects;
+
+    CreatureGameStatsRetWrapper(const CreatureGameStats& creatureGameStats);
+};
+
+
+#endif
+
+#ifndef FIREARM_FIRE_SPECS
+#define FIREARM_FIRE_SPECS
+
+struct FirearmFireSpecs {
+    int numberOfBullets;
+    int perBulletDamage;
+    std::vector<int> bulletSpreadFromCenter;
+    std::variant<std::vector<int>, int> bulletTravelDistance;
+    std::variant<std::vector<bool>, bool> bulletPierce;
+
+    FirearmFireSpecs(int numberOfBullets, int perBulletDamage, std::vector<int> bulletSpreadFromCenter = {0}, 
+                     int bulletTravelDistance = 550, bool bulletPierce = false);
 
 };
 

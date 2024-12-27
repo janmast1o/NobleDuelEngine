@@ -3,6 +3,7 @@ CXXFLAGS = -std=c++17 -Wall -g
 
 SOURCES = main.cpp \
           source_code/offline_engine.cpp \
+		  source_code/player_ui.cpp \
 		  source_code/player.cpp \
 		  source_code/creature.cpp \
 		  source_code/interactable_manager.cpp \

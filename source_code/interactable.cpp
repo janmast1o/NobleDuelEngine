@@ -11,7 +11,7 @@ Interactable::Interactable(SDL_Renderer* renderer, Point center, ModelCollection
 
 void Interactable::updateLastInteraction() {
     lastInteraction_.first = sessionEngineClock_.cycles;
-    lastInteraction_.second = sessionEngineClock_.framesInCycle;
+    lastInteraction_.second = sessionEngineClock_.framesInCurrentCycle;
 }
 
 

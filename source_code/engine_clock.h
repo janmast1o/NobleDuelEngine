@@ -4,7 +4,7 @@
 struct EngineClock {
 
     unsigned int cycles = 0;
-    unsigned int framesInCycle = 0;
+    unsigned int framesInCurrentCycle = 0;
 
     EngineClock();
 
