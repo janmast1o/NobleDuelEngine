@@ -388,8 +388,15 @@ CreatureGameStatsRetWrapper::CreatureGameStatsRetWrapper(const CreatureGameStats
     passiveEffects(const_cast<const std::list<PassiveEffect>&>(creatureGameStats.passiveEffects)) {}
 
 
-FirearmFireSpecs::FirearmFireSpecs(int numberOfBullets, int perBulletDamage, std::vector<int> bulletSpreadFromCenter, 
-                                   int bulletTravelDistance, bool bulletPierce) :
+FirearmFireSpecs::FirearmFireSpecs(int numberOfBullets, int perBulletDamage, std::vector<float> bulletSpreadFromCenter, 
+                                   float bulletTravelDistance, bool bulletPierce, float bulletSpeed, Matter bulletMatter) :
                                    numberOfBullets(numberOfBullets), perBulletDamage(perBulletDamage),
                                    bulletSpreadFromCenter(bulletSpreadFromCenter), bulletTravelDistance(bulletTravelDistance),
-                                   bulletPierce(bulletPierce) {}
+                                   bulletPierce(bulletPierce), bulletSpeed(bulletSpeed), bulletMatter(bulletMatter) {}
+
+
+ProjectileSpecs::ProjectileSpecs() : damage(0), travelDistance(0), pierce(false), travelSpeed(0) {}
+
+
+ProjectileSpecs::ProjectileSpecs(int damage, float travelDistance, bool pierce, float travelSpeed, Matter matter) :
+                                 damage(damage), travelDistance(travelDistance), pierce(pierce), travelSpeed(travelSpeed), matter(matter) {}                                   

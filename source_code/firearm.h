@@ -25,9 +25,9 @@ public:
 
     Firearm(SDL_Renderer* renderer, Point center, ModelCollection modelCollection, 
             const EngineClock& sessionEngineClock, ObjectMap& objectMap, float mass,
-            ItemDependencyState initialDependencyState = INDEPENDENT, Creature* initialOwner = nullptr, 
             ProjectileFactory& projectileFactory, int usedAmmoTypeId, 
-            std::optional<FirearmFireSpecs> fireSpecs, std::optional<FirearmFireSpecs> alternativeFireSpecs = std::nullopt);
+            std::optional<FirearmFireSpecs> fireSpecs, std::optional<FirearmFireSpecs> alternativeFireSpecs = std::nullopt,
+            ItemDependencyState initialDependencyState = INDEPENDENT, Creature* initialOwner = nullptr);
 
     void use() override;
     void alternativeUse() override;  

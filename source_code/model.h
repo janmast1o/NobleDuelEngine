@@ -27,10 +27,13 @@ public:
     SDL_Texture* getTexture() const;
     float getModelTextureWidth() const;
     float getModelTextureHeight() const;
+    Rectangle getRelativeRectangle() const;
     Point getItemGripPointRelativeToCenter() const;
     void setItemGripPointRelativeToCenter(Point newItemGripPointRelativeToCenter);
     Point& getTextureRelativeUL();
     Hitbox* getHitboxPtr() const;
+
+    Hitbox* replaceHitboxWithAStaticCopy(std::list<Hitbox>& saveContainer, Point* newHitboxNewOwnerCenterPtr);
 
 };
 

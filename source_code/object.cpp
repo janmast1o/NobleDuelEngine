@@ -230,3 +230,8 @@ bool Object::isParticipatingInMomentum() const {
 
 
 void Object::registerBeingAffectedByOutsideMomentum(float otherObjectMass, float otherObjectHVelocity, float hTranslation) {;}
+
+
+void Object::replaceAllHitboxPtrsWithStaticCopies(std::list<Hitbox>& saveContainer) {
+    modelCollection_.replaceAllHitboxPtrsWithStaticCopies(saveContainer, &center_);
+}

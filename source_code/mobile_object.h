@@ -127,7 +127,7 @@ public:
     bool isParticipatingInMomentum() const override;
     void registerBeingAffectedByOutsideMomentum(float otherObjectMass, float otherObjectHVelocity, float hTranslation) override; 
 
-    bool isAnythingScheduled() const;
+    virtual bool isAnythingScheduled() const;
     void runScheduledForNonEmptyMomentum();
     virtual void runScheduled();
 

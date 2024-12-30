@@ -20,6 +20,11 @@ Item::Item(SDL_Renderer* renderer, Point center, ModelCollection modelCollection
 }
 
 
+void Item::temporarilySetIndependentForRedrawing() {
+    dependencyState_ = TEMP_INDEPENDENT;
+}
+
+
 bool Item::isParticipatingInCollisions() const {
     return dependencyState_ == INDEPENDENT;
 }
@@ -46,7 +51,7 @@ void Item::updateLastUse() {
 
 
 bool Item::isAvailableForNextUse() const {
-    return (sessionEngineClock_.cycles*FPS + sessionEngineClock_.framesInCurrentCycle - (lastUse_.first*FPS + lastUse_.second) > cooldown_);
+    return (sessionEngineClock_.getCurrentTimeInFrames() - (lastUse_.first*FPS + lastUse_.second) > cooldown_);
 }
 
 
@@ -125,6 +130,9 @@ bool Item::collideableWith(const Object& otherObject) {
 void Item::redrawObject() {
     if (dependencyState_ == INDEPENDENT) {
         Object::redrawObject();
+    } else if (dependencyState_ == TEMP_INDEPENDENT) {
+        Object::redrawObject();
+        dependencyState_ = DEPENDENT;
     }
 }
 
@@ -132,5 +140,8 @@ void Item::redrawObject() {
 void Item::redrawObject(bool drawHitboxes, float pointSize) {
     if (dependencyState_ == INDEPENDENT) {
         Object::redrawObject(drawHitboxes, pointSize);
+    } else if (dependencyState_ == TEMP_INDEPENDENT) {
+        Object::redrawObject(drawHitboxes, pointSize);
+        dependencyState_ = DEPENDENT;
     }
 }

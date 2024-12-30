@@ -32,6 +32,7 @@ public:
     Model* getFirstModelPtrForState(State state);
 
     std::list<int> getAllTiedHitboxes() const;
+    void replaceAllHitboxPtrsWithStaticCopies(std::list<Hitbox>& saveContainer, Point* newOwnerCenterPtr);
 
 };
 

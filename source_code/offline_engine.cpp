@@ -5,13 +5,18 @@
 #include "constants.h"
 
 
-OfflineEngine::OfflineEngine(int windowWidth, int windowHeight) : hitboxIdCounter_(0) {
+OfflineEngine::OfflineEngine(int windowWidth, int windowHeight) : hitboxIdCounter_(0), projectileFactory_(projectileManager_) {
     if (SDL_Init(SDL_INIT_VIDEO)) {
         std::cerr << "SDL_Init failed" << std::endl;
         return;
     }
 
+    windowUpperLeftCorner_ = {0,0};
+    windowRelativeRectangle_ = Rectangle((float) windowWidth, (float) windowHeight);
+    
     window_ = SDL_CreateWindow("Noble Duel Engine Showcase", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight, 0);
+    SDL_SetWindowResizable(window_, SDL_FALSE);
+    SDL_SetWindowFullscreen(window_, 0);
 
     if (!window_) {
         std::cerr << "SDL_CreateWindow failed" << std::endl;
@@ -66,6 +71,16 @@ MobileHitbox* OfflineEngine::makeMobileHitbox(const std::vector<Point>& hull) {
     allHitboxes_[hitboxIdCounter_] = newMobileHitbox;
     ++hitboxIdCounter_;
     return newMobileHitbox;
+}
+
+
+int OfflineEngine::registerNewProjectileArchetype(ModelCollection& newProjectileArchetypeModelCollection, 
+                                                  MobileHitbox& leftTravellingHitbox, MobileHitbox& rightTravellingHitbox) {
+    std::lock_guard<std::mutex> lock(objectCreationMutex_);
+    Projectile newProjectileArchetype(renderer_, {0,0}, newProjectileArchetypeModelCollection,
+                                      leftTravellingHitbox, rightTravellingHitbox,
+                                      sessionEngineClock_, objectMap_, 1, {0,0}); 
+    return projectileFactory_.registerNewProjectileArchetype(newProjectileArchetype);
 }
 
 
@@ -137,6 +152,19 @@ ThrustingWeapon* OfflineEngine::makeThrustingWeapon(Point& center, ModelCollecti
 }
 
 
+Firearm* OfflineEngine::makeFirearm(Point& center, ModelCollection& modelCollection, float mass, int usedAmmoTypeId,
+                                    std::optional<FirearmFireSpecs> fireSpecs, std::optional<FirearmFireSpecs> alternativeFireSpecs) {
+    std::lock_guard<std::mutex> lock(objectCreationMutex_);
+    Firearm* newFirearm = new Firearm(renderer_, center, modelCollection, sessionEngineClock_, objectMap_, mass,
+                                      projectileFactory_, usedAmmoTypeId, fireSpecs, alternativeFireSpecs);
+    allObjects_.emplace_back(newFirearm);
+    mobileObjectPtrs_.push_back(newFirearm);
+    objectMap_.addNewObject(*newFirearm);
+    interactableManager_.addNewInteractable(*newFirearm);
+    return newFirearm;                                  
+}
+
+
 Creature* OfflineEngine::makeCreature(Point& center, ModelCollection& modelCollection, float mass, int health) {
     std::lock_guard<std::mutex> lock(objectCreationMutex_);
     Creature* newCreature = new Creature(renderer_, center, modelCollection, sessionEngineClock_, objectMap_, mass, health, interactableManager_);
@@ -205,7 +233,7 @@ void OfflineEngine::run() {
                 player2Ptr_ = nullptr;
             } else {
                 player2Ptr_->updateTargetedPoint(Point((float) mouseX, (float) -mouseY));
-                player2Ptr_->readInputs(SDL_GetKeyboardState(NULL), false, false);
+                player2Ptr_->readInputs(SDL_GetKeyboardState(NULL), mouseButtonEvent & SDL_BUTTON(SDL_BUTTON_LEFT), false);
             }
         }
 
@@ -218,6 +246,8 @@ void OfflineEngine::run() {
                 ++it;
             }
         }
+
+        projectileManager_.simulateProjectiles();
 
         if (playerPtr_ != nullptr) {
             playerPtr_->runScheduled();
@@ -248,6 +278,7 @@ void OfflineEngine::run() {
             }
         }
 
+        projectileManager_.redrawProjectiles();
         playerUi_.redrawBars();
 
         auto end = std::chrono::high_resolution_clock::now();

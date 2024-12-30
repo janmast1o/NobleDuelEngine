@@ -69,3 +69,15 @@ void ModelCycle::reset() {
     (*it_).currentLingerCounter = 0;
     it_ = modelList_.begin();
 }
+
+
+Hitbox* ModelCycle::replaceCollisionMeshWithAStaticCopy(std::list<Hitbox>& saveContainer, Point* newHitboxNewOwnerCenterPtr) {
+    saveContainer.emplace_back(0, *collisionMeshPtr_);
+    Hitbox* newlyCreatedCollisionMesh = &saveContainer.back();
+    collisionMeshPtr_ = newlyCreatedCollisionMesh;
+    collisionMeshPtr_->setOwnerCenterPtr(newHitboxNewOwnerCenterPtr);
+    return collisionMeshPtr_;
+}
+
+
+

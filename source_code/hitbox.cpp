@@ -104,6 +104,10 @@ bool Hitbox::collidesWithAfterVectorTranslation(const Hitbox& otherHitbox, const
     const Rectangle currentRectangle = getRectangleAfterVectorTranslation(translationVector);
     const Rectangle otherCurrentRectangle = otherHitbox.getCurrentRectangle();
     if (!(currentRectangle.collidesWith(otherCurrentRectangle))) {
+        // if (currentRectangle.upperRight.x - currentRectangle.lowerLeft.x < ERROR_EPS) {
+        //     std::cout << currentRectangle.lowerLeft << " " << currentRectangle.upperRight << std::endl;
+        // }
+        
         return false;
     }
     const std::vector<Point> currentHitboxHull = getHullAfterVectorTranslation(translationVector);

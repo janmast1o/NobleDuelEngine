@@ -52,6 +52,8 @@ public:
     Model& moveAndGetModel();
     void reset();
 
+    Hitbox* replaceCollisionMeshWithAStaticCopy(std::list<Hitbox>& saveContainer, Point* newHitboxNewOwnerCenterPtr);
+
 };
 
 #endif

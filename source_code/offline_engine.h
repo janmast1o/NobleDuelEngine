@@ -8,9 +8,13 @@
 #include "thrusting_weapon.h"
 #include "button.h"
 #include "player_ui.h"
+#include "firearm.h"
+#include "projectile_factory.h"
+#include "projectile_manager.h"
+#include "utility_functions.h"
+#include "structs_and_enums.h"
 #include <mutex>
 #include <functional>
-
 
 class OfflineEngine {
     
@@ -31,6 +35,8 @@ private:
 
     };
     
+    Point windowUpperLeftCorner_;
+    Rectangle windowRelativeRectangle_;
     SDL_Window* window_;
     SDL_Renderer* renderer_;
 
@@ -51,6 +57,9 @@ private:
     
     ObjectMap objectMap_;
     InteractableManager interactableManager_;
+    ProjectileFactory projectileFactory_;
+    ProjectileManager projectileManager_;
+
     std::unordered_map<int, Hitbox*> allHitboxes_;
 
     std::list<SDL_Texture*> textures_;
@@ -66,6 +75,9 @@ public:
     StaticHitbox* makeStaticHitbox(const std::vector<Point>& hull);
     MobileHitbox* makeMobileHitbox(const std::vector<Point>& hull);
 
+    int registerNewProjectileArchetype(ModelCollection& newProjectileArchetypeModelCollection, 
+                                       MobileHitbox& leftTravellingHitbox, MobileHitbox& rightTravellingHitbox);
+
     Object* makeObject(Point& center, ModelCollection& modelCollection);
     MobileObject* makeMobileObject(Point& center, ModelCollection& modelCollection, float mass);
     
@@ -80,6 +92,9 @@ public:
                                          int damage, int poiseDamage,
                                          unsigned short attackFrames, unsigned short recoveryFrames, 
                                          float attackExtendRange);
+
+    Firearm* makeFirearm(Point& center, ModelCollection& modelCollection, float mass, int usedAmmoTypeId,
+                         std::optional<FirearmFireSpecs> fireSpecs, std::optional<FirearmFireSpecs> alternativeFireSpecs = std::nullopt);
 
     Creature* makeCreature(Point& center, ModelCollection& modelCollection, float mass, int health);
     Player* makePlayer(Point& center, ModelCollection& modelCollection, float mass, int health);

@@ -7,6 +7,10 @@ SOURCES = main.cpp \
 		  source_code/player.cpp \
 		  source_code/creature.cpp \
 		  source_code/interactable_manager.cpp \
+		  source_code/projectile_factory.cpp \
+		  source_code/projectile_manager.cpp \
+		  source_code/projectile.cpp \
+		  source_code/firearm.cpp \
 		  source_code/consumable.cpp \
 		  source_code/thrusting_weapon.cpp \
 		  source_code/item.cpp \

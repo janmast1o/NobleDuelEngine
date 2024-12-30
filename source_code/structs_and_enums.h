@@ -320,7 +320,8 @@ struct HandleParams {
 
 enum ItemDependencyState {
     DEPENDENT,
-    INDEPENDENT
+    INDEPENDENT,
+    TEMP_INDEPENDENT
 };
 
 #endif
@@ -437,12 +438,31 @@ struct CreatureGameStatsRetWrapper {
 struct FirearmFireSpecs {
     int numberOfBullets;
     int perBulletDamage;
-    std::vector<int> bulletSpreadFromCenter;
-    std::variant<std::vector<int>, int> bulletTravelDistance;
+    std::vector<float> bulletSpreadFromCenter;
+    std::variant<std::vector<float>, float> bulletTravelDistance;
     std::variant<std::vector<bool>, bool> bulletPierce;
+    std::variant<std::vector<float>, float> bulletSpeed; // speed [unit/s]
+    std::variant<std::vector<Matter>, Matter> bulletMatter;
 
-    FirearmFireSpecs(int numberOfBullets, int perBulletDamage, std::vector<int> bulletSpreadFromCenter = {0}, 
-                     int bulletTravelDistance = 550, bool bulletPierce = false);
+    FirearmFireSpecs(int numberOfBullets, int perBulletDamage, std::vector<float> bulletSpreadFromCenter = {0}, 
+                     float bulletTravelDistance = 550, bool bulletPierce = false, float bulletSpeed = 520, Matter bulletMater = SOLID);
+
+};
+
+#endif
+
+#ifndef PROJECTILE_SPECS
+#define PROJECTILE_SPECS
+
+struct ProjectileSpecs {
+    int damage;
+    float travelDistance;
+    bool pierce;
+    float travelSpeed;
+    Matter matter;
+
+    ProjectileSpecs();
+    ProjectileSpecs(int damage, float travelDistance, bool pierce, float bulletSpeed, Matter matter = SOLID);
 
 };
 

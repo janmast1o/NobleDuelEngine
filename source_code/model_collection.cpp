@@ -131,3 +131,13 @@ std::list<int> ModelCollection::getAllTiedHitboxes() const {
     }
     return std::list<int>(allTiedHitboxesSet.begin(), allTiedHitboxesSet.end());
 }
+
+
+void ModelCollection::replaceAllHitboxPtrsWithStaticCopies(std::list<Hitbox>& saveContainer, Point* newOwnerCenterPtr) {
+    for (auto& p : cyclesForStates_) {
+        for (auto& r : p.second) {
+            r.model.replaceHitboxWithAStaticCopy(saveContainer, newOwnerCenterPtr);
+        }
+        p.second.replaceCollisionMeshWithAStaticCopy(saveContainer, newOwnerCenterPtr);
+    }
+}

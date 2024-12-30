@@ -343,6 +343,9 @@ void Creature::handleDropItem() {
 void Creature::handleSwitchToNextItem() {
     previousInteractionScheduled_ = interactionScheduled_;
     itemListIndex_ = (itemListIndex_+1)%itemList_.size();
+    if (itemList_[itemListIndex_] != nullptr) {
+        itemList_[itemListIndex_]->setCenter(getCurrentItemGripPoint());
+    }
     clearInteractionScheduled();
 }
 
@@ -380,6 +383,10 @@ void Creature::updateTargetedPoint(const Point& newTargetedPoint) {
     targetedPoint_.y = newTargetedPoint.y;
 }
 
+
+Point Creature::getTargetedPoint() const {
+    return targetedPoint_;
+}
 
 
 float Creature::getJumpingV() const {
@@ -508,15 +515,19 @@ bool Creature::isAnythingScheduledForItem() const {
 void Creature::redrawObject() {
     Object::redrawObject();
     if (itemList_[itemListIndex_] != nullptr) {
-        itemList_[itemListIndex_]->Object::redrawObject();
+        // itemList_[itemListIndex_]->Object::redrawObject();
+        itemList_[itemListIndex_]->temporarilySetIndependentForRedrawing();
+        itemList_[itemListIndex_]->redrawObject();
     }
 }
     
     
 void Creature::redrawObject(bool drawHitboxes, float pointSize) {
-    Object::redrawObject();
+    Object::redrawObject(drawHitboxes, pointSize);
     if (itemList_[itemListIndex_] != nullptr) {
-        itemList_[itemListIndex_]->Object::redrawObject(drawHitboxes, pointSize);
+        // itemList_[itemListIndex_]->Object::redrawObject(drawHitboxes, pointSize);
+        itemList_[itemListIndex_]->temporarilySetIndependentForRedrawing();
+        itemList_[itemListIndex_]->redrawObject();
     }
 }
 

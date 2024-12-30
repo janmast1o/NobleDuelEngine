@@ -58,6 +58,8 @@ public:
     
     void updateTargetedPoint(const Point& newTargtedPoint);
 
+    Point getTargetedPoint() const;
+
     float getJumpingV() const;
 
     float getRegularHorizontalAcc() const;

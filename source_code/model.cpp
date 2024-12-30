@@ -1,6 +1,8 @@
 #include "model.h"
 #include "hitbox.h"
 #include "model_cycle.h"
+#include "static_hitbox.h"
+#include "mobile_hitbox.h"
 
 Model::Model(SDL_Texture* texture, Hitbox* hitboxPtr) : texture_(texture), hitboxPtr_(hitboxPtr) {
     int iwidth, iheight;
@@ -42,6 +44,11 @@ float Model::getModelTextureHeight() const {
 }
 
 
+Rectangle Model::getRelativeRectangle() const {
+    return relativeRectangle_;
+}
+
+
 Point Model::getItemGripPointRelativeToCenter() const {
     return itemGripPointRelativeToCenter_;
 }
@@ -58,5 +65,17 @@ Point& Model::getTextureRelativeUL() {
 
 
 Hitbox* Model::getHitboxPtr() const {
+    return hitboxPtr_;
+}
+
+
+Hitbox* Model::replaceHitboxWithAStaticCopy(std::list<Hitbox>& saveContainer, Point* newHitboxNewOwnerCenterPtr) {
+    saveContainer.emplace_back(0, *hitboxPtr_);
+    Hitbox* newlyCreatedHitbox = &saveContainer.back();
+    // std::cout << dynamic_cast<MobileHitbox*>(newlyCreatedHitbox) << std::endl;
+    // std::cout << dynamic_cast<StaticHitbox*>(newlyCreatedHitbox) << std::endl;
+    hitboxPtr_ = newlyCreatedHitbox;
+    hitboxPtr_->setOwnerCenterPtr(newHitboxNewOwnerCenterPtr);
+    // std::cout << *hitboxPtr_->getOwnerCenterPtr() << std::endl;
     return hitboxPtr_;
 }

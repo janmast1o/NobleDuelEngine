@@ -62,6 +62,11 @@ std::pair<float, float> findLineCoefficients(const Point& A, const Point& B) {
 }
 
 
+Point rotateVector(const Point& A, float rotationAngle) {
+    return {A.x*std::cos(rotationAngle) - A.y*std::sin(rotationAngle), A.x*std::sin(rotationAngle) + A.y*std::cos(rotationAngle)};
+}
+
+
 unsigned int convertPairToFrames(std::pair<unsigned int, unsigned int>& P, int framesInCycle) {
     return P.first*framesInCycle+P.second;
 }

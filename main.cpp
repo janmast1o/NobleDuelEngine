@@ -324,7 +324,67 @@ void prepareGame(int windowWidth, int windowHeight, OfflineEngine& engine) {
     rapier->setHasWindUp(true);
     rapier->setWindUpExtendRange(10);
     rapier->setWindUpFrames(5);
-    
+
+    SDL_Texture* orangeBulletTexture = engine.createTexture("resources/orange_bullet.png");
+    std::pair<float, float> orangeBulletWAH = engine.readTexturesWidthAndHeight(orangeBulletTexture);
+    float orangeBulletW = orangeBulletWAH.first;
+    float orangeBulletH = orangeBulletWAH.second;
+    MobileHitbox* orangeBulletHitbox = engine.makeMobileHitbox({{0,0}});
+    Model orangeBulletModel(orangeBulletTexture, orangeBulletHitbox);
+    MobileHitbox* orangeBulletMesh = engine.makeMobileHitbox({{0,0}});
+    ModelCycle orangeBulletModelCycle(orangeBulletMesh);
+    orangeBulletModelCycle.addModelAndResetIterator(orangeBulletModel, 1);
+    ModelCollection orangeBulletModelCollection;
+    orangeBulletModelCollection.addModelCycleForState(IDLE, orangeBulletModelCycle);
+    orangeBulletModelCollection.addModelCycleForState(MOVING_LEFT, orangeBulletModelCycle);
+    orangeBulletModelCollection.addModelCycleForState(MOVING_RIGHT, orangeBulletModelCycle);
+    MobileHitbox leftTravellingHitbox(0, {{0,0}});
+    MobileHitbox rightTravellingHitbox(0, {{0,0}});
+    int orangeBulletIndex = engine.registerNewProjectileArchetype(orangeBulletModelCollection, leftTravellingHitbox, rightTravellingHitbox);
+    // std::cout << orangeBulletIndex << std::endl;
+
+    SDL_Texture* redGunUnownedTexture = engine.createTexture("resources/golden_icon.png");
+    std::pair<float, float> redGunUnownedWAH = engine.readTexturesWidthAndHeight(redGunUnownedTexture);
+    float redGunUnownedW = redGunUnownedWAH.first;
+    float redGunUnownedH = redGunUnownedWAH.second;
+    MobileHitbox* redGunUnownedHitbox = engine.makeMobileHitbox({{-redGunUnownedW/2, -redGunUnownedH/2}, {redGunUnownedW/2, -redGunUnownedH/2}, {redGunUnownedW/2, redGunUnownedH/2}, {-redGunUnownedW/2, redGunUnownedH/2}});
+    Model redGunUnownedModel(redGunUnownedTexture, redGunUnownedHitbox);
+    MobileHitbox* redGunUnownedMesh = engine.makeMobileHitbox({{-redGunUnownedW/2, -redGunUnownedH/2}, {redGunUnownedW/2, -redGunUnownedH/2}, {redGunUnownedW/2, redGunUnownedH/2}, {-redGunUnownedW/2, redGunUnownedH/2}});
+    ModelCycle redGunUnownedModelCycle(redGunUnownedMesh);
+    redGunUnownedModelCycle.addModelAndResetIterator(redGunUnownedModel, 1);
+
+    SDL_Texture* redGunLeftFacingTexture = engine.createTexture("resources/red_rect.png");
+    std::pair<float, float> redGunLeftFacingWAH = engine.readTexturesWidthAndHeight(redGunLeftFacingTexture);
+    float redGunLeftFacingW = redGunLeftFacingWAH.first;
+    float redGunLeftFacingH = redGunLeftFacingWAH.second;
+    MobileHitbox* redGunLeftFacingHitbox = engine.makeMobileHitbox({{-redGunLeftFacingW/2, -redGunLeftFacingH/2}, {redGunLeftFacingW/2, -redGunLeftFacingH/2}, {redGunLeftFacingW/2, redGunLeftFacingH/2}, {-redGunLeftFacingW/2, redGunLeftFacingH/2}});
+    Model redGunLeftFacingModel(redGunLeftFacingTexture, redGunLeftFacingHitbox);
+    MobileHitbox* redGunLeftFacingMesh = engine.makeMobileHitbox({{-redGunLeftFacingW/2, -redGunLeftFacingH/2}, {redGunLeftFacingW/2, -redGunLeftFacingH/2}, {redGunLeftFacingW/2, redGunLeftFacingH/2}, {-redGunLeftFacingW/2, redGunLeftFacingH/2}});
+    ModelCycle redGunLeftFacingModelCycle(redGunLeftFacingMesh);
+    redGunLeftFacingModelCycle.addModelAndResetIterator(redGunLeftFacingModel, 1);
+
+    SDL_Texture* redGunRightFacingTexture = engine.createTexture("resources/red_rect.png");
+    std::pair<float, float> redGunRightFacingWAH = engine.readTexturesWidthAndHeight(redGunRightFacingTexture);
+    float redGunRightFacingW = redGunRightFacingWAH.first;
+    float redGunRightFacingH = redGunRightFacingWAH.second;
+    MobileHitbox* redGunRightFacingHitbox = engine.makeMobileHitbox({{-redGunRightFacingW/2, -redGunRightFacingH/2}, {redGunRightFacingW/2, -redGunRightFacingH/2}, {redGunRightFacingW/2, redGunRightFacingH/2}, {-redGunRightFacingW/2, redGunRightFacingH/2}});
+    Model redGunRightFacingModel(redGunRightFacingTexture, redGunRightFacingHitbox);
+    MobileHitbox* redGunRightFacingMesh = engine.makeMobileHitbox({{-redGunRightFacingW/2, -redGunRightFacingH/2}, {redGunRightFacingW/2, -redGunRightFacingH/2}, {redGunRightFacingW/2, redGunRightFacingH/2}, {-redGunRightFacingW/2, redGunRightFacingH/2}});
+    ModelCycle redGunRightFacingModelCycle(redGunRightFacingMesh);
+    redGunRightFacingModelCycle.addModelAndResetIterator(redGunRightFacingModel, 1);
+
+    ModelCollection redGunModelCollection;
+    redGunModelCollection.addModelCycleForState(IDLE, redGunUnownedModelCycle);
+    redGunModelCollection.addModelCycleForState(OWNED_LEFT, redGunLeftFacingModelCycle);
+    redGunModelCollection.addModelCycleForState(OWNED_RIGHT, redGunRightFacingModelCycle);
+
+    Point redGunCenter(1180, 0);
+    FirearmFireSpecs redGunFireSpecs(1, 15);   
+    FirearmFireSpecs redGunAltFireSpecs(3, 15);
+    redGunAltFireSpecs.bulletSpreadFromCenter = {0, M_PI/6.0, - M_PI/6.0};
+    Firearm* redGun = engine.makeFirearm(redGunCenter, redGunModelCollection, 10, orangeBulletIndex, redGunFireSpecs, redGunAltFireSpecs);
+    // std::cout << redGun << std::endl;    
+
     SDL_Texture* playerTexture = engine.createTexture("resources/first_sprite_tbg_2.png");
     std::pair<float, float> playerWAH = engine.readTexturesWidthAndHeight(playerTexture);
     float playerW = playerWAH.first;

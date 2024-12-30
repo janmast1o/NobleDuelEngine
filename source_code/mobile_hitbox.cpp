@@ -67,6 +67,10 @@ const std::vector<Point> MobileHitbox::getCurrentBottom() const {
 
 
 const Rectangle MobileHitbox::getRectangleAfterVectorTranslation(const Point& translationVector) const {
+    // if (relativeHull_.size() == 1) {
+    //         if (ownerCenterPtr_ != nullptr) std::cout << *ownerCenterPtr_ << std::endl;
+    //         else std::cout << "OO" << std::endl;
+    // }
     Rectangle currentRectangle = relativeRectangle_;
     if (ownerCenterPtr_ != nullptr) {
         currentRectangle.lowerLeft += *ownerCenterPtr_+translationVector;

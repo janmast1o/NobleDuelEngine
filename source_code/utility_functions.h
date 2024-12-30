@@ -29,6 +29,8 @@ float findSlopeCoefficient(const Point& A, const Point& B);
 
 std::pair<float, float> findLineCoefficients(const Point& A, const Point& B);
 
+Point rotateVector(const Point& A, float rotationAngle);
+
 unsigned int convertPairToFrames(std::pair<unsigned int, unsigned int>& P, int framesInCycle);
 
 float seeIfLinesOverlapAlongXAxis(float firstStartX, float firstEndX, float secondStartX, float secondEndX);
