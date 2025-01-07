@@ -17,6 +17,7 @@ public:
     void simulateProjectiles();
     void redrawProjectiles();
     void redrawProjectiles(bool drawHitboxes, float pointSize);
+    void redrawProjectiles(const Rectangle& currentlyObservedRectangle);
 
 };
 

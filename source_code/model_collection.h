@@ -11,6 +11,7 @@ class ModelCollection {
 
 private:
 
+    Rectangle largestRectangle_;
     std::unordered_map<State, ModelCycle> cyclesForStates_;
 
 public:
@@ -18,6 +19,8 @@ public:
     ModelCollection();
     ModelCollection(const ModelCollection& otherModelCollection);
 
+    Rectangle getLargestRectangle() const;
+    void determineLargestRectangle();
     void registerOwnerCenterPtrForHitboxes(Point* ownerCenterPtr);
     
     void addModelCycleForState(State state, ModelCycle newModelCycle);

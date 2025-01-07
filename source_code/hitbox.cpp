@@ -61,6 +61,31 @@ void Hitbox::makeInactive() {
 }
 
 
+const Rectangle Hitbox::getRelativeRectangle() const {
+    return relativeRectangle_;
+}
+
+
+const std::vector<Point> Hitbox::getRelativeHull() const {
+    return relativeHull_;
+}
+
+
+const std::vector<Point> Hitbox::getRelativeGentleSlope() const {
+    return relativeGentleSlopeTop_;
+}
+
+
+const std::vector<Point> Hitbox::getRelativeTop() const {
+    return relativeTop_;
+}
+
+
+const std::vector<Point> Hitbox::getRelativeBottom() const {
+    return relativeBottom_;
+}
+
+
 const Rectangle Hitbox::getCurrentRectangle() const {;}
 
 const std::vector<Point> Hitbox::getCurrentHull() const {;}

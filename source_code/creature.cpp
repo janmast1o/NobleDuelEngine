@@ -86,7 +86,7 @@ void Creature::handleBePushedHorizontally(HandleParams handleParams) {
     float sy = sx*slopeInclineDirectlyUnderneath_;
     Point svec(sx, sy);
     adjustSVec(svec);
-    std::list<Object*> potentiallyColliding = objectMap_.getPotentiallyColliding(*this);
+    std::list<Object*> potentiallyColliding = objectMap_.getPotentiallyColliding(*this, svec);
     bool collisionDetected = false;
     bool groundUnderneathFound = false;
     bool changingSlopes = false;
@@ -202,7 +202,7 @@ void Creature::handleMoveHorizontally() {
     float sy = sx*slopeInclineDirectlyUnderneath_;
     Point svec(sx, sy);
     adjustSVec(svec);
-    std::list<Object*> potentiallyColliding = objectMap_.getPotentiallyColliding(*this);
+    std::list<Object*> potentiallyColliding = objectMap_.getPotentiallyColliding(*this, svec);
     bool collisionDetected = false;
     bool groundUnderneathFound = false;
     bool changingSlopes = false;
@@ -355,6 +355,7 @@ void Creature::translateObjectByVector(const Point& translationVector) {
     if (itemList_[itemListIndex_] != nullptr) {
         itemList_[itemListIndex_]->translateObjectByVector(translationVector);
     }
+    objectMap_.updateObjectPosition(*this);
 }
 
 
@@ -528,6 +529,15 @@ void Creature::redrawObject(bool drawHitboxes, float pointSize) {
         // itemList_[itemListIndex_]->Object::redrawObject(drawHitboxes, pointSize);
         itemList_[itemListIndex_]->temporarilySetIndependentForRedrawing();
         itemList_[itemListIndex_]->redrawObject();
+    }
+}
+
+
+void Creature::redrawObject(const Rectangle& currentlyObservedRectangle) {
+    Object::redrawObject(currentlyObservedRectangle);
+    if (itemList_[itemListIndex_] != nullptr) {
+        itemList_[itemListIndex_]->temporarilySetIndependentForRedrawing();
+        itemList_[itemListIndex_]->redrawObject(currentlyObservedRectangle);
     }
 }
 

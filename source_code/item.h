@@ -55,6 +55,7 @@ public:
 
     void redrawObject() override;
     void redrawObject(bool drawHitboxes, float pointSize) override;
+    void redrawObject(const Rectangle& currentlyObservedRectangle) override;
 
     void runScheduled() override = 0;
 

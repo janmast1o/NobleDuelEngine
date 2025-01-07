@@ -141,7 +141,7 @@ void FloatingPlatform::handleMoveAccordingToMode() {
         incrementMovementModeIndex = true;
     }
 
-    const std::list<Object*> potentiallyColliding = objectMap_.getPotentiallyColliding(*this);
+    const std::list<Object*> potentiallyColliding = objectMap_.getPotentiallyColliding(*this, svec);
     bool collisionDetected = false;
     std::list<MobileObject*> foundMobileDirectlyAbove;
     MobileObject* mop;

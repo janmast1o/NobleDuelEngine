@@ -18,6 +18,7 @@ SOURCES = main.cpp \
 		  source_code/floating_platform.cpp \
 		  source_code/mobile_object.cpp \
 		  source_code/object_map.cpp \
+		  source_code/grid_organizer.cpp \
 		  source_code/button.cpp \
 		  source_code/interactable.cpp \
 		  source_code/object.cpp \

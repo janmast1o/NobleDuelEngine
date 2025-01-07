@@ -44,6 +44,9 @@ public:
 
     void redrawObject() override;
     void redrawObject(bool drawHitboxes, float pointSize) override;
+    void redrawObject(const Rectangle& currentlyObservedRectangle) override;
+
+    void translateObjectByVector(const Point& translationVector) override;
 
     bool isAnythingScheduled() const override; 
     void runScheduled() override;

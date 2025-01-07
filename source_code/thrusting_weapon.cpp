@@ -113,7 +113,7 @@ void ThrustingWeapon::handleAttack() {
     float sx = sideFacedDuringAttackStartUpAsInt_*(attackExtendRange_/ (float) attackFrames_);
     Point svec(sx, 0);
     dependencyState_ = INDEPENDENT;
-    std::list<Object*> potentiallyColliding = objectMap_.getPotentiallyColliding(*this);
+    std::list<Object*> potentiallyColliding = objectMap_.getPotentiallyColliding(*this, svec);
     // std::cout << potentiallyColliding.size() << std::endl;
     dependencyState_ = DEPENDENT;
     setMatter(LIGHT_PHANTOM);

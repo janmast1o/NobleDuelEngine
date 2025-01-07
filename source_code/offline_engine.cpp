@@ -5,14 +5,18 @@
 #include "constants.h"
 
 
-OfflineEngine::OfflineEngine(int windowWidth, int windowHeight) : hitboxIdCounter_(0), projectileFactory_(projectileManager_) {
+OfflineEngine::OfflineEngine(int windowWidth, int windowHeight, GridOrganizerCreationArgs gridCreationArgs) : 
+    objectMap_(gridCreationArgs.celledRectangle, gridCreationArgs.numOfRows, gridCreationArgs.numOfCols),
+    interactableManager_(gridCreationArgs.celledRectangle, gridCreationArgs.numOfRows, gridCreationArgs.numOfCols),
+    hitboxIdCounter_(0), projectileFactory_(projectileManager_), anchoredOnPlayerCenter_(false) {
     if (SDL_Init(SDL_INIT_VIDEO)) {
         std::cerr << "SDL_Init failed" << std::endl;
         return;
     }
 
     windowUpperLeftCorner_ = {0,0};
-    windowRelativeRectangle_ = Rectangle((float) windowWidth, (float) windowHeight);
+    windowRelativeRectangle_ = {{0,-windowHeight}, {windowWidth,0}};
+    windowRectangle_ = windowRelativeRectangle_;
     
     window_ = SDL_CreateWindow("Noble Duel Engine Showcase", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight, 0);
     SDL_SetWindowResizable(window_, SDL_FALSE);
@@ -37,6 +41,27 @@ OfflineEngine::OfflineEngine(int windowWidth, int windowHeight) : hitboxIdCounte
 
     playerUi_ = {renderer_, playerPtr_, {10, 10}, 400, 25, 3, {10, 40}, 400, 25, 3};
 
+}
+
+
+void OfflineEngine::setAnchoredOnPoint(const Point& newUpperLeftAnchor) {
+    windowUpperLeftCorner_ = newUpperLeftAnchor;
+    windowRectangle_ = windowRelativeRectangle_+windowUpperLeftCorner_;
+}
+
+
+void OfflineEngine::setAnchoredOnPlayerCenter() {
+    if (playerPtr_ != nullptr) {
+        anchoredOnPlayerCenter_ = true;
+    }
+}
+
+
+void OfflineEngine::updateWindowUpperLeftCorner() {
+    if (anchoredOnPlayerCenter_ && playerPtr_ != nullptr) {
+        windowUpperLeftCorner_ = playerPtr_->getCenter() + Point(-windowRelativeRectangle_.getWidth()/2, windowRelativeRectangle_.getHeight()/2);
+        windowRectangle_ = windowRelativeRectangle_+windowUpperLeftCorner_;
+    }
 }
 
 
@@ -223,7 +248,7 @@ void OfflineEngine::run() {
                 playerPtr_ = nullptr;
                 playerUi_.setPlayerPtr(nullptr);
             } else {
-                playerPtr_->updateTargetedPoint(Point((float) mouseX, (float) -mouseY));
+                playerPtr_->updateTargetedPoint(Point(((float) mouseX)+windowUpperLeftCorner_.x, ((float) -mouseY)+windowUpperLeftCorner_.y));
                 playerPtr_->readInputs(SDL_GetKeyboardState(NULL), mouseButtonEvent & SDL_BUTTON(SDL_BUTTON_LEFT), mouseButtonEvent & SDL_BUTTON(SDL_BUTTON_RIGHT));
             }
         }
@@ -257,6 +282,7 @@ void OfflineEngine::run() {
             player2Ptr_->runScheduled();
         }
 
+        updateWindowUpperLeftCorner();
         for (auto it = allObjects_.begin(); it != allObjects_.end(); ) {
             if (!(*it).object->isAlive()) {
                 if (!(*it).previouslyDead) {
@@ -273,12 +299,13 @@ void OfflineEngine::run() {
                     it = allObjects_.erase(it);
                 }
             } else {
-                (*it).object->redrawObject();
+                // (*it).object->redrawObject();
+                (*it).object->redrawObject(windowRectangle_);              
                 ++it;
             }
         }
 
-        projectileManager_.redrawProjectiles();
+        projectileManager_.redrawProjectiles(windowRectangle_);
         playerUi_.redrawBars();
 
         auto end = std::chrono::high_resolution_clock::now();

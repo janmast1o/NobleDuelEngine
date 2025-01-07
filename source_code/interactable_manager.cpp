@@ -3,7 +3,10 @@
 #include "constants.h"
 
 
-InteractableManager::InteractableManager() {;}
+InteractableManager::InteractableManager(Rectangle& celledRectangle, int numOfRows, int numOfCols) : interactableGridOrganizer_(celledRectangle, numOfRows, numOfCols) {;}
+
+
+// InteractableManager::InteractableManager() {;}
 
 
 void InteractableManager::addNewInteractable(Interactable& newInteractable) {

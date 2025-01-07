@@ -40,7 +40,7 @@ void Projectile::handleProjectileMovement() {
     float sx = travelDirAlongXAxis_*std::abs(projectileSpecs_.travelSpeed / (FPS*std::sqrt(1+std::pow(travelDirectionSlopeCoefficient_,2))));
     float sy = sx*travelDirectionSlopeCoefficient_;
     Point svec(sx,sy);
-    std::list<Object*> potentiallyColliding = objectMap_.getPotentiallyColliding(*this);
+    std::list<Object*> potentiallyColliding = objectMap_.getPotentiallyColliding(*this, svec);
     bool shouldDisappear = false;
 
     MobileHitbox* hitboxPtr;
@@ -139,6 +139,29 @@ void Projectile::redrawObject(bool drawHitboxes, float pointSize) {
             }
         }
     }
+}
+
+
+void Projectile::redrawObject(const Rectangle& currentlyObservedRectangle) {
+    Model* model = getNextModelPtr();
+    if (model != nullptr && model->getTexture() != nullptr &&
+        currentlyObservedRectangle.collidesWith(model->getRelativeRectangle()+getCenter())) {
+        SDL_FRect destRect;
+        destRect.w = model->getModelTextureWidth();
+        destRect.h = model->getModelTextureHeight();
+        destRect.x = model->getTextureRelativeUL().x + getCenter().x;
+        destRect.y = model->getTextureRelativeUL().y + getCenter().y;
+        destRect.x -= currentlyObservedRectangle.upperLeft.x;
+        destRect.y -= currentlyObservedRectangle.upperLeft.y;
+        destRect.y *= -1;
+        SDL_RenderCopyExF(getRenderer(), model->getTexture(), NULL, &destRect, 
+                          -std::atan(travelDirectionSlopeCoefficient_)*(180/M_PI), NULL, SDL_FLIP_NONE);
+    }
+}
+
+
+void Projectile::translateObjectByVector(const Point& translationVector) {
+    setCenter(getCenter()+translationVector);
 }
 
 

@@ -145,3 +145,13 @@ void Item::redrawObject(bool drawHitboxes, float pointSize) {
         dependencyState_ = DEPENDENT;
     }
 }
+
+
+void Item::redrawObject(const Rectangle& currentlyObservedRectangle) {
+    if (dependencyState_ == INDEPENDENT) {
+        Object::redrawObject(currentlyObservedRectangle);
+    } else if (dependencyState_ == TEMP_INDEPENDENT) {
+        Object::redrawObject(currentlyObservedRectangle);
+        dependencyState_ = DEPENDENT;
+    }
+}

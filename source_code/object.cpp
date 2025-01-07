@@ -19,6 +19,7 @@ Object::Object(SDL_Renderer* renderer, Point center, ModelCollection modelCollec
         previousState_ = IDLE;
         damageReceiveState_ = INVULNERABLE;
         registerOwnerCenterPtrForHitboxes();
+        modelCollection_.determineLargestRectangle();
     }
 
 
@@ -43,6 +44,16 @@ Model* Object::getNextModelPtr() {
     } else {
         return modelCollection_.getFirstModelPtrForState(state_);
     }
+}
+
+
+Rectangle Object::getLargestRectangle() const {
+    return modelCollection_.getLargestRectangle();
+}
+
+
+Rectangle Object::getLargestRectangle() {
+    return modelCollection_.getLargestRectangle();
 }
 
 
@@ -180,6 +191,25 @@ void Object::redrawObject(bool drawHitboxes, float pointSize) {
             }
         }
     }
+}
+
+
+void Object::redrawObject(const Rectangle& currentlyObservedRectangle) {
+    Model* model = getNextModelPtr();
+    if (model != nullptr && model->getTexture() != nullptr &&
+        currentlyObservedRectangle.collidesWith(model->getRelativeRectangle()+center_)) {
+
+        SDL_FRect destRect;
+        destRect.w = model->getModelTextureWidth();
+        destRect.h = model->getModelTextureHeight();
+        destRect.x = model->getTextureRelativeUL().x + center_.x;
+        destRect.y = model->getTextureRelativeUL().y + center_.y;
+        destRect.x -= currentlyObservedRectangle.upperLeft.x;
+        destRect.y -= currentlyObservedRectangle.upperLeft.y;
+        destRect.y *= -1;
+
+        SDL_RenderCopyF(renderer_, model->getTexture(), NULL, &destRect);
+    } 
 }
 
 

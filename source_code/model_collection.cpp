@@ -10,6 +10,33 @@ ModelCollection::ModelCollection(const ModelCollection& otherModelCollection) :
 
 
 
+Rectangle ModelCollection::getLargestRectangle() const {
+    return largestRectangle_;
+}
+
+
+void ModelCollection::determineLargestRectangle() {
+    Point lowerLeft;
+    Point upperRight;
+
+    for (auto& p : cyclesForStates_) {
+        for (auto& r : p.second) {
+            Hitbox* hitboxPtr = r.model.getHitboxPtr();
+            if (hitboxPtr != nullptr) {
+                Rectangle hitboxRectangle = hitboxPtr->getRelativeRectangle();
+                lowerLeft = lowerLeft.getLowerLeft(hitboxRectangle.lowerLeft);
+                upperRight = upperRight.getUpperRight(hitboxRectangle.upperRight);
+            }         
+        }
+        Rectangle collisionMeshRectangle = p.second.getCurrentCollisionMesh().getRelativeRectangle();
+        lowerLeft = lowerLeft.getLowerLeft(collisionMeshRectangle.lowerLeft);
+        upperRight = upperRight.getUpperRight(collisionMeshRectangle.upperRight);
+    }
+
+    largestRectangle_ = {lowerLeft, upperRight};
+}
+
+
 void ModelCollection::registerOwnerCenterPtrForHitboxes(Point* ownerCenterPtr) {
     std::unordered_map<int, Hitbox*> allTiedHitboxesMap;
     for (auto& p : cyclesForStates_) {

@@ -6,6 +6,7 @@
 #include "model_collection.h"
 #include "static_hitbox.h"
 #include "engine_clock.h"
+#include "grid_organizer.h"
 
 class Object {
 
@@ -48,6 +49,8 @@ public:
 
     SDL_Renderer* getRenderer() const;
 
+    Rectangle getLargestRectangle() const;
+    Rectangle getLargestRectangle();
     Hitbox& getCurrentCollisionMesh() const;
     Hitbox& getCurrentHitbox() const;
     Point getCurrentItemGripPoint() const;
@@ -74,6 +77,7 @@ public:
 
     virtual void redrawObject();
     virtual void redrawObject(bool drawHitboxes, float pointSize);
+    virtual void redrawObject(const Rectangle& currentlyObservedRectangle);
 
     virtual bool collideableWith(const Object& otherObject) const;
     virtual bool collideableWith(const Object& otherObject);

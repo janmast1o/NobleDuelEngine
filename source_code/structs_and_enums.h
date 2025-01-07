@@ -32,6 +32,9 @@ struct Point {
     bool isLowerLeft(const Point& otherPoint) const;
     bool isUpperRight(const Point& otherPoint) const;
 
+    Point getLowerLeft(const Point& otherPoint) const;
+    Point getUpperRight(const Point& otherPoint) const;
+
     float distanceFromOther(const Point& otherPoint) const;
 
     friend std::ostream& operator<<(std::ostream& os, const Point& point);
@@ -53,7 +56,13 @@ struct Rectangle {
     Rectangle(float width, float height);
     Rectangle(const Rectangle& otherRectangle);
 
+    Rectangle operator+(const Point& point);
+    Rectangle operator+(const Point& point) const;
+
+    float getWidth() const;
+    float getHeight() const;
     bool collidesWith(const Rectangle& otherRectangle) const;
+    Rectangle getSmallestRectContainingBoth(const Rectangle& otherRectangle) const;
 };
 
 #endif 
@@ -464,6 +473,19 @@ struct ProjectileSpecs {
     ProjectileSpecs();
     ProjectileSpecs(int damage, float travelDistance, bool pierce, float bulletSpeed, Matter matter = SOLID);
 
+};
+
+#endif
+
+#ifndef GRID_ORGANIZER_CREATION_ARGS
+#define GRID_ORGANIZER_CREATION_ARGS
+
+struct GridOrganizerCreationArgs {
+    Rectangle celledRectangle;
+    int numOfRows;
+    int numOfCols;
+
+    GridOrganizerCreationArgs(Rectangle& celledRectangle, int numOfRows, int numOfCols);
 };
 
 #endif

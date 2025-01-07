@@ -344,7 +344,7 @@ bool MobileObject::moveMobileDirectlyAbove(std::list<MobileObject*>& mobileDirec
     }
     std::unordered_set<MobileObject*> allDirectlyAboveSet(mobileDirectlyAbove.begin(), mobileDirectlyAbove.end());
     for (MobileObject* m : mobileDirectlyAbove) {
-        std::list<Object*> potentiallyColliding = objectMap_.getPotentiallyColliding(*m);
+        std::list<Object*> potentiallyColliding = objectMap_.getPotentiallyColliding(*m, translationVector);
         bool collisionDetected = false;
         for (Object* p : potentiallyColliding) {
             if (p != this && p != m && m->collideableWith(*p) && m->collidesWithTopAfterVectorTranslation(*p, translationVector)) {
@@ -360,7 +360,7 @@ bool MobileObject::moveMobileDirectlyAbove(std::list<MobileObject*>& mobileDirec
 
 
 void MobileObject::handleCheckForGroundDirectlyUnderneath() {
-    std::list<Object*> potentiallyUnderneath = objectMap_.getPotentiallyUnderneath(*this);
+    std::list<Object*> potentiallyUnderneath = objectMap_.getPotentiallyColliding(*this);
     bool groundUnderneathFound = false;
     for (Object* p : potentiallyUnderneath) {
         if (p != this && collideableWith(*p)) {
@@ -398,7 +398,7 @@ void MobileObject::handleBePushedHorizontally(HandleParams handleParams) {
     float sy = sx*slopeInclineDirectlyUnderneath_;
     Point svec(sx, sy);
     adjustSVec(svec);
-    std::list<Object*> potentiallyColliding = objectMap_.getPotentiallyColliding(*this);
+    std::list<Object*> potentiallyColliding = objectMap_.getPotentiallyColliding(*this, svec);
     bool collisionDetected = false;
     bool groundUnderneathFound = false;
     bool changingSlopes = false;
@@ -487,7 +487,7 @@ void MobileObject::handleEscapeFromUnderneathObjectOnTop(HandleParams handlePara
     float sy = sx*slopeInclineDirectlyUnderneath_;
     Point svec(sx, sy);
     adjustSVec(svec);
-    std::list<Object*> potentiallyColliding = objectMap_.getPotentiallyColliding(*this);
+    std::list<Object*> potentiallyColliding = objectMap_.getPotentiallyColliding(*this, svec);
     bool collisionDetected = false;
     bool groundUnderneathFound = false;
     bool changingSlopes = false;
@@ -582,7 +582,7 @@ void MobileObject::handleSlideDown(HandleParams handleParams) {
     float sy = -std::abs(b*std::pow(std::sin(gamma), 2));
     Point svec(sx, sy);
     adjustSVec(svec);
-    std::list<Object*> potentiallyCollding = objectMap_.getPotentiallyColliding(*this);
+    std::list<Object*> potentiallyCollding = objectMap_.getPotentiallyColliding(*this, svec);
     bool collisionDetected = false;
     bool groundUnderneathFound = false;
     float alpha = -INFINITY;
@@ -686,7 +686,7 @@ void MobileObject::handleSlideOffTop() {
     float sy = -std::abs(alpha*sx);
     Point svec(sx, sy);
     adjustSVec(svec);
-    std::list<Object*> potentiallyColliding = objectMap_.getPotentiallyColliding(*this);
+    std::list<Object*> potentiallyColliding = objectMap_.getPotentiallyColliding(*this, svec);
     bool collisionDetected = false;
 
     for (Object* p : potentiallyColliding) {
@@ -726,7 +726,7 @@ void MobileObject::handleAirborne(HandleParams handleParams) {
     float sy = velocity_.verticalVelocity*(1.0/FPS);
     Point svec(sx, sy);
     adjustSVec(svec);
-    std::list<Object*> potentiallyColliding = objectMap_.getPotentiallyColliding(*this);
+    std::list<Object*> potentiallyColliding = objectMap_.getPotentiallyColliding(*this, svec);
     bool collisionDetected = false;
     bool groundUnderneathFound = false;
     std::list<MobileObject*> foundMobileDirectlyAbove;
@@ -804,7 +804,7 @@ void MobileObject::handleFreefall() {
     float sy = velocity_.verticalVelocity*(1.0/FPS);
     Point svec(0, sy);
     adjustSVec(svec);
-    std::list<Object*> potentiallyUnderneath = objectMap_.getPotentiallyUnderneath(*this);
+    std::list<Object*> potentiallyUnderneath = objectMap_.getPotentiallyColliding(*this, svec);
     bool groundUnderneathFound = false;
     float tempAlpha;
     float alpha = -INFINITY;
@@ -925,6 +925,7 @@ bool MobileObject::collidesWithHitboxAfterVectorTranslation(Object& otherObject,
 
 void MobileObject::translateObjectByVector(const Point& translationVector) {
     setCenter(getCenter()+translationVector);
+    objectMap_.updateObjectPosition(*this);
 }
 
 

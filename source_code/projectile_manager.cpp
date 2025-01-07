@@ -50,3 +50,10 @@ void ProjectileManager::redrawProjectiles(bool drawHitboxes, float pointSize) {
         p.redrawObject(drawHitboxes, pointSize);
     }
 }
+
+
+void ProjectileManager::redrawProjectiles(const Rectangle& currentlyObservedRectangle) {
+    for (Projectile& p : simulatedProjectiles_) {
+        p.redrawObject(currentlyObservedRectangle);
+    }
+}

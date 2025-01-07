@@ -426,8 +426,10 @@ void prepareGame(int windowWidth, int windowHeight, OfflineEngine& engine) {
 int main() {
     int windowWidth = 1400;
     int windowHeight = 900;
-    OfflineEngine engine(windowWidth, windowHeight);
+    Rectangle celledRectangle({-10, -1000}, {1500, 0});
+    OfflineEngine engine(windowWidth, windowHeight, {celledRectangle, 4, 4});
     prepareGame(windowWidth, windowHeight, engine);
+    engine.setAnchoredOnPlayerCenter();
     engine.run();
     // std::vector<Point> S1 = {Point(21,1), Point(20,3), Point(18,5), Point(14,6), Point(7,5), Point(4,4), Point(2,2)};
     // std::vector<Point> R1 = {Point(21, 10), Point(20,9), Point(19,8), Point(12,7), Point(7,7), Point(4,8), Point(3,10)};

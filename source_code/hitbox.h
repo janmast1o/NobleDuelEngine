@@ -36,6 +36,12 @@ public:
     void makeActive();
     void makeInactive();
 
+    const Rectangle getRelativeRectangle() const;
+    const std::vector<Point> getRelativeHull() const;
+    const std::vector<Point> getRelativeGentleSlope() const;
+    const std::vector<Point> getRelativeTop() const;
+    const std::vector<Point> getRelativeBottom() const;
+    
     virtual const Rectangle getCurrentRectangle() const;
     virtual const std::vector<Point> getCurrentHull() const;
     virtual const std::vector<Point> getCurrentGentleSlopeTop() const;

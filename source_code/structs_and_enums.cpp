@@ -56,6 +56,16 @@ bool Point::isUpperRight(const Point& otherPoint) const {
 }
 
 
+Point Point::getLowerLeft(const Point& otherPoint) const {
+    return {std::min(x, otherPoint.x), std::min(y, otherPoint.y)};
+}
+
+
+Point Point::getUpperRight(const Point& otherPoint) const {
+    return {std::max(x, otherPoint.x), std::max(y, otherPoint.y)};
+}
+
+
 float Point::distanceFromOther(const Point& otherPoint) const {
     return std::sqrt(std::pow(x-otherPoint.x, 2) + std::pow(y-otherPoint.y, 2));
 }
@@ -92,6 +102,26 @@ Rectangle::Rectangle(const Rectangle& otherRectangle) :
     upperLeft(otherRectangle.upperLeft) {}
 
 
+Rectangle Rectangle::operator+(const Point& point) {
+    return {lowerLeft+point, upperRight+point};
+}
+
+
+Rectangle Rectangle::operator+(const Point& point) const {
+    return {lowerLeft+point, upperRight+point};
+}
+
+
+float Rectangle::getWidth() const {
+    return (upperRight.x-lowerLeft.x);
+}
+
+
+float Rectangle::getHeight() const {
+    return (upperRight.y-lowerLeft.y);
+}
+
+
 bool Rectangle::collidesWith(const Rectangle& otherRectangle) const {
     if (lowerLeft.isLowerLeft(otherRectangle.lowerLeft) && upperRight.isUpperRight(otherRectangle.lowerLeft)) {
         return true;
@@ -112,6 +142,11 @@ bool Rectangle::collidesWith(const Rectangle& otherRectangle) const {
     } else {
         return false;
     }
+}
+
+
+Rectangle Rectangle::getSmallestRectContainingBoth(const Rectangle& otherRectangle) const {
+    return {lowerLeft.getLowerLeft(otherRectangle.lowerLeft), upperRight.getUpperRight(otherRectangle.upperRight)};
 }
 
 
@@ -399,4 +434,8 @@ ProjectileSpecs::ProjectileSpecs() : damage(0), travelDistance(0), pierce(false)
 
 
 ProjectileSpecs::ProjectileSpecs(int damage, float travelDistance, bool pierce, float travelSpeed, Matter matter) :
-                                 damage(damage), travelDistance(travelDistance), pierce(pierce), travelSpeed(travelSpeed), matter(matter) {}                                   
+                                 damage(damage), travelDistance(travelDistance), pierce(pierce), travelSpeed(travelSpeed), matter(matter) {}  
+
+
+GridOrganizerCreationArgs::GridOrganizerCreationArgs(Rectangle& celledRectangle, int numOfRows, int numOfCols) :
+                                                     celledRectangle(celledRectangle), numOfRows(numOfRows), numOfCols(numOfCols) {}                                                                  

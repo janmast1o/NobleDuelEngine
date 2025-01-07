@@ -37,8 +37,10 @@ private:
     
     Point windowUpperLeftCorner_;
     Rectangle windowRelativeRectangle_;
+    Rectangle windowRectangle_;
     SDL_Window* window_;
     SDL_Renderer* renderer_;
+    bool anchoredOnPlayerCenter_;
 
     EngineClock sessionEngineClock_;
 
@@ -64,9 +66,16 @@ private:
 
     std::list<SDL_Texture*> textures_;
 
+protected:
+
+    void updateWindowUpperLeftCorner();
+
 public:
 
-    OfflineEngine(int windowWidth, int windowHeight);
+    OfflineEngine(int windowWidth, int windowHeight, GridOrganizerCreationArgs gridCreationArgs);
+
+    void setAnchoredOnPoint(const Point& newLeftUpperAnchor);
+    void setAnchoredOnPlayerCenter();
 
     SDL_Texture* createTexture(const char* filepath);
 

@@ -216,6 +216,31 @@ void Firearm::redrawObject(bool drawHitboxes, float pointSize) {
 }
 
 
+void Firearm::redrawObject(const Rectangle& currentlyObservedRectangle) {
+    if (dependencyState_ == INDEPENDENT) {
+        Object::redrawObject(currentlyObservedRectangle);
+        return;
+    } else if (dependencyState_ == TEMP_INDEPENDENT) {
+        Model* model = getNextModelPtr();
+        if (model != nullptr && model->getTexture() != nullptr &&
+            currentlyObservedRectangle.collidesWith(model->getRelativeRectangle()+getCenter())) {
+            SDL_FRect destRect;
+            destRect.w = model->getModelTextureWidth();
+            destRect.h = model->getModelTextureHeight();
+            destRect.x = model->getTextureRelativeUL().x + getCenter().x;
+            destRect.y = model->getTextureRelativeUL().y + getCenter().y;
+            destRect.x -= currentlyObservedRectangle.upperLeft.x;
+            destRect.y -= currentlyObservedRectangle.upperLeft.y;
+            destRect.y *= -1;
+            // SDL_FPoint rotationPoint = {-model->getTextureRelativeUL().x, model->getTextureRelativeUL().y-destRect.h};
+            // SDL_RenderCopyExF(getRenderer(), model->getTexture(), NULL, &destRect, calculateRotationAngle(), &rotationPoint, SDL_FLIP_NONE);
+            SDL_RenderCopyExF(getRenderer(), model->getTexture(), NULL, &destRect, calculateRotationAngle(), NULL, SDL_FLIP_NONE);
+        }
+        dependencyState_ = DEPENDENT;
+    }
+}
+
+
 void Firearm::runScheduled() {
     if (dependencyState_ == INDEPENDENT) {
         MobileObject::runScheduled();
