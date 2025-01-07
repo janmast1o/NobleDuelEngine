@@ -202,11 +202,8 @@ void Object::redrawObject(const Rectangle& currentlyObservedRectangle) {
         SDL_FRect destRect;
         destRect.w = model->getModelTextureWidth();
         destRect.h = model->getModelTextureHeight();
-        destRect.x = model->getTextureRelativeUL().x + center_.x;
-        destRect.y = model->getTextureRelativeUL().y + center_.y;
-        destRect.x -= currentlyObservedRectangle.upperLeft.x;
-        destRect.y -= currentlyObservedRectangle.upperLeft.y;
-        destRect.y *= -1;
+        destRect.x = model->getTextureRelativeUL().x + center_.x - currentlyObservedRectangle.upperLeft.x;
+        destRect.y = -model->getTextureRelativeUL().y - center_.y + currentlyObservedRectangle.upperLeft.y;
 
         SDL_RenderCopyF(renderer_, model->getTexture(), NULL, &destRect);
     } 

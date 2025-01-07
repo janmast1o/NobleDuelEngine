@@ -17,6 +17,7 @@ OfflineEngine::OfflineEngine(int windowWidth, int windowHeight, GridOrganizerCre
     windowUpperLeftCorner_ = {0,0};
     windowRelativeRectangle_ = {{0,-windowHeight}, {windowWidth,0}};
     windowRectangle_ = windowRelativeRectangle_;
+    auxWindowUpperLeftAnchor_ = {-windowRelativeRectangle_.getWidth()/2, windowRelativeRectangle_.getHeight()/2};
     
     window_ = SDL_CreateWindow("Noble Duel Engine Showcase", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight, 0);
     SDL_SetWindowResizable(window_, SDL_FALSE);
@@ -59,7 +60,7 @@ void OfflineEngine::setAnchoredOnPlayerCenter() {
 
 void OfflineEngine::updateWindowUpperLeftCorner() {
     if (anchoredOnPlayerCenter_ && playerPtr_ != nullptr) {
-        windowUpperLeftCorner_ = playerPtr_->getCenter() + Point(-windowRelativeRectangle_.getWidth()/2, windowRelativeRectangle_.getHeight()/2);
+        windowUpperLeftCorner_ = playerPtr_->getCenter() + auxWindowUpperLeftAnchor_;
         windowRectangle_ = windowRelativeRectangle_+windowUpperLeftCorner_;
     }
 }

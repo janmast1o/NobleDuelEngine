@@ -33,6 +33,12 @@ bool MobileObject::isMobile() const {
 }    
 
 
+void MobileObject::setCenter(const Point& newCenter) {
+    Object::setCenter(newCenter);
+    objectMap_.updateObjectPosition(*this);
+}
+
+
 float MobileObject::getCurrentHVelocity() const {
     return velocity_.horizontalVelocity;
 }
@@ -925,7 +931,7 @@ bool MobileObject::collidesWithHitboxAfterVectorTranslation(Object& otherObject,
 
 void MobileObject::translateObjectByVector(const Point& translationVector) {
     setCenter(getCenter()+translationVector);
-    objectMap_.updateObjectPosition(*this);
+    // objectMap_.updateObjectPosition(*this);
 }
 
 

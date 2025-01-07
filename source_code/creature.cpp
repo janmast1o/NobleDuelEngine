@@ -355,7 +355,7 @@ void Creature::translateObjectByVector(const Point& translationVector) {
     if (itemList_[itemListIndex_] != nullptr) {
         itemList_[itemListIndex_]->translateObjectByVector(translationVector);
     }
-    objectMap_.updateObjectPosition(*this);
+    // objectMap_.updateObjectPosition(*this);
 }
 
 

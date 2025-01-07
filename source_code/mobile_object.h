@@ -85,6 +85,8 @@ public:
 
     bool isMobile() const override;
 
+    void setCenter(const Point& newCenter) override;
+
     float getCurrentHVelocity() const;
     float getMass() const;
     

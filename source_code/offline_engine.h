@@ -36,6 +36,7 @@ private:
     };
     
     Point windowUpperLeftCorner_;
+    Point auxWindowUpperLeftAnchor_;
     Rectangle windowRelativeRectangle_;
     Rectangle windowRectangle_;
     SDL_Window* window_;

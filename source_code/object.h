@@ -26,6 +26,9 @@ private:
     State previousState_;
     DamageReceiveState damageReceiveState_;
 
+    // Point previousCurrentlyObservedRectangleUpperLeft_;
+    // Point previousTextureUpperLeftDisplayPoint_;
+
     void registerOwnerCenterPtrForHitboxes();
 
 protected:
@@ -64,7 +67,7 @@ public:
     bool isAlive() const;
 
     Point& getCenter();
-    void setCenter(const Point& newCenter);
+    virtual void setCenter(const Point& newCenter);
 
     Matter getMatter() const;
     void setMatter(Matter matter);
