@@ -33,6 +33,8 @@ public:
 
     Projectile(const Projectile& otherProjectile);           
 
+    void setCenter(const Point& newCenter) override;
+
     Creature* getShooter() const;
     void setShooter(Creature* newShooter); 
 
@@ -44,7 +46,7 @@ public:
 
     void redrawObject() override;
     void redrawObject(bool drawHitboxes, float pointSize) override;
-    void redrawObject(const Rectangle& currentlyObservedRectangle) override;
+    void redrawObject(const Rectangle& currentlyObservedRectangle, bool smoothOut = true) override;
 
     void translateObjectByVector(const Point& translationVector) override;
 

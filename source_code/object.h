@@ -26,18 +26,20 @@ private:
     State previousState_;
     DamageReceiveState damageReceiveState_;
 
-    // Point previousCurrentlyObservedRectangleUpperLeft_;
-    // Point previousTextureUpperLeftDisplayPoint_;
-
     void registerOwnerCenterPtrForHitboxes();
 
 protected:
 
     const EngineClock& sessionEngineClock_;
+
+    Point previousObservedRectangleUpperLeft_;
+    Point previousDisplayUpperLeft_;
     
     Model* getNextModelPtr();
 
     // Hitbox& getCurrentCollisionMesh() const;
+
+    virtual Point smoothOutForDisplay(Point currentObservedRectangleUpperLeft, Point calcDisplayUpperLeft);
 
     friend class MobileObject;
 
@@ -80,7 +82,7 @@ public:
 
     virtual void redrawObject();
     virtual void redrawObject(bool drawHitboxes, float pointSize);
-    virtual void redrawObject(const Rectangle& currentlyObservedRectangle);
+    virtual void redrawObject(const Rectangle& currentlyObservedRectangle, bool smoothOut = true);
 
     virtual bool collideableWith(const Object& otherObject) const;
     virtual bool collideableWith(const Object& otherObject);

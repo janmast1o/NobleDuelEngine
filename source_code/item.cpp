@@ -147,11 +147,11 @@ void Item::redrawObject(bool drawHitboxes, float pointSize) {
 }
 
 
-void Item::redrawObject(const Rectangle& currentlyObservedRectangle) {
+void Item::redrawObject(const Rectangle& currentlyObservedRectangle, bool smoothOut) {
     if (dependencyState_ == INDEPENDENT) {
-        Object::redrawObject(currentlyObservedRectangle);
+        MobileObject::redrawObject(currentlyObservedRectangle, smoothOut);
     } else if (dependencyState_ == TEMP_INDEPENDENT) {
-        Object::redrawObject(currentlyObservedRectangle);
+        MobileObject::redrawObject(currentlyObservedRectangle, smoothOut);
         dependencyState_ = DEPENDENT;
     }
 }

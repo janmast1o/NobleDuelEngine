@@ -216,7 +216,7 @@ void Firearm::redrawObject(bool drawHitboxes, float pointSize) {
 }
 
 
-void Firearm::redrawObject(const Rectangle& currentlyObservedRectangle) {
+void Firearm::redrawObject(const Rectangle& currentlyObservedRectangle, bool smoothOut) {
     if (dependencyState_ == INDEPENDENT) {
         Object::redrawObject(currentlyObservedRectangle);
         return;
@@ -224,16 +224,20 @@ void Firearm::redrawObject(const Rectangle& currentlyObservedRectangle) {
         Model* model = getNextModelPtr();
         if (model != nullptr && model->getTexture() != nullptr &&
             currentlyObservedRectangle.collidesWith(model->getRelativeRectangle()+getCenter())) {
+
             SDL_FRect destRect;
             destRect.w = model->getModelTextureWidth();
             destRect.h = model->getModelTextureHeight();
-            destRect.x = model->getTextureRelativeUL().x + getCenter().x;
-            destRect.y = model->getTextureRelativeUL().y + getCenter().y;
-            destRect.x -= currentlyObservedRectangle.upperLeft.x;
-            destRect.y -= currentlyObservedRectangle.upperLeft.y;
-            destRect.y *= -1;
-            // SDL_FPoint rotationPoint = {-model->getTextureRelativeUL().x, model->getTextureRelativeUL().y-destRect.h};
-            // SDL_RenderCopyExF(getRenderer(), model->getTexture(), NULL, &destRect, calculateRotationAngle(), &rotationPoint, SDL_FLIP_NONE);
+            Point calcUpperLeft = {
+                model->getTextureRelativeUL().x + getCenter().x - currentlyObservedRectangle.upperLeft.x,
+                model->getTextureRelativeUL().y + getCenter().y - currentlyObservedRectangle.upperLeft.y
+            };
+
+            if (smoothOut) calcUpperLeft = smoothOutForDisplay(currentlyObservedRectangle.upperLeft, calcUpperLeft);
+            destRect.x = calcUpperLeft.x;
+            destRect.y = -calcUpperLeft.y;
+            previousObservedRectangleUpperLeft_ = currentlyObservedRectangle.upperLeft;
+            previousDisplayUpperLeft_ = calcUpperLeft;
             SDL_RenderCopyExF(getRenderer(), model->getTexture(), NULL, &destRect, calculateRotationAngle(), NULL, SDL_FLIP_NONE);
         }
         dependencyState_ = DEPENDENT;

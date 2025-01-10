@@ -321,7 +321,7 @@ void fillT(typename std::list<TEntry>::iterator it, int startEl, int endEl) {
 }
 
 
-float minVertDistance(const std::vector<Point>& S, const std::vector<Point>& R) {
+float calculateMinVertDistance(const std::vector<Point>& S, const std::vector<Point>& R) {
     int startS, endS, incS, startR, endR, incR;
     if (S[0].x < S.back().x) {
         startS = 0;
@@ -455,6 +455,31 @@ float minVertDistance(const std::vector<Point>& S, const std::vector<Point>& R) 
         }
         return minDistance;
     }
+}
+
+
+float calculateMinDistanceAlongTheLine(const std::vector<Point>& D, const std::vector<Point>& E, Point v) {
+    if (v.y == 0) return calculateMinVertDistance(D, E);
+    float vx, vy;
+    vx = v.x;
+    vy = v.y;
+    Point l(v.y, -v.x);
+    std::vector<Point> Di = getPolygonSideCastableOntoLine(D, l);
+    std::vector<Point> Ej = getPolygonSideCastableOntoLine(E, -l);
+    std::vector<std::pair<std::optional<Point>, std::optional<Point>>> C = mergeDiAndEj(Di, Ej);
+    std::vector<std::optional<int>> lastInstanceOfOther = getLastInstanceOfOther(C);
+    std::vector<std::optional<int>> nextInstanceOfOther = getNextInstanceOfOther(C);
+    int start = getStartOfSearchSliceIndex(C, lastInstanceOfOther, nextInstanceOfOther);
+    int end = getEndOfSearchSliceIndex(C, lastInstanceOfOther, nextInstanceOfOther);
+
+    if (end < start) return INFINITY;
+
+    for (int i=start; i<=end; ++i) {
+        if (C[i].first.has_value() && !C[i].second.has_value()) {
+            Point ep = C[lastInstanceOfOther[i].value()].first.value();
+            Point er = C[nextInstanceOfOther[i].value()].first.value();
+        }
+    }  
 }
 
 

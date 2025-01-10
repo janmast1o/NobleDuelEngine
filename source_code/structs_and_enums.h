@@ -11,6 +11,8 @@
 #define POINT_H
 
 struct Point {
+    static float comparisonEps;
+
     float x;
     float y;
 
@@ -28,6 +30,8 @@ struct Point {
 
     Point& operator+=(const Point& otherPoint);
     Point& operator-=(const Point& otherPoint);
+
+    bool operator==(const Point& otherPoint) const;
 
     bool isLowerLeft(const Point& otherPoint) const;
     bool isUpperRight(const Point& otherPoint) const;

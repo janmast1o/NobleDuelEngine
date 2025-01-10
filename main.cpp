@@ -435,11 +435,11 @@ int main() {
     // std::vector<Point> R1 = {Point(21, 10), Point(20,9), Point(19,8), Point(12,7), Point(7,7), Point(4,8), Point(3,10)};
     // std::vector<Point> P1 = {{5,11}, {6,9}, {7,7}, {10,7}, {15,9}, {23,14}};
 
-    // std::cout << minVertDistance(S1, R1) << std::endl;
-    // std::cout << minVertDistance(S1, P1) << std::endl;
-    // std::cout << minVertDistance(R1, S1) << std::endl;
-    // std::cout << minVertDistance(P1, S1) << std::endl;
-    // std::cout << minVertDistance(P1, R1) << std::endl;
+    // std::cout << calculateMinVertDistance(S1, R1) << std::endl;
+    // std::cout << calculateMinVertDistance(S1, P1) << std::endl;
+    // std::cout << calculateMinVertDistance(R1, S1) << std::endl;
+    // std::cout << calculateMinVertDistance(P1, S1) << std::endl;
+    // std::cout << calculateMinVertDistance(P1, R1) << std::endl;
 
     // std::vector<Point> S = {{593.98, -332.5}, {642.98, -332.5}, {642.98, -283.5}, {593.98, -283.5}};
     // std::vector<Point> R = {{631, -332.5}, {669, -332.5}, {669, -292.5}, {631, -292.5}};

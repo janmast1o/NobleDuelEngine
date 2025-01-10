@@ -35,6 +35,11 @@ Projectile::Projectile(const Projectile& otherProjectile) :
 }
 
 
+void Projectile::setCenter(const Point& newCenter) {
+    Object::setCenter(newCenter);
+}
+
+
 void Projectile::handleProjectileMovement() {
     previouslyScheduled_ = scheduled_;
     float sx = travelDirAlongXAxis_*std::abs(projectileSpecs_.travelSpeed / (FPS*std::sqrt(1+std::pow(travelDirectionSlopeCoefficient_,2))));
@@ -142,20 +147,25 @@ void Projectile::redrawObject(bool drawHitboxes, float pointSize) {
 }
 
 
-void Projectile::redrawObject(const Rectangle& currentlyObservedRectangle) {
+void Projectile::redrawObject(const Rectangle& currentlyObservedRectangle, bool smoothOut) {
     Model* model = getNextModelPtr();
     if (model != nullptr && model->getTexture() != nullptr &&
         currentlyObservedRectangle.collidesWith(model->getRelativeRectangle()+getCenter())) {
         SDL_FRect destRect;
         destRect.w = model->getModelTextureWidth();
         destRect.h = model->getModelTextureHeight();
-        destRect.x = model->getTextureRelativeUL().x + getCenter().x;
-        destRect.y = model->getTextureRelativeUL().y + getCenter().y;
-        destRect.x -= currentlyObservedRectangle.upperLeft.x;
-        destRect.y -= currentlyObservedRectangle.upperLeft.y;
-        destRect.y *= -1;
+        Point calcUpperLeft = {
+            model->getTextureRelativeUL().x + getCenter().x - currentlyObservedRectangle.upperLeft.x,
+            model->getTextureRelativeUL().y + getCenter().y - currentlyObservedRectangle.upperLeft.y
+        };
+
+        if (smoothOut) calcUpperLeft = smoothOutForDisplay(currentlyObservedRectangle.upperLeft, calcUpperLeft);
+        destRect.x = calcUpperLeft.x;
+        destRect.y = -calcUpperLeft.y;
+        previousObservedRectangleUpperLeft_ = currentlyObservedRectangle.upperLeft;
+        previousDisplayUpperLeft_ = calcUpperLeft;
         SDL_RenderCopyExF(getRenderer(), model->getTexture(), NULL, &destRect, 
-                          -std::atan(travelDirectionSlopeCoefficient_)*(180/M_PI), NULL, SDL_FLIP_NONE);
+                          -std::atan(travelDirectionSlopeCoefficient_)*(180/M_PI), NULL, SDL_FLIP_NONE);                 
     }
 }
 

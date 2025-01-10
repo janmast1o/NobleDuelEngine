@@ -20,6 +20,8 @@ Object::Object(SDL_Renderer* renderer, Point center, ModelCollection modelCollec
         damageReceiveState_ = INVULNERABLE;
         registerOwnerCenterPtrForHitboxes();
         modelCollection_.determineLargestRectangle();
+        previousObservedRectangleUpperLeft_ = {-INFINITY, -INFINITY};
+        previousDisplayUpperLeft_ = {-INFINITY, -INFINITY};
     }
 
 
@@ -44,6 +46,29 @@ Model* Object::getNextModelPtr() {
     } else {
         return modelCollection_.getFirstModelPtrForState(state_);
     }
+}
+
+
+Point Object::smoothOutForDisplay(Point currentlyObservedRectangleUpperLeft, Point calcDisplayUpperLeft) {
+    if (currentlyObservedRectangleUpperLeft == previousObservedRectangleUpperLeft_) calcDisplayUpperLeft;
+    else if (previousDisplayUpperLeft_.x == -INFINITY && previousDisplayUpperLeft_.y == -INFINITY) {
+        return calcDisplayUpperLeft;
+    }
+
+    Point displayUpperLeftAfterSmoothOut = calcDisplayUpperLeft;
+    if (currentlyObservedRectangleUpperLeft.x > previousObservedRectangleUpperLeft_.x) {
+        displayUpperLeftAfterSmoothOut.x = std::min(previousDisplayUpperLeft_.x, calcDisplayUpperLeft.x);
+    } else if (currentlyObservedRectangleUpperLeft.x < previousObservedRectangleUpperLeft_.x) {
+        displayUpperLeftAfterSmoothOut.x = std::max(previousDisplayUpperLeft_.x, calcDisplayUpperLeft.x);
+    }
+
+    if (currentlyObservedRectangleUpperLeft.y > previousObservedRectangleUpperLeft_.y) {
+        displayUpperLeftAfterSmoothOut.y = std::min(previousDisplayUpperLeft_.y, calcDisplayUpperLeft.y);
+    } else if (currentlyObservedRectangleUpperLeft.y < previousObservedRectangleUpperLeft_.y) {
+        displayUpperLeftAfterSmoothOut.y = std::max(previousDisplayUpperLeft_.y, calcDisplayUpperLeft.y);
+    }
+
+    return displayUpperLeftAfterSmoothOut;
 }
 
 
@@ -182,6 +207,7 @@ void Object::redrawObject(bool drawHitboxes, float pointSize) {
         destRect.h = model->getModelTextureHeight();
         destRect.x = model->getTextureRelativeUL().x + center_.x;
         destRect.y = -(model->getTextureRelativeUL().y + center_.y);
+
         SDL_RenderCopyF(renderer_, model->getTexture(), NULL, &destRect);
         if (drawHitboxes) {
             std::vector<Point> hull = model->getHitboxPtr()->getCurrentHull();
@@ -194,7 +220,7 @@ void Object::redrawObject(bool drawHitboxes, float pointSize) {
 }
 
 
-void Object::redrawObject(const Rectangle& currentlyObservedRectangle) {
+void Object::redrawObject(const Rectangle& currentlyObservedRectangle, bool smoothOut) {
     Model* model = getNextModelPtr();
     if (model != nullptr && model->getTexture() != nullptr &&
         currentlyObservedRectangle.collidesWith(model->getRelativeRectangle()+center_)) {
@@ -202,8 +228,18 @@ void Object::redrawObject(const Rectangle& currentlyObservedRectangle) {
         SDL_FRect destRect;
         destRect.w = model->getModelTextureWidth();
         destRect.h = model->getModelTextureHeight();
-        destRect.x = model->getTextureRelativeUL().x + center_.x - currentlyObservedRectangle.upperLeft.x;
-        destRect.y = -model->getTextureRelativeUL().y - center_.y + currentlyObservedRectangle.upperLeft.y;
+        Point calcUpperLeft = {
+            model->getTextureRelativeUL().x + center_.x - currentlyObservedRectangle.upperLeft.x,
+            model->getTextureRelativeUL().y + center_.y - currentlyObservedRectangle.upperLeft.y
+        };
+        // destRect.x = model->getTextureRelativeUL().x + center_.x - currentlyObservedRectangle.upperLeft.x;
+        // destRect.y = -model->getTextureRelativeUL().y - center_.y + currentlyObservedRectangle.upperLeft.y;
+
+        if (smoothOut) calcUpperLeft = smoothOutForDisplay(currentlyObservedRectangle.upperLeft, calcUpperLeft);
+        destRect.x = calcUpperLeft.x;
+        destRect.y = -calcUpperLeft.y;
+        previousObservedRectangleUpperLeft_ = currentlyObservedRectangle.upperLeft;
+        previousDisplayUpperLeft_ = calcUpperLeft;
 
         SDL_RenderCopyF(renderer_, model->getTexture(), NULL, &destRect);
     } 

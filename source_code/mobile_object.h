@@ -10,6 +10,8 @@ class MobileObject : virtual public Object {
 
 protected:
 
+    Point previousFrameCenter_;
+    
     float mass_;
     float slopeInclineDirectlyUnderneath_;
     MomentumDictated currentMomentumDictated_;
@@ -39,6 +41,8 @@ protected:
 
     std::list<MobileObject*> spawnedObjects_;
 
+    Point smoothOutForDisplay(Point currentlyObservedRectangleUpperLeft, Point calcDisplayUpperLeft) override;
+    
     void removeGroundReactionAcceleration();
     void addGroundReactionAcceleration();
 
@@ -86,6 +90,7 @@ public:
     bool isMobile() const override;
 
     void setCenter(const Point& newCenter) override;
+    void updatePreviousFrameCenter();
 
     float getCurrentHVelocity() const;
     float getMass() const;
@@ -128,6 +133,8 @@ public:
 
     bool isParticipatingInMomentum() const override;
     void registerBeingAffectedByOutsideMomentum(float otherObjectMass, float otherObjectHVelocity, float hTranslation) override; 
+
+    void redrawObject(const Rectangle& currentlyObservedRectangle, bool smoothOut = true) override;
 
     virtual bool isAnythingScheduled() const;
     void runScheduledForNonEmptyMomentum();

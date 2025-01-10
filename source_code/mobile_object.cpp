@@ -7,6 +7,7 @@
 
 MobileObject::MobileObject(SDL_Renderer* renderer, Point center, ModelCollection modelCollection, const EngineClock& sessionEngineClock, ObjectMap& objectMap, float mass) :
     Object(renderer, center, modelCollection, sessionEngineClock), objectMap_(objectMap), mass_(mass) {
+        previousFrameCenter_ = {-INFINITY, -INFINITY};
         acceleration_.verticalAcceleration = -GRAVITATIONAL_PULL;
         slopeInclineDirectlyUnderneath_ = 0;
         participatingInMomentum_ = true;
@@ -31,6 +32,11 @@ MobileObject::MobileObject(SDL_Renderer* renderer, Point center, ModelCollection
 bool MobileObject::isMobile() const {
     return true;
 }    
+
+
+void MobileObject::updatePreviousFrameCenter() {
+    previousFrameCenter_ = getCenter();
+}
 
 
 void MobileObject::setCenter(const Point& newCenter) {
@@ -213,6 +219,33 @@ void MobileObject::prepareNextEscapeScheduled(float escapeDirection, MobileObjec
     auxDistanceToCover_ = findEscapeDisAlongXAxis(escapingFrom, escapeDirection);
     auxDistanceCoveredSoFar_ = 0;
     setScheduled(HANDLE_ESCAPE_WITH_RETRY);    
+}
+
+
+Point MobileObject::smoothOutForDisplay(Point currentlyObservedRectangleUpperLeft, Point calcDisplayUpperLeft) {
+    if (currentlyObservedRectangleUpperLeft == previousObservedRectangleUpperLeft_) calcDisplayUpperLeft;
+    else if (previousDisplayUpperLeft_.x == -INFINITY && previousDisplayUpperLeft_.y == -INFINITY) {
+        return calcDisplayUpperLeft;
+    }
+
+    Point displayUpperLeftAfterSmoothOut = calcDisplayUpperLeft;
+    if (previousFrameCenter_.x != getCenter().x) {
+        if (currentlyObservedRectangleUpperLeft.x > previousObservedRectangleUpperLeft_.x) {
+            displayUpperLeftAfterSmoothOut.x = std::min(previousDisplayUpperLeft_.x, calcDisplayUpperLeft.x);
+        } else if (currentlyObservedRectangleUpperLeft.x < previousObservedRectangleUpperLeft_.x) {
+            displayUpperLeftAfterSmoothOut.x = std::max(previousDisplayUpperLeft_.x, calcDisplayUpperLeft.x);
+        }
+    } 
+
+    if (previousFrameCenter_.y != getCenter().y) {
+        if (currentlyObservedRectangleUpperLeft.y > previousObservedRectangleUpperLeft_.y) {
+            displayUpperLeftAfterSmoothOut.y = std::min(previousDisplayUpperLeft_.y, calcDisplayUpperLeft.y);
+        } else if (currentlyObservedRectangleUpperLeft.y < previousObservedRectangleUpperLeft_.y) {
+            displayUpperLeftAfterSmoothOut.y = std::max(previousDisplayUpperLeft_.y, calcDisplayUpperLeft.y);
+        }
+    }
+
+    return displayUpperLeftAfterSmoothOut;
 }
 
 
@@ -970,6 +1003,30 @@ void MobileObject::registerBeingAffectedByOutsideMomentum(float otherObjectMass,
     } else if (currentMomentumDictated_.maxReceivedPosExplicitHTranslation < hTranslation) {
         currentMomentumDictated_.maxReceivedPosExplicitHTranslation = hTranslation;
     }
+}
+
+
+void MobileObject::redrawObject(const Rectangle& currentlyObservedRectangle, bool smoothOut) {
+    Model* model = getNextModelPtr();
+    if (model != nullptr && model->getTexture() != nullptr &&
+        currentlyObservedRectangle.collidesWith(model->getRelativeRectangle()+center_)) {
+
+        SDL_FRect destRect;
+        destRect.w = model->getModelTextureWidth();
+        destRect.h = model->getModelTextureHeight();
+        Point calcUpperLeft = {
+            model->getTextureRelativeUL().x + center_.x - currentlyObservedRectangle.upperLeft.x,
+            model->getTextureRelativeUL().y + center_.y - currentlyObservedRectangle.upperLeft.y
+        };
+
+        if (smoothOut) calcUpperLeft = smoothOutForDisplay(currentlyObservedRectangle.upperLeft, calcUpperLeft);
+        destRect.x = calcUpperLeft.x;
+        destRect.y = -calcUpperLeft.y;
+        previousObservedRectangleUpperLeft_ = currentlyObservedRectangle.upperLeft;
+        previousDisplayUpperLeft_ = calcUpperLeft;
+
+        SDL_RenderCopyF(renderer_, model->getTexture(), NULL, &destRect);
+    } 
 }
 
 

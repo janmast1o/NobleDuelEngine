@@ -533,11 +533,11 @@ void Creature::redrawObject(bool drawHitboxes, float pointSize) {
 }
 
 
-void Creature::redrawObject(const Rectangle& currentlyObservedRectangle) {
-    Object::redrawObject(currentlyObservedRectangle);
+void Creature::redrawObject(const Rectangle& currentlyObservedRectangle, bool smoothOut) {
+    MobileObject::redrawObject(currentlyObservedRectangle, smoothOut);
     if (itemList_[itemListIndex_] != nullptr) {
         itemList_[itemListIndex_]->temporarilySetIndependentForRedrawing();
-        itemList_[itemListIndex_]->redrawObject(currentlyObservedRectangle);
+        itemList_[itemListIndex_]->redrawObject(currentlyObservedRectangle, smoothOut);
     }
 }
 

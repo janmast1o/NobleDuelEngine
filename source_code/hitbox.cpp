@@ -217,14 +217,14 @@ bool Hitbox::collidesWithTopAfterVectorTranslation(const Hitbox& otherHitbox, co
 float Hitbox::findMinVertDistanceFromTop(const Hitbox& otherHitbox) const {
     const std::vector<Point> currentBottom = getCurrentBottom();
     const std::vector<Point> otherCurrentTop = otherHitbox.getCurrentTop();
-    return minVertDistance(currentBottom, otherCurrentTop);
+    return calculateMinVertDistance(currentBottom, otherCurrentTop);
 }
 
 
 float Hitbox::findMinVertDistanceFromTopAfterVectorTranslation(const Hitbox& otherHitbox, const Point& translationVector) const {
     const std::vector<Point> currentBottom = getBottomAfterVectorTranslation(translationVector);
     const std::vector<Point> otherCurrentTop = otherHitbox.getCurrentTop();
-    return minVertDistance(currentBottom, otherCurrentTop);
+    return calculateMinVertDistance(currentBottom, otherCurrentTop);
 }
 
 

@@ -2,6 +2,8 @@
 #include "constants.h"
 #include "utility_functions.h"
 
+float Point::comparisonEps = 1e-5;
+
 Point::Point() : x(0), y(0) {}
 Point::Point(float x, float y) : x(x), y(y) {}
 Point::Point(const Point& otherPoint) : x(otherPoint.x), y(otherPoint.y) {}
@@ -43,6 +45,11 @@ Point& Point::operator-=(const Point& otherPoint) {
     x -= otherPoint.x;
     y -= otherPoint.y;
     return *this;
+}
+
+
+bool Point::operator==(const Point& otherPoint) const {
+    return std::abs(x-otherPoint.x) < comparisonEps && std::abs(y-otherPoint.y) < comparisonEps;
 }
 
 

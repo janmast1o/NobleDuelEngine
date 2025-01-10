@@ -103,7 +103,7 @@ public:
 
     void redrawObject() override;
     void redrawObject(bool drawHitboxes, float pointSize) override;
-    void redrawObject(const Rectangle& currentlyObservedRectangle) override;
+    void redrawObject(const Rectangle& currentlyObservedRectangle, bool smoothOut = true) override;
 
     void runInteractionScheduled();
     void runScheduled() override;

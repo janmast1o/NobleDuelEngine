@@ -306,6 +306,10 @@ void OfflineEngine::run() {
             }
         }
 
+        for (MobileObject* mo : mobileObjectPtrs_) {
+            if (mo->isAlive()) mo->updatePreviousFrameCenter();
+        }
+
         projectileManager_.redrawProjectiles(windowRectangle_);
         playerUi_.redrawBars();
 

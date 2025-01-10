@@ -53,7 +53,9 @@ bool gjk(const std::vector<Point>& S, const std::vector<Point>& R);
 
 void fillT(typename std::list<TEntry>::iterator it, int startEl, int endEl);
 
-float minVertDistance(const std::vector<Point>& S, const std::vector<Point>& R);
+float calculateMinVertDistance(const std::vector<Point>& S, const std::vector<Point>& R);
+
+float calculateMinDistanceAlongTheLine(const std::vector<Point>& S, const std::vector<Point>& R, Point v);
 
 bool isLeftFacing(State state);
 

@@ -36,7 +36,6 @@ public:
 
 
     void emplaceInGrid(const T& newElement, const Rectangle& rectangle) {
-        // std::cout << "A" << std::endl;
         if (cellsCorrespondingToInstances_.find(newElement) != cellsCorrespondingToInstances_.end()) {
             for (std::pair<int, int>& p : cellsCorrespondingToInstances_.at(newElement)) {
                 getCell(p.first, p.second).erase(newElement);
@@ -79,7 +78,6 @@ public:
             outsideTheGrid_.emplace(newElement);
         }
 
-        // std::cout << "A1" << std::endl;
     }
 
 
@@ -94,11 +92,11 @@ public:
         }
 
         outsideTheGrid_.erase(element);
+        
     }
 
 
     std::list<T> getPotentiallyColliding(Rectangle collisionRectangle) {
-        // std::cout << "B" << std::endl;
         Point lowerLeft = collisionRectangle.lowerLeft;
         Point upperRight = collisionRectangle.upperRight;
 
@@ -133,8 +131,6 @@ public:
                 potentiallyColliding.emplace(t);
             }
         }
-
-        // std::cout << "B1" << std::endl;
 
         return std::list<T>(potentiallyColliding.begin(), potentiallyColliding.end());
     }
