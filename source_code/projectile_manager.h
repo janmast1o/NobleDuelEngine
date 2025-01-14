@@ -8,7 +8,7 @@ class ProjectileManager {
 private:
 
     std::list<Projectile> simulatedProjectiles_;
-    std::list<std::list<Hitbox>> simulatedProjectilesHitboxes_;
+    // std::list<std::list<Hitbox>> simulatedProjectilesHitboxes_;
 
 public:
 

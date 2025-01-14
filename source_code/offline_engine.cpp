@@ -40,6 +40,7 @@ OfflineEngine::OfflineEngine(int windowWidth, int windowHeight, GridOrganizerCre
         return;
     } 
 
+    SDL_RenderSetLogicalSize(renderer_, windowWidth, windowHeight);
     playerUi_ = {renderer_, playerPtr_, {10, 10}, 400, 25, 3, {10, 40}, 400, 25, 3};
 
 }

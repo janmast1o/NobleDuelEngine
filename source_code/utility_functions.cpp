@@ -4,6 +4,8 @@
 #include <list>
 #include <optional>
 
+constexpr float errEps = 1e-5;
+
 void drawPoint(SDL_Renderer* renderer, float x, float y, float pointSize) {
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
     SDL_FRect pointRect;
@@ -57,6 +59,7 @@ float findSlopeCoefficient(const Point& A, const Point& B) {
 
 std::pair<float, float> findLineCoefficients(const Point& A, const Point& B) {
     float a = findSlopeCoefficient(A, B);
+    if (a == INFINITY) return {INFINITY, INFINITY};
     float b = A.y - a*A.x;
     return {a, b};
 }
@@ -458,28 +461,235 @@ float calculateMinVertDistance(const std::vector<Point>& S, const std::vector<Po
 }
 
 
+std::vector<Point> getPolygonSideCastableOntoLine(const std::vector<Point>& D, const Point& l) {
+    size_t n = D.size();
+    size_t start = support(D, l);
+    size_t end = support(D, -l);
+    size_t toReserve;
+    if (start <= end) toReserve = end-start+1;
+    else toReserve = (n-start)+end+1;
+    std::vector<Point> castable;
+    castable.reserve(toReserve);
+    int i = start;
+    
+    while (true) {
+        castable.push_back(D[i]);
+        if (i == end) break;
+        else i = (i+1)%n;
+    }
+
+    return castable;
+}
+
+
+float getGamma(const Point& p, const Point& v) {
+    return p.y - ((v.y/v.x)*p.x);
+}
+
+
+template <typename T>
+bool isLesser(T a, T b) {
+    return b-a > errEps;
+}
+
+
+template <typename T>
+bool isGreater(T a, T b) {
+    return a-b > errEps;
+}
+
+
+std::vector<std::pair<std::optional<Point>, std::optional<Point>>> mergeDiAndEj(const std::vector<Point>& Di, const std::vector<Point>& Ej, const Point& v) {
+    size_t i = Di.size();
+    size_t j = Ej.size();
+    std::vector<std::pair<std::optional<Point>, std::optional<Point>>> C(i+j);
+    size_t a = 0;
+    size_t b = 0;
+    size_t index = 0;
+    bool (*compareFunction)(float, float);
+    if (getGamma(Di[0], v) < getGamma(Di[i-1], v)) compareFunction = isLesser;
+    else compareFunction = isGreater;
+
+    while (a < i && b < j) {
+        if (compareFunction(getGamma(Di[a], v), getGamma(Ej[b], v))) {
+            C[index] = {Di[a], {}};
+            ++a;
+        } else if (compareFunction(getGamma(Ej[b], v), getGamma(Di[a], v))) {
+            C[index] = {{}, Ej[b]};
+            ++b;
+        } else {
+            C[index] = {Di[a], Ej[b]};
+            ++a;
+            ++b;
+        }
+        ++index;
+    }
+
+    if (a == i) {
+        while (b < j) {
+            C[index] = {{}, Ej[b]};
+            ++b;
+            ++index;
+        }
+    } else {
+        while (a < i) {
+            C[index] = {Di[a], {}};
+            ++a;
+            ++index;
+        }
+    }
+
+    return C;
+}
+
+
+std::vector<int> getLastInstanceOfOther(const std::vector<std::pair<std::optional<Point>, std::optional<Point>>>& C) {
+    int n = C.size();
+    int lastD, lastE;
+    lastD = -1;
+    lastE = -1;
+    std::vector<int> lastInstanceOfOther(n, -1);
+
+    for (size_t i=0; i<n; ++i) {
+        if (C[i].first.has_value()) {
+            lastD = i;
+            if (!C[i].second.has_value()) lastInstanceOfOther[i] = lastE;
+        }
+        if (C[i].second.has_value()) {
+            lastE = i;
+            if (!C[i].first.has_value()) lastInstanceOfOther[i] = lastD;
+        }
+    }
+
+    return lastInstanceOfOther;
+}
+
+
+std::vector<int> getNextInstanceOfOther(const std::vector<std::pair<std::optional<Point>, std::optional<Point>>>& C) {
+    int n = C.size();
+    int nextD, nextE;
+    nextD = -1;
+    nextE = -1;
+    std::vector<int> lastInstanceOfOther(n, -1);
+
+    for (int i=n-1; i>=0; --i) {
+        if (C[i].first.has_value()) {
+            nextD = i;
+            if (!C[i].second.has_value()) lastInstanceOfOther[i] = nextE;
+        }
+        if (C[i].second.has_value()) {
+            nextE = i;
+            if (!C[i].first.has_value()) lastInstanceOfOther[i] = nextD;
+        }
+    }
+
+    return lastInstanceOfOther;
+}
+
+
+std::pair<int, int> getSearchSlideIndices(std::vector<std::pair<std::optional<Point>, std::optional<Point>>>& C, 
+                          std::vector<int>& lastInstanceOfOther, std::vector<int>& nextInstanceOfOther) {
+
+    int n = C.size();
+    int i = 0;
+    int start, end;
+    while (i < n) {
+        if (C[i].first.has_value() && C[i].second.has_value()) break;
+        else if (lastInstanceOfOther[i] >= 0) break;
+        else ++i;
+    }
+
+    start = i;
+    i = n-1;
+    while (i >= 0) {
+        if (C[i].first.has_value() && C[i].second.has_value()) break;
+        else if (nextInstanceOfOther[i] >= 0) break;
+        else --i;
+    }
+
+    end = i;
+    return {start, end};
+}
+
+
+Point getCommonPointBetweenTwoLines(float a1, float b1, float a2, float b2) {
+    float x = (b2-b1) / (a1-a2);
+    return {x, a1*x+b1};
+}
+
+
 float calculateMinDistanceAlongTheLine(const std::vector<Point>& D, const std::vector<Point>& E, Point v) {
-    if (v.y == 0) return calculateMinVertDistance(D, E);
+    if (v.x == 0) return calculateMinVertDistance(D, E);
     float vx, vy;
     vx = v.x;
     vy = v.y;
-    Point l(v.y, -v.x);
+    Point l(vy, -vx);
     std::vector<Point> Di = getPolygonSideCastableOntoLine(D, l);
     std::vector<Point> Ej = getPolygonSideCastableOntoLine(E, -l);
-    std::vector<std::pair<std::optional<Point>, std::optional<Point>>> C = mergeDiAndEj(Di, Ej);
-    std::vector<std::optional<int>> lastInstanceOfOther = getLastInstanceOfOther(C);
-    std::vector<std::optional<int>> nextInstanceOfOther = getNextInstanceOfOther(C);
-    int start = getStartOfSearchSliceIndex(C, lastInstanceOfOther, nextInstanceOfOther);
-    int end = getEndOfSearchSliceIndex(C, lastInstanceOfOther, nextInstanceOfOther);
+    std::reverse(Ej.begin(), Ej.end());
+    std::vector<std::pair<std::optional<Point>, std::optional<Point>>> C = mergeDiAndEj(Di, Ej, v);
+    std::vector<int> lastInstanceOfOther = getLastInstanceOfOther(C);
+    std::vector<int> nextInstanceOfOther = getNextInstanceOfOther(C);
+    int start, end;
+    std::tie(start, end) = getSearchSlideIndices(C, lastInstanceOfOther, nextInstanceOfOther);
 
     if (end < start) return INFINITY;
 
     for (int i=start; i<=end; ++i) {
         if (C[i].first.has_value() && !C[i].second.has_value()) {
-            Point ep = C[lastInstanceOfOther[i].value()].first.value();
-            Point er = C[nextInstanceOfOther[i].value()].first.value();
+            Point ep = C[lastInstanceOfOther[i]].second.value();
+            Point er = C[nextInstanceOfOther[i]].second.value();
+            float alphaE, betaE;
+            std::tie(alphaE, betaE) = findLineCoefficients(ep, er);
+            Point epsilon;
+            float gamma = getGamma(C[i].first.value(), v);
+            
+            if (alphaE == INFINITY) {
+                // std::cout << "A1" << std::endl;
+                epsilon = {ep.x, vy/vx*ep.x + gamma};
+            } else if (std::abs(alphaE - vy/vx) < errEps) {
+                // std::cout << "A2" << std::endl;
+                if (std::abs(betaE - gamma) < errEps) epsilon = C[i].first.value(); // might happen
+                else return 0; // uninteded, pretty much freezes movement for safety
+            } else {
+                epsilon = getCommonPointBetweenTwoLines(alphaE, betaE, vy/vx, gamma);
+            }
+            
+            C[i].second = epsilon;
+
+        } else if (!C[i].first.has_value() && C[i].second.has_value()) {
+            Point dp = C[lastInstanceOfOther[i]].first.value();
+            Point dr = C[nextInstanceOfOther[i]].first.value();
+            float alphaD, betaD;
+            std::tie(alphaD, betaD) = findLineCoefficients(dp, dr);
+            Point delta;
+            float gamma = getGamma(C[i].second.value(), v);
+
+            if (alphaD == INFINITY) {
+                // std::cout << "B1" << std::endl;
+                delta = {dp.x, vy/vx*dp.x + gamma};
+            } else if (std::abs(alphaD - vy/vx) < errEps) {
+                // std::cout << "B2" << std::endl;
+                if (std::abs(betaD - gamma) < errEps) delta = C[i].second.value();
+                else return 0;
+            } else {
+                delta = getCommonPointBetweenTwoLines(alphaD, betaD, vy/vx, gamma);
+            }
+            
+            C[i].first = delta;
+        
         }
-    }  
+    }
+
+    float minDistanceAlongTheLine = INFINITY;
+    for (int i=start; i<=end; ++i) {
+        minDistanceAlongTheLine = std::min(
+            minDistanceAlongTheLine, 
+            C[i].first.value().distanceFromOther(C[i].second.value())
+        );      
+    }
+
+    return minDistanceAlongTheLine;
 }
 
 

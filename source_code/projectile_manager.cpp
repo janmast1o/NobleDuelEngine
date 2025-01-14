@@ -5,7 +5,7 @@ ProjectileManager::ProjectileManager() {}
 
 Projectile* ProjectileManager::makeNewProjectile(Projectile& projectileArchetype) {
     simulatedProjectiles_.emplace_back(projectileArchetype);
-    simulatedProjectilesHitboxes_.emplace_back();
+    // simulatedProjectilesHitboxes_.emplace_back();
     Projectile* newSimulatedProjectile = &simulatedProjectiles_.back();
     // newSimulatedProjectile->replaceAllHitboxPtrsWithStaticCopies(simulatedProjectilesHitboxes_.back());
     return newSimulatedProjectile;
@@ -24,15 +24,15 @@ void ProjectileManager::simulateProjectiles() {
     // }
 
     auto it = simulatedProjectiles_.begin();
-    auto ith = simulatedProjectilesHitboxes_.begin();
-    while (it != simulatedProjectiles_.end() && ith != simulatedProjectilesHitboxes_.end()) {
+    // auto ith = simulatedProjectilesHitboxes_.begin();
+    while (it != simulatedProjectiles_.end()) {
         if (it->isAlive()) {
             it->runScheduled();
             ++it;
-            ++ith;
+            // ++ith;
         } else {
             it = simulatedProjectiles_.erase(it);
-            ith = simulatedProjectilesHitboxes_.erase(ith);
+            // ith = simulatedProjectilesHitboxes_.erase(ith);
         }
     }
 }

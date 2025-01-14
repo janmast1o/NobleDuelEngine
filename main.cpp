@@ -445,5 +445,18 @@ int main() {
     // std::vector<Point> R = {{631, -332.5}, {669, -332.5}, {669, -292.5}, {631, -292.5}};
     // std::cout << gjk(S, R) << std::endl;
 
+    // std::vector<Point> D1, E1; 
+    // D1 = {{10,11},{8,12},{2,13},{1,11},{2,6},{4,3},{8,4},{9,6}};
+    // E1 = {{25,3},{21,13},{15,11},{13,9},{13,6},{14,3},{15,1},{22,1}};
+    // Point v1 = {11,-3};
+    // Point v2 = {-11,3};
+    // Point v3 = {1,0};
+    // Point v4 = {0,1};
+    // std::cout << calculateMinDistanceAlongTheLine(D1, E1, v1) << std::endl;
+    // std::cout << calculateMinDistanceAlongTheLine(E1, D1, v2) << std::endl;
+    // std::cout << calculateMinDistanceAlongTheLine(E1, D1, v1) << std::endl;
+    // std::cout << calculateMinDistanceAlongTheLine(D1, E1, v3) << std::endl;
+    // std::cout << calculateMinDistanceAlongTheLine(D1, E1, v4) << std::endl;
+
     return 0;
 }

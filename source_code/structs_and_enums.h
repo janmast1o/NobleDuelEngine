@@ -25,6 +25,7 @@ struct Point {
     Point operator*(const float scalar) const;
 
     friend Point operator*(const float scalar, const Point& point);
+    friend Point operator*(const Point& point, const float scalar);
 
     Point operator-() const;
 
@@ -40,6 +41,8 @@ struct Point {
     Point getUpperRight(const Point& otherPoint) const;
 
     float distanceFromOther(const Point& otherPoint) const;
+
+    float asVectorLength() const;
 
     friend std::ostream& operator<<(std::ostream& os, const Point& point);
 };

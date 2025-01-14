@@ -86,26 +86,26 @@ const std::vector<Point> Hitbox::getRelativeBottom() const {
 }
 
 
-const Rectangle Hitbox::getCurrentRectangle() const {;}
+// const Rectangle Hitbox::getCurrentRectangle() const {;}
 
-const std::vector<Point> Hitbox::getCurrentHull() const {;}
+// const std::vector<Point> Hitbox::getCurrentHull() const {;}
 
-const std::vector<Point> Hitbox::getCurrentGentleSlopeTop() const {;}
+// const std::vector<Point> Hitbox::getCurrentGentleSlopeTop() const {;}
 
-const std::vector<Point> Hitbox::getCurrentTop() const {;}
+// const std::vector<Point> Hitbox::getCurrentTop() const {;}
 
-const std::vector<Point> Hitbox::getCurrentBottom() const {;}
+// const std::vector<Point> Hitbox::getCurrentBottom() const {;}
 
 
-const Rectangle Hitbox::getRectangleAfterVectorTranslation(const Point& translationVector) const {;}
+// const Rectangle Hitbox::getRectangleAfterVectorTranslation(const Point& translationVector) const {;}
 
-const std::vector<Point> Hitbox::getHullAfterVectorTranslation(const Point& translationVector) const {;}
+// const std::vector<Point> Hitbox::getHullAfterVectorTranslation(const Point& translationVector) const {;}
 
-const std::vector<Point> Hitbox::getGentleSlopeTopAfterVectorTranslation(const Point& translationVector) const {;}
+// const std::vector<Point> Hitbox::getGentleSlopeTopAfterVectorTranslation(const Point& translationVector) const {;}
 
-const std::vector<Point> Hitbox::getTopAfterVectorTranslation(const Point& translationVector) const {;}
+// const std::vector<Point> Hitbox::getTopAfterVectorTranslation(const Point& translationVector) const {;}
 
-const std::vector<Point> Hitbox::getBottomAfterVectorTranslation(const Point& translationVector) const {;}
+// const std::vector<Point> Hitbox::getBottomAfterVectorTranslation(const Point& translationVector) const {;}
 
 
 float Hitbox::getCurrentLeftmostX() const {;}
@@ -129,10 +129,6 @@ bool Hitbox::collidesWithAfterVectorTranslation(const Hitbox& otherHitbox, const
     const Rectangle currentRectangle = getRectangleAfterVectorTranslation(translationVector);
     const Rectangle otherCurrentRectangle = otherHitbox.getCurrentRectangle();
     if (!(currentRectangle.collidesWith(otherCurrentRectangle))) {
-        // if (currentRectangle.upperRight.x - currentRectangle.lowerLeft.x < ERROR_EPS) {
-        //     std::cout << currentRectangle.lowerLeft << " " << currentRectangle.upperRight << std::endl;
-        // }
-        
         return false;
     }
     const std::vector<Point> currentHitboxHull = getHullAfterVectorTranslation(translationVector);
@@ -212,6 +208,14 @@ bool Hitbox::collidesWithTopAfterVectorTranslation(const Hitbox& otherHitbox, co
         return false;
     }
 }
+
+
+float Hitbox::findMinDistanceAlongTheLine(const Hitbox& otherHitbox, const Point& translationVector) const {
+    const std::vector<Point> currentHull = otherHitbox.getCurrentHull();
+    const std::vector<Point> otherCurrentHull = otherHitbox.getCurrentHull();
+    return calculateMinDistanceAlongTheLine(currentHull, otherCurrentHull, translationVector);
+}
+
 
 
 float Hitbox::findMinVertDistanceFromTop(const Hitbox& otherHitbox) const {

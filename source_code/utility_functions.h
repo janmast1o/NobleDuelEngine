@@ -55,6 +55,8 @@ void fillT(typename std::list<TEntry>::iterator it, int startEl, int endEl);
 
 float calculateMinVertDistance(const std::vector<Point>& S, const std::vector<Point>& R);
 
+Point getCommonPointBetweenTwoLines(float a1, float b1, float a2, float b2);
+
 float calculateMinDistanceAlongTheLine(const std::vector<Point>& S, const std::vector<Point>& R, Point v);
 
 bool isLeftFacing(State state);

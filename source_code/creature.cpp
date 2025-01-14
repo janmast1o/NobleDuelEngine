@@ -93,13 +93,14 @@ void Creature::handleBePushedHorizontally(HandleParams handleParams) {
     float alpha = -INFINITY;
     float beta = INFINITY;
     float gamma = -INFINITY;
+    float dis = INFINITY;
     std::list<MobileObject*> foundMobileDirectlyAbove;
     Object* alphaTempObjectCurrentlyUnderneath;
     Object* gammaTempObjectCurrentlyUnderneath;
 
-    horizontalMovementMainBody(svec, potentiallyColliding, alpha, beta, gamma, 
+    horizontalMovementMainBody(svec, potentiallyColliding, alpha, beta, gamma, dis,
                                collisionDetected, groundUnderneathFound, changingSlopes,
-                               false, foundMobileDirectlyAbove,
+                               false, &foundMobileDirectlyAbove,
                                alphaTempObjectCurrentlyUnderneath,
                                gammaTempObjectCurrentlyUnderneath);
 
@@ -145,6 +146,12 @@ void Creature::handleBePushedHorizontally(HandleParams handleParams) {
         }
 
     } else {
+        if (dis < svec.asVectorLength()) {
+            svec = dis*svec;
+            moveMobileDirectlyAbove(foundMobileDirectlyAbove, svec);
+            translateObjectByVector(svec);
+        }
+
         if (handleParams.retry) {
             setScheduled(HANDLE_BE_PUSHED_HORIZONTALLY_NO_RETRY);
         } else {
@@ -209,13 +216,14 @@ void Creature::handleMoveHorizontally() {
     float alpha = -INFINITY;
     float beta = INFINITY;
     float gamma = -INFINITY;
+    float dis = INFINITY;
     std::list<MobileObject*> foundMobileDirectlyAbove;
     Object* alphaTempObjectCurrentlyUnderneath;
     Object* gammaTempObjectCurrentlyUnderneath;
 
-    horizontalMovementMainBody(svec, potentiallyColliding, alpha, beta, gamma, 
+    horizontalMovementMainBody(svec, potentiallyColliding, alpha, beta, gamma, dis,
                                collisionDetected, groundUnderneathFound, changingSlopes, 
-                               true, foundMobileDirectlyAbove,
+                               true, &foundMobileDirectlyAbove,
                                alphaTempObjectCurrentlyUnderneath,
                                gammaTempObjectCurrentlyUnderneath);
 
@@ -260,6 +268,12 @@ void Creature::handleMoveHorizontally() {
         }
 
     } else {
+        if (dis < svec.asVectorLength()) {
+            svec = dis*svec;
+            moveMobileDirectlyAbove(foundMobileDirectlyAbove, svec);
+            translateObjectByVector(svec);
+        }
+
         clearScheduled();
     }
 
@@ -355,7 +369,6 @@ void Creature::translateObjectByVector(const Point& translationVector) {
     if (itemList_[itemListIndex_] != nullptr) {
         itemList_[itemListIndex_]->translateObjectByVector(translationVector);
     }
-    // objectMap_.updateObjectPosition(*this);
 }
 
 

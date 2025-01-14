@@ -33,7 +33,7 @@ public:
     Point& getTextureRelativeUL();
     Hitbox* getHitboxPtr() const;
 
-    Hitbox* replaceHitboxWithAStaticCopy(std::list<Hitbox>& saveContainer, Point* newHitboxNewOwnerCenterPtr);
+    // Hitbox* replaceHitboxWithAStaticCopy(std::list<Hitbox>& saveContainer, Point* newHitboxNewOwnerCenterPtr);
 
 };
 

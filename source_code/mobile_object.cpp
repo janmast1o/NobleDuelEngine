@@ -200,7 +200,7 @@ void MobileObject::prepareNextSlideOffTopScheduled() {
     zeroVelocity();
     velocity_.horizontalVelocity = slideDirAsFloat*objectSpecificPhysicsChar_.slideV;
     setScheduled(HANDLE_SLIDE_OFF_TOP);
-    if (objectCurrentlyUnderneath_->isMobile()) {
+    if (objectCurrentlyUnderneath_->isMobile()) { // idk if it should actually set it this way, but it works for now
         dynamic_cast<MobileObject*>(objectCurrentlyUnderneath_)->prepareNextEscapeScheduled(-slideDirAsFloat, *this);
     }
 }
@@ -271,10 +271,12 @@ void MobileObject::zeroAirborneGhostHorizontalVelocity() {
 
 
 void MobileObject::horizontalMovementMainBody(Point& svec, const std::list<Object*>& potentiallyColliding, 
-                                              float& alpha, float& beta, float& gamma, bool& collisionDetected, 
+                                              float& alpha, float& beta, float& gamma, float& dis, 
+                                              bool& collisionDetected, 
                                               bool& groundUnderneathFound, bool& changingSlopes, bool moveHorizontallyCurrentlyHandled,
-                                              std::list<MobileObject*>& foundMobileDirectlyAbove, 
+                                              std::list<MobileObject*>* foundMobileDirectlyAbove, 
                                               Object*& alphaTempObjectCurrentlyUnderneath, Object*& gammaTempObjectCurrentlyUnderneath) {                                            
+    
     for (Object* p : potentiallyColliding) {
         if (p != this && collideableWith(*p)) {
             if (collidesWithAfterVectorTranslation(*p, svec)) {
@@ -294,10 +296,12 @@ void MobileObject::horizontalMovementMainBody(Point& svec, const std::list<Objec
                     } else {
                         if (p->isMobile()) {
                             MobileObject* mop = dynamic_cast<MobileObject*>(p);
-                            if (mop->isDirectlyAbove(*this)) {
-                                foundMobileDirectlyAbove.push_back(mop);
+                            if (mop->isDirectlyAbove(*this) && foundMobileDirectlyAbove != nullptr) {
+                                foundMobileDirectlyAbove->push_back(mop);
                             } else {
                                 collisionDetected = true;
+                                dis = std::min(dis, std::abs(findMinDistanceAlongTheLine(*p, svec)));
+
                                 if (mop->isParticipatingInMomentum()) {
                                     mop->registerBeingAffectedByOutsideMomentum(mass_, velocity_.horizontalVelocity, svec.x);
                                     if (!moveHorizontallyCurrentlyHandled && getSign(mop->getCurrentHVelocity())*svec.x >= 0) {
@@ -308,6 +312,7 @@ void MobileObject::horizontalMovementMainBody(Point& svec, const std::list<Objec
                             }
                         } else {
                             collisionDetected = true;
+                            dis = std::min(dis, std::abs(findMinDistanceAlongTheLine(*p, svec)));
                         }
                     }
                 }
@@ -444,13 +449,14 @@ void MobileObject::handleBePushedHorizontally(HandleParams handleParams) {
     float alpha = -INFINITY;
     float beta = INFINITY;
     float gamma = -INFINITY;
+    float dis = INFINITY;
     std::list<MobileObject*> foundMobileDirectlyAbove;
     Object* alphaTempObjectCurrentlyUnderneath;
     Object* gammaTempObjectCurrentlyUnderneath;
 
-    horizontalMovementMainBody(svec, potentiallyColliding, alpha, beta, gamma, 
+    horizontalMovementMainBody(svec, potentiallyColliding, alpha, beta, gamma, dis,
                                collisionDetected, groundUnderneathFound, changingSlopes, 
-                               false, foundMobileDirectlyAbove,
+                               false, &foundMobileDirectlyAbove,
                                alphaTempObjectCurrentlyUnderneath,
                                gammaTempObjectCurrentlyUnderneath);
 
@@ -497,6 +503,12 @@ void MobileObject::handleBePushedHorizontally(HandleParams handleParams) {
         }
 
     } else {
+        if (dis < svec.asVectorLength()) {
+            svec = dis*svec;
+            moveMobileDirectlyAbove(foundMobileDirectlyAbove, svec);
+            translateObjectByVector(svec);
+        }
+
         if (handleParams.retry) {
             setScheduled(HANDLE_BE_PUSHED_HORIZONTALLY_NO_RETRY);
         } else {
@@ -533,13 +545,14 @@ void MobileObject::handleEscapeFromUnderneathObjectOnTop(HandleParams handlePara
     float alpha = -INFINITY;
     float beta = INFINITY;
     float gamma = -INFINITY;
+    float dis = INFINITY;
     std::list<MobileObject*> foundMobileDirectlyAbove;
     Object* alphaTempObjectCurrentlyUnderneath;
     Object* gammaTempObjectCurrentlyUnderneath;
 
-    horizontalMovementMainBody(svec, potentiallyColliding, alpha, beta, gamma, 
+    horizontalMovementMainBody(svec, potentiallyColliding, alpha, beta, gamma, dis,
                                collisionDetected, groundUnderneathFound, changingSlopes, 
-                               false, foundMobileDirectlyAbove,
+                               false, &foundMobileDirectlyAbove,
                                alphaTempObjectCurrentlyUnderneath,
                                gammaTempObjectCurrentlyUnderneath);
 
@@ -588,6 +601,11 @@ void MobileObject::handleEscapeFromUnderneathObjectOnTop(HandleParams handlePara
         }
 
     } else {
+        if (dis < svec.asVectorLength()) {
+            svec = dis*svec;
+            translateObjectByVector(svec);
+        }
+
         if (handleParams.retry) {
             setScheduled(HANDLE_ESCAPE_NO_RETRY);
         } else {
@@ -625,6 +643,7 @@ void MobileObject::handleSlideDown(HandleParams handleParams) {
     bool collisionDetected = false;
     bool groundUnderneathFound = false;
     float alpha = -INFINITY;
+    float dis = INFINITY;
     Object* alphaTempObjectCurrentlyUnderneath;
 
     for (Object* p : potentiallyCollding) {
@@ -641,15 +660,17 @@ void MobileObject::handleSlideDown(HandleParams handleParams) {
                             alpha = delta;
                             alphaTempObjectCurrentlyUnderneath = p;
                             if (std::abs(delta)-MAXIMUM_GENTLE_SLOPE_COEFFICIENT < ERROR_EPS) {
+                                dis = std::min(dis, std::abs(findMinDistanceAlongTheLine(*p, svec)));
                                 collisionDetected = true;
-                                break;
+                                // break;
                             } else if (std::abs(delta)-MAXIMUM_GENTLE_SLOPE_COEFFICIENT > -ERROR_EPS) {
                                 svec.y = dvec.y;
                             }
                         }
                     } else {
+                        dis = std::min(dis, std::abs(findMinDistanceAlongTheLine(*p, svec)));        
                         collisionDetected = true;
-                        break;
+                        // break;
                     }
 
                 }
@@ -687,6 +708,11 @@ void MobileObject::handleSlideDown(HandleParams handleParams) {
         }
 
     } else {
+        if (dis < svec.asVectorLength()) {
+            svec = svec*dis;
+            translateObjectByVector(svec);
+        }
+
         if (handleParams.retry) {
             setScheduled(HANDLE_SLIDE_DOWN_NO_RETRY);
         } else {
@@ -727,16 +753,21 @@ void MobileObject::handleSlideOffTop() {
     adjustSVec(svec);
     std::list<Object*> potentiallyColliding = objectMap_.getPotentiallyColliding(*this, svec);
     bool collisionDetected = false;
+    float dis = INFINITY;
 
     for (Object* p : potentiallyColliding) {
         if (p != this && p != objectCurrentlyUnderneath_ && collideableWith(*p)) {
             if (collidesWithAfterVectorTranslation(*p, svec)) {
                 collisionDetected = true;
+                dis = std::min(dis, std::abs(findMinDistanceAlongTheLine(*p, svec)));
             }
         }
     }
 
     if (!collisionDetected) {
+        translateObjectByVector(svec);
+    } else if (dis < svec.asVectorLength()) {
+        svec = svec*dis;
         translateObjectByVector(svec);
     }
 
@@ -924,6 +955,11 @@ bool MobileObject::isDirectlyAboveAfterVectorTranslation(Object& otherObject, co
 
 bool MobileObject::collidesWithTopAfterVectorTranslation(Object& otherObject, const Point& translationVector) const {
     return getCurrentCollisionMesh().collidesWithTopAfterVectorTranslation(otherObject.getCurrentCollisionMesh(), translationVector);
+}
+
+
+float MobileObject::findMinDistanceAlongTheLine(Object& otherObject, const Point& translationVector) const {
+    return getCurrentCollisionMesh().findMinDistanceAlongTheLine(otherObject.getCurrentCollisionMesh(), translationVector);
 }
 
 

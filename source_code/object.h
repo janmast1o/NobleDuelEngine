@@ -92,7 +92,7 @@ public:
     virtual bool isParticipatingInMomentum() const;
     virtual void registerBeingAffectedByOutsideMomentum(float otherObjectMass, float otherObjectHVelocity, float hTranslation); 
 
-    void replaceAllHitboxPtrsWithStaticCopies(std::list<Hitbox>& saveContainer);
+    // void replaceAllHitboxPtrsWithStaticCopies(std::list<Hitbox>& saveContainer);
 
     virtual ~Object() = default;
 

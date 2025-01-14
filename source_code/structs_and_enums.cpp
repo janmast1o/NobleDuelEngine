@@ -29,6 +29,11 @@ Point operator*(const float scalar, const Point& point) {
 }
 
 
+Point operator*(const Point& point, const float scalar) {
+    return Point(scalar * point.x, scalar * point.y);
+}
+
+
 Point Point::operator-() const {
     return Point(-x, -y);
 }
@@ -75,6 +80,11 @@ Point Point::getUpperRight(const Point& otherPoint) const {
 
 float Point::distanceFromOther(const Point& otherPoint) const {
     return std::sqrt(std::pow(x-otherPoint.x, 2) + std::pow(y-otherPoint.y, 2));
+}
+
+
+float Point::asVectorLength() const {
+    return std::sqrt(std::pow(x, 2) + std::pow(y, 2));
 }
 
 

@@ -56,8 +56,8 @@ protected:
     void prepareNextEscapeScheduled(float escapeDirection, MobileObject& escapingFrom);
 
     void horizontalMovementMainBody(Point& svec, const std::list<Object*>& potentiallyColliding, 
-                                    float& alpha, float& beta, float& gamma, bool& collisionDetected, bool& groundUnderneathFound, bool& changingSlopes,
-                                    bool moveHorizontallyCurrentlyHandled, std::list<MobileObject*>& foundMobileDirectlyAbove,
+                                    float& alpha, float& beta, float& gamma, float& delta, bool& collisionDetected, bool& groundUnderneathFound, bool& changingSlopes,
+                                    bool moveHorizontallyCurrentlyHandled, std::list<MobileObject*>* foundMobileDirectlyAbove,
                                     Object*& alphaTempObjectCurrentlyUnderneath, Object*& gammaTempObjectCurrentlyUnderneath);
 
     void freefallMainBody(Point& svec, const std::list<Object*>& potentiallyUnderneath,
@@ -71,7 +71,6 @@ protected:
     void handleCheckForGroundDirectlyUnderneath();
     virtual void handleBePushedHorizontally(HandleParams handleParams = {0, true});
     void handleEscapeFromUnderneathObjectOnTop(HandleParams handleParams = {0, true});
-    // virtual void handleMoveHorizontally();
     void handleSlideDown(HandleParams handleParams = {0, true});
     void handleSlideOffTop();
     void handleAirborne(HandleParams handleParams = {0, false});
@@ -122,6 +121,7 @@ public:
     bool isDirectlyAbove(Object& otherObject) const;
     bool isDirectlyAboveAfterVectorTranslation(Object& otherObject, const Point& translationVector) const;
     bool collidesWithTopAfterVectorTranslation(Object& otherObject, const Point& translationVector) const;
+    float findMinDistanceAlongTheLine(Object& otherObject, const Point& translationVector) const;
     float findMinVertDistanceFromTop(Object& otherObject) const;
     float findMinVertDistanceFromTopAfterVectorTranslation(Object& otherObject, const Point& translationVector) const;
     float isCollisionAfterVectorTranslationCausedByGentleSlope(Object& otherObject, const Point& translationVector) const;
