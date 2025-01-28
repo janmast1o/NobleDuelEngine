@@ -146,11 +146,9 @@ void Creature::handleBePushedHorizontally(HandleParams handleParams) {
         }
 
     } else {
-        if (dis < svec.asVectorLength()) {
-            svec = dis*svec;
-            moveMobileDirectlyAbove(foundMobileDirectlyAbove, svec);
-            translateObjectByVector(svec);
-        }
+        svec *= dis/svec.asVectorLength();
+        moveMobileDirectlyAbove(foundMobileDirectlyAbove, svec);
+        translateObjectByVector(svec);
 
         if (handleParams.retry) {
             setScheduled(HANDLE_BE_PUSHED_HORIZONTALLY_NO_RETRY);
@@ -268,9 +266,8 @@ void Creature::handleMoveHorizontally() {
         }
 
     } else {
-        if (dis < svec.asVectorLength()) {
-            svec = dis*svec;
-            moveMobileDirectlyAbove(foundMobileDirectlyAbove, svec);
+        svec *= dis/svec.asVectorLength();
+        if (moveMobileDirectlyAbove(foundMobileDirectlyAbove, svec)) {
             translateObjectByVector(svec);
         }
 
@@ -591,11 +588,9 @@ void Creature::runScheduled() {
     creatureGameStats_.runPassiveEffects(sessionEngineClock_);
 
     runInteractionScheduled();
+    if (momentumTransferProtcol_.runScheduledCorrespondingToFoundInterval()) return;
     
-    if (!currentMomentumDictated_.isEmpty() && 
-        !shouldIgnoreOutsideMomentumFunction_(mass_, objectSpecificPhysicsChar_.maxTrueHorizontalV, std::abs(currentMomentumDictated_.cumultativeReceivedMomentum))) {
-            runScheduledForNonEmptyMomentum();
-    } else if (isAnythingScheduled()) {
+    if (isAnythingScheduled()) {
         currentMomentumDictated_.clear();
         switch (scheduled_) {
             case HANDLE_BE_PUSHED_HORIZONTALLY_WITH_RETRY:
@@ -605,11 +600,9 @@ void Creature::runScheduled() {
                 handleBePushedHorizontally({0, false});
                 break;     
             case HANDLE_MOVE_HORIZONTALLY:
-                // std::cout << "HMH" << std::endl;
                 handleMoveHorizontally();
                 break;
             case HANDLE_SLIDE_DOWN_WITH_RETRY:
-                // std::cout << "HSD" << std::endl;
                 handleSlideDown();
                 break;
             case HANDLE_SLIDE_DOWN_NO_RETRY:
@@ -622,22 +615,18 @@ void Creature::runScheduled() {
                 handleEscapeFromUnderneathObjectOnTop({0, false});       
                 break;     
             case HANDLE_SLIDE_OFF_TOP:
-                // std::cout << "HSOT" << std::endl; 
                 handleSlideOffTop();
                 break;        
             case HANDLE_JUMP:
                 handleJump();
                 break;
             case HANDLE_AIRBORNE:
-                // std::cout << "HA" << std::endl;
                 handleAirborne();
                 break;
             case HANDLE_FREEFALL:
-                // std::cout << "HF" << std::endl;
                 handleFreefall();
                 break;   
             case HANDLE_STOP:
-                // std::cout << "HS" << std::endl;
                 handleStop();
                 break;
             default:
@@ -647,9 +636,5 @@ void Creature::runScheduled() {
     } else {
         handleCheckForGroundDirectlyUnderneath();
         currentMomentumDictated_.clear();
-    }
-
-    // creatureGameStats_.runStaminaRegening(sessionEngineClock_);
-    // creatureGameStats_.runPassiveEffects(sessionEngineClock_);
-
+    }   
 }

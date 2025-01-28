@@ -31,6 +31,7 @@ struct Point {
 
     Point& operator+=(const Point& otherPoint);
     Point& operator-=(const Point& otherPoint);
+    Point& operator*=(const float scalar);
 
     bool operator==(const Point& otherPoint) const;
 
@@ -310,7 +311,7 @@ struct TEntry {
 struct MomentumDictated {
     float receivedHVelocity;
     float receivedExplicitHTranslation;
-    float cumultativeReceivedMomentum;
+    float cumulativeReceivedMomentum;
     float maxReceivedPosExplicitHTranslation;
     float maxReceivedNegExplicitHTranslation;
 
@@ -493,6 +494,51 @@ struct GridOrganizerCreationArgs {
     int numOfCols;
 
     GridOrganizerCreationArgs(Rectangle& celledRectangle, int numOfRows, int numOfCols);
+};
+
+#endif
+
+#ifndef MOMENTUM_TRANSFER_PROTOCOL
+#define MOMENTUM_TRANSFER_PROTOCOL
+
+class MobileObject;
+
+struct MomentumTransferProtocol {
+    
+private:
+
+    MobileObject& correspondingMobileObject;
+
+    float shouldIgnoreUpperThreshold;
+    float shouldBeNudgedUpperThreshold;
+    float shouldBeVecTranslatedUpperThreshold;
+
+    friend class MobileObject;
+
+public:
+
+    MomentumTransferProtocol(MobileObject& correspondingMobileObject);
+    MomentumTransferProtocol(MobileObject& correspondingMobileObject,
+                             float shouldIgnoreUpperTheshold, float shouldBeNudgedUpperThreshold, float shouldBeVecTranslatedUpperThreshold);
+
+    float getIgnoreUpperThreshold() const;
+    void setIgnoreUpperThreshold(float newIgnoreUpperThreshold);
+
+    float getBeNudgedUpperThreshold() const;
+    void setBeNudgedUpperThreshold(float newBeNudgedThreshold);
+
+    float getBeVecTranslatedUpperThreshold() const;
+    void setBeVecTranslatedUpperThreshold(float newBeVecTranslatedThreshold);
+
+    bool shouldIgnoreOutsideMomentum() const;
+    bool shouldOnlyBeNudged() const;
+    bool shouldOnlyBeVecTranslated() const;
+    bool shouldHaveOutsideMomentumTransferred() const;
+
+    float calculateSxCoeffForNudgingOnly() const;
+
+    bool runScheduledCorrespondingToFoundInterval();
+
 };
 
 #endif

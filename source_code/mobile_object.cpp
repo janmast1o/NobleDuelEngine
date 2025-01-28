@@ -4,9 +4,23 @@
 #include "utility_functions.h"
 #include <cmath>
 #include <unordered_set>
+#include <typeinfo>
+
+
+const float MobileObject::defaultMTPIgnoreCoeff = 0.75;
+const float MobileObject::defaultMTPBeNudgedCoeff = 0.95;
+const float MobileObject::defaultMTPBeVecTranslatedCoeff = 1.25;
+
+const float MobileObject::defaultCanCarryWeightOnTopCoeff = 1.4;
+const float MobileObject::defaultShouldIgnoreOtherSlidingOffTopCoeff = 1.5;
+
+const float MobileObject::defaultParamSxVecMomentumTransferLoss = 0.15;
+
 
 MobileObject::MobileObject(SDL_Renderer* renderer, Point center, ModelCollection modelCollection, const EngineClock& sessionEngineClock, ObjectMap& objectMap, float mass) :
-    Object(renderer, center, modelCollection, sessionEngineClock), objectMap_(objectMap), mass_(mass) {
+    Object(renderer, center, modelCollection, sessionEngineClock), objectMap_(objectMap), mass_(mass),
+    momentumTransferProtcol_(*this), onlyParamSxMomentumTransferLoss_(defaultParamSxVecMomentumTransferLoss) {
+
         previousFrameCenter_ = {-INFINITY, -INFINITY};
         acceleration_.verticalAcceleration = -GRAVITATIONAL_PULL;
         slopeInclineDirectlyUnderneath_ = 0;
@@ -14,17 +28,15 @@ MobileObject::MobileObject(SDL_Renderer* renderer, Point center, ModelCollection
         scheduled_ = HANDLE_FREEFALL;
         previouslyScheduled_ = NOTHING;
         
-        shouldIgnoreOutsideMomentumFunction_ = [](float mass, float maxHVelocity, float outsideMomentum){
-            return 0.8*mass*maxHVelocity > outsideMomentum;
+        momentumTransferProtcol_.setIgnoreUpperThreshold(defaultMTPIgnoreCoeff*mass_*objectSpecificPhysicsChar_.maxTrueHorizontalV);
+        momentumTransferProtcol_.setBeNudgedUpperThreshold(defaultMTPBeNudgedCoeff*mass_*objectSpecificPhysicsChar_.maxTrueHorizontalV);
+        momentumTransferProtcol_.setBeVecTranslatedUpperThreshold(defaultMTPBeVecTranslatedCoeff*mass_*objectSpecificPhysicsChar_.maxTrueHorizontalV);
+        
+        canCarryWeightOnTopFunction_ = [](float mass, float cumulativeWeight) {
+            return defaultCanCarryWeightOnTopCoeff*mass > cumulativeWeight;
         };
-        shouldOnlyBeMovedSlightlyByOutsideMomentmFunction_ = [](float mass, float maxHVelocity, float outsideMomentum){
-            return 1.2*mass*maxHVelocity > outsideMomentum;
-        };
-        canCarryWeightOnTop_ = [](float mass, float cumulativeWeight) {
-            return 1.4*mass > cumulativeWeight;
-        };
-        shouldIgnoreOtherSlidingOffTop_ = [](float mass, float otherMass) {
-            return 1.5*mass > otherMass;
+        shouldIgnoreOtherSlidingOffTopFunction_ = [](float mass, float otherMass) {
+            return defaultShouldIgnoreOtherSlidingOffTopCoeff*mass > otherMass;
         };
     }
 
@@ -52,6 +64,16 @@ float MobileObject::getCurrentHVelocity() const {
 
 float MobileObject::getMass() const {
     return mass_;
+}
+
+
+void MobileObject::setMass(float newMass, bool updateMomentumTransferProtocol) {
+    mass_ = newMass;
+    if (updateMomentumTransferProtocol) {
+        momentumTransferProtcol_.setIgnoreUpperThreshold(defaultMTPIgnoreCoeff*mass_*objectSpecificPhysicsChar_.maxTrueHorizontalV);
+        momentumTransferProtcol_.setBeNudgedUpperThreshold(defaultMTPBeNudgedCoeff*mass_*objectSpecificPhysicsChar_.maxTrueHorizontalV);
+        momentumTransferProtcol_.setBeVecTranslatedUpperThreshold(defaultMTPBeVecTranslatedCoeff*mass_*objectSpecificPhysicsChar_.maxTrueHorizontalV);
+    }
 }
 
 
@@ -90,8 +112,13 @@ float MobileObject::getTrueMaxHorizontalV() const {
 }
 
 
-void MobileObject::setTrueMaxHorizontalV(float newTrueMaxHorizontalV) {
+void MobileObject::setTrueMaxHorizontalV(float newTrueMaxHorizontalV, bool updateMomentumTransferProtocol) {
     objectSpecificPhysicsChar_.maxTrueHorizontalV = newTrueMaxHorizontalV;
+    if (updateMomentumTransferProtocol) {
+        momentumTransferProtcol_.setIgnoreUpperThreshold(defaultMTPIgnoreCoeff*mass_*objectSpecificPhysicsChar_.maxTrueHorizontalV);
+        momentumTransferProtcol_.setBeNudgedUpperThreshold(defaultMTPBeNudgedCoeff*mass_*objectSpecificPhysicsChar_.maxTrueHorizontalV);
+        momentumTransferProtcol_.setBeVecTranslatedUpperThreshold(defaultMTPBeVecTranslatedCoeff*mass_*objectSpecificPhysicsChar_.maxTrueHorizontalV);
+    }
 }
 
 
@@ -112,6 +139,56 @@ int MobileObject::getMaxAirborneAccelerableFrames() const {
 
 void MobileObject::setMaxAirborneAccelerableFrames(int newMaxAirborneAccelerableFrames) {
     objectSpecificPhysicsChar_.maxAirborneAccelerableFrames = newMaxAirborneAccelerableFrames;
+}
+
+
+float MobileObject::getShouldMTPIgnoreUpperThreshold() const {
+    return momentumTransferProtcol_.getIgnoreUpperThreshold();
+}
+
+
+float MobileObject::getShouldMTPBeNudgedThreshold() const {
+    return momentumTransferProtcol_.getBeNudgedUpperThreshold();
+}
+
+
+float MobileObject::getShouldMTPBeVecTranslatedThreshold() const {
+    return momentumTransferProtcol_.getBeVecTranslatedUpperThreshold();
+} 
+
+
+void MobileObject::setShouldMTPIgnoreUpperThreshold(float newIgnoreUpperThreshold) {
+    momentumTransferProtcol_.setIgnoreUpperThreshold(newIgnoreUpperThreshold);
+}
+
+
+void MobileObject::setShouldMTPBeNudgedUpperThreshold(float newBeNudgedUpperThreshold) {
+    momentumTransferProtcol_.setBeNudgedUpperThreshold(newBeNudgedUpperThreshold);
+}
+
+
+void MobileObject::setShouldMTPBeVecTranslatedUpperThreshold(float newBeVecTranslatedUpperTheshold) {
+    momentumTransferProtcol_.setBeVecTranslatedUpperThreshold(newBeVecTranslatedUpperTheshold);
+}
+
+
+float MobileObject::getParamSxMomentumTransferLoss() const {
+    return onlyParamSxMomentumTransferLoss_;
+}
+
+
+void MobileObject::setOnlyParamSxMomentumTransferLoss(float newOnlyVecMomentumTransferLoss) {
+    onlyParamSxMomentumTransferLoss_ = newOnlyVecMomentumTransferLoss;
+}
+
+
+void MobileObject::setCanCarryWeightOnTopFunction(std::function<bool(float, float)>& newCanCarryWeightOnTopFunction) {
+    canCarryWeightOnTopFunction_ = newCanCarryWeightOnTopFunction;
+}
+
+
+void MobileObject::setShouldIgnoreOtherSlidingOffTopFunction(std::function<bool(float, float)>& newShouldIgnoreOtherSlidingOffTopFunction) {
+    shouldIgnoreOtherSlidingOffTopFunction_ = newShouldIgnoreOtherSlidingOffTopFunction;
 }
 
 
@@ -179,10 +256,13 @@ void MobileObject::applyFriction() {
 }
 
 
-void MobileObject::fixReceivedVelocityIfNeccessary(float& receivedHVelocity, float& receivedHTranslation) const {
-    if (std::abs(receivedHVelocity*(1.0/FPS)) < std::abs(receivedHTranslation)) {
+bool MobileObject::fixReceivedVelocityIfNeccessary(float& receivedHVelocity, float& receivedHTranslation) const {
+    if (std::abs(receivedHVelocity) < CALC_ERROR_EPS) {
         receivedHVelocity = receivedHTranslation*FPS;
+        return true;
     }
+
+    return false;
 }
 
 
@@ -210,7 +290,7 @@ void MobileObject::prepareNextEscapeScheduled(float escapeDirection, MobileObjec
     if (scheduled_ == HANDLE_AIRBORNE || scheduled_ == HANDLE_FREEFALL || 
         scheduled_ == HANDLE_SLIDE_DOWN_NO_RETRY || scheduled_ == HANDLE_SLIDE_DOWN_WITH_RETRY) {
             return;
-    } else if (shouldIgnoreOtherSlidingOffTop_(mass_, escapingFrom.getMass())) {
+    } else if (shouldIgnoreOtherSlidingOffTopFunction_(mass_, escapingFrom.getMass())) {
         return;
     }
 
@@ -229,7 +309,7 @@ Point MobileObject::smoothOutForDisplay(Point currentlyObservedRectangleUpperLef
     }
 
     Point displayUpperLeftAfterSmoothOut = calcDisplayUpperLeft;
-    if (previousFrameCenter_.x != getCenter().x) {
+    if (previousFrameCenter_.x == getCenter().x) {
         if (currentlyObservedRectangleUpperLeft.x > previousObservedRectangleUpperLeft_.x) {
             displayUpperLeftAfterSmoothOut.x = std::min(previousDisplayUpperLeft_.x, calcDisplayUpperLeft.x);
         } else if (currentlyObservedRectangleUpperLeft.x < previousObservedRectangleUpperLeft_.x) {
@@ -237,7 +317,7 @@ Point MobileObject::smoothOutForDisplay(Point currentlyObservedRectangleUpperLef
         }
     } 
 
-    if (previousFrameCenter_.y != getCenter().y) {
+    if (previousFrameCenter_.y == getCenter().y) {
         if (currentlyObservedRectangleUpperLeft.y > previousObservedRectangleUpperLeft_.y) {
             displayUpperLeftAfterSmoothOut.y = std::min(previousDisplayUpperLeft_.y, calcDisplayUpperLeft.y);
         } else if (currentlyObservedRectangleUpperLeft.y < previousObservedRectangleUpperLeft_.y) {
@@ -383,7 +463,7 @@ bool MobileObject::moveMobileDirectlyAbove(std::list<MobileObject*>& mobileDirec
             sum += m->getMass();
         }
     }
-    if (!canCarryWeightOnTop_(mass_, sum)) {
+    if (!canCarryWeightOnTopFunction_(mass_, sum)) {
         return false;
     }
     std::unordered_set<MobileObject*> allDirectlyAboveSet(mobileDirectlyAbove.begin(), mobileDirectlyAbove.end());
@@ -435,10 +515,11 @@ void MobileObject::handleBePushedHorizontally(HandleParams handleParams) {
     newVelocity();
     applyFriction();
     float sx = velocity_.horizontalVelocity*(1.0/FPS) + handleParams.paramSx;
-    if (std::abs(sx) < ERROR_EPS) {
+    if (std::abs(sx) < CALC_ERROR_EPS) {
         clearScheduled();
         return;
     }
+
     float sy = sx*slopeInclineDirectlyUnderneath_;
     Point svec(sx, sy);
     adjustSVec(svec);
@@ -460,6 +541,7 @@ void MobileObject::handleBePushedHorizontally(HandleParams handleParams) {
                                alphaTempObjectCurrentlyUnderneath,
                                gammaTempObjectCurrentlyUnderneath);
 
+    
     if (!collisionDetected && !changingSlopes) {
         moveMobileDirectlyAbove(foundMobileDirectlyAbove, svec);
         translateObjectByVector(svec);
@@ -492,7 +574,7 @@ void MobileObject::handleBePushedHorizontally(HandleParams handleParams) {
         moveMobileDirectlyAbove(foundMobileDirectlyAbove, svec+Point(0,-beta));
         translateObjectByVector(svec+Point(0,-beta));
         
-        if (!objectCurrentlyUnderneath_->canHaveOtherOnTop()) { // added first if
+        if (!objectCurrentlyUnderneath_->canHaveOtherOnTop()) {
             prepareNextSlideOffTopScheduled();
         }
         else if (std::abs(gamma)-MAXIMUM_GENTLE_SLOPE_COEFFICIENT > -ERROR_EPS) {
@@ -503,11 +585,9 @@ void MobileObject::handleBePushedHorizontally(HandleParams handleParams) {
         }
 
     } else {
-        if (dis < svec.asVectorLength()) {
-            svec = dis*svec;
-            moveMobileDirectlyAbove(foundMobileDirectlyAbove, svec);
-            translateObjectByVector(svec);
-        }
+        svec *= dis / svec.asVectorLength();
+        moveMobileDirectlyAbove(foundMobileDirectlyAbove, svec);
+        translateObjectByVector(svec);
 
         if (handleParams.retry) {
             setScheduled(HANDLE_BE_PUSHED_HORIZONTALLY_NO_RETRY);
@@ -556,6 +636,7 @@ void MobileObject::handleEscapeFromUnderneathObjectOnTop(HandleParams handlePara
                                alphaTempObjectCurrentlyUnderneath,
                                gammaTempObjectCurrentlyUnderneath);
 
+
     if (!collisionDetected && !changingSlopes) {
         moveMobileDirectlyAbove(foundMobileDirectlyAbove, svec);
         auxDistanceCoveredSoFar_ += svec.x;
@@ -601,10 +682,9 @@ void MobileObject::handleEscapeFromUnderneathObjectOnTop(HandleParams handlePara
         }
 
     } else {
-        if (dis < svec.asVectorLength()) {
-            svec = dis*svec;
-            translateObjectByVector(svec);
-        }
+        svec *= dis/svec.asVectorLength();
+        translateObjectByVector(svec);
+        moveMobileDirectlyAbove(foundMobileDirectlyAbove, svec);
 
         if (handleParams.retry) {
             setScheduled(HANDLE_ESCAPE_NO_RETRY);
@@ -662,15 +742,13 @@ void MobileObject::handleSlideDown(HandleParams handleParams) {
                             if (std::abs(delta)-MAXIMUM_GENTLE_SLOPE_COEFFICIENT < ERROR_EPS) {
                                 dis = std::min(dis, std::abs(findMinDistanceAlongTheLine(*p, svec)));
                                 collisionDetected = true;
-                                // break;
                             } else if (std::abs(delta)-MAXIMUM_GENTLE_SLOPE_COEFFICIENT > -ERROR_EPS) {
                                 svec.y = dvec.y;
                             }
                         }
                     } else {
-                        dis = std::min(dis, std::abs(findMinDistanceAlongTheLine(*p, svec)));        
+                        dis = std::min(dis, std::abs(findMinDistanceAlongTheLine(*p, svec)));    
                         collisionDetected = true;
-                        // break;
                     }
 
                 }
@@ -708,10 +786,8 @@ void MobileObject::handleSlideDown(HandleParams handleParams) {
         }
 
     } else {
-        if (dis < svec.asVectorLength()) {
-            svec = svec*dis;
-            translateObjectByVector(svec);
-        }
+        svec *= dis/svec.asVectorLength();
+        translateObjectByVector(svec);
 
         if (handleParams.retry) {
             setScheduled(HANDLE_SLIDE_DOWN_NO_RETRY);
@@ -766,8 +842,8 @@ void MobileObject::handleSlideOffTop() {
 
     if (!collisionDetected) {
         translateObjectByVector(svec);
-    } else if (dis < svec.asVectorLength()) {
-        svec = svec*dis;
+    } else {
+        svec *= dis/svec.asVectorLength();
         translateObjectByVector(svec);
     }
 
@@ -1030,15 +1106,20 @@ bool MobileObject::isParticipatingInMomentum() const {
 
 
 void MobileObject::registerBeingAffectedByOutsideMomentum(float otherObjectMass, float otherObjectHVelocity, float hTranslation) {
-    fixReceivedVelocityIfNeccessary(otherObjectHVelocity, hTranslation);
-    currentMomentumDictated_.receivedExplicitHTranslation += hTranslation*(otherObjectMass/mass_);
-    currentMomentumDictated_.receivedHVelocity += calculateVelocityAfterCollision(mass_, velocity_.horizontalVelocity, otherObjectMass, otherObjectHVelocity);
-    currentMomentumDictated_.cumultativeReceivedMomentum += otherObjectMass*otherObjectHVelocity;
-    if (hTranslation < 0 && currentMomentumDictated_.maxReceivedNegExplicitHTranslation > hTranslation) {
+    bool onlySx = fixReceivedVelocityIfNeccessary(otherObjectHVelocity, hTranslation);
+    float alpha = 1;
+    if (onlySx) alpha -= onlyParamSxMomentumTransferLoss_;
+
+    currentMomentumDictated_.receivedExplicitHTranslation += alpha*hTranslation*(otherObjectMass/mass_);
+    currentMomentumDictated_.receivedHVelocity += alpha*calculateVelocityAfterCollision(mass_, velocity_.horizontalVelocity, otherObjectMass, otherObjectHVelocity);
+    currentMomentumDictated_.cumulativeReceivedMomentum += alpha*otherObjectMass*otherObjectHVelocity;
+    
+    if (hTranslation < 0 && hTranslation < currentMomentumDictated_.maxReceivedNegExplicitHTranslation) {
         currentMomentumDictated_.maxReceivedNegExplicitHTranslation = hTranslation;
-    } else if (currentMomentumDictated_.maxReceivedPosExplicitHTranslation < hTranslation) {
+    } else if (hTranslation > 0 && hTranslation > currentMomentumDictated_.maxReceivedPosExplicitHTranslation) {
         currentMomentumDictated_.maxReceivedPosExplicitHTranslation = hTranslation;
     }
+
 }
 
 
@@ -1058,6 +1139,7 @@ void MobileObject::redrawObject(const Rectangle& currentlyObservedRectangle, boo
         if (smoothOut) calcUpperLeft = smoothOutForDisplay(currentlyObservedRectangle.upperLeft, calcUpperLeft);
         destRect.x = calcUpperLeft.x;
         destRect.y = -calcUpperLeft.y;
+        previousFrameCenter_ = center_;
         previousObservedRectangleUpperLeft_ = currentlyObservedRectangle.upperLeft;
         previousDisplayUpperLeft_ = calcUpperLeft;
 
@@ -1071,37 +1153,10 @@ bool MobileObject::isAnythingScheduled() const {
 }
 
 
-void MobileObject::runScheduledForNonEmptyMomentum() {
-    float paramSx = currentMomentumDictated_.receivedExplicitHTranslation;
-
-    if (!shouldOnlyBeMovedSlightlyByOutsideMomentmFunction_(mass_, objectSpecificPhysicsChar_.maxTrueHorizontalV, 
-                                                            std::abs(currentMomentumDictated_.cumultativeReceivedMomentum))) {
-        velocity_.horizontalVelocity = currentMomentumDictated_.receivedHVelocity;
-        if (paramSx < 0 && paramSx < currentMomentumDictated_.maxReceivedNegExplicitHTranslation) {
-            paramSx = currentMomentumDictated_.maxReceivedNegExplicitHTranslation;
-        } else if (paramSx > currentMomentumDictated_.maxReceivedPosExplicitHTranslation) {
-            paramSx = currentMomentumDictated_.maxReceivedPosExplicitHTranslation;
-        }
-    } else if (getSign(currentMomentumDictated_.receivedExplicitHTranslation)*velocity_.horizontalVelocity < 0) {
-        velocity_.horizontalVelocity = 0;
-    }
-
-    currentMomentumDictated_.clear();
-
-    if (scheduled_ == HANDLE_FREEFALL || scheduled_ == HANDLE_AIRBORNE) {
-        handleAirborne({paramSx});
-    } else {
-        handleBePushedHorizontally({paramSx, true});
-    }
-
-}
-
-
 void MobileObject::runScheduled() {
-    if (!currentMomentumDictated_.isEmpty() && 
-        !shouldIgnoreOutsideMomentumFunction_(mass_, objectSpecificPhysicsChar_.maxTrueHorizontalV, std::abs(currentMomentumDictated_.cumultativeReceivedMomentum))) {
-            runScheduledForNonEmptyMomentum();
-    } else if (isAnythingScheduled()) {
+    if (momentumTransferProtcol_.runScheduledCorrespondingToFoundInterval()) return;
+    
+    if (isAnythingScheduled()) {
         currentMomentumDictated_.clear();
         switch (scheduled_) {
             case HANDLE_BE_PUSHED_HORIZONTALLY_WITH_RETRY:
@@ -1110,12 +1165,7 @@ void MobileObject::runScheduled() {
             case HANDLE_BE_PUSHED_HORIZONTALLY_NO_RETRY:
                 handleBePushedHorizontally({0, false});
                 break;     
-            // case HANDLE_MOVE_HORIZONTALLY:
-            //     // std::cout << "HMH" << std::endl;
-            //     handleMoveHorizontally();
-            //     break;
             case HANDLE_SLIDE_DOWN_WITH_RETRY:
-                // std::cout << "HSD" << std::endl;
                 handleSlideDown();
                 break;
             case HANDLE_SLIDE_DOWN_NO_RETRY:
@@ -1128,19 +1178,15 @@ void MobileObject::runScheduled() {
                 handleEscapeFromUnderneathObjectOnTop({0, false});       
                 break; 
             case HANDLE_SLIDE_OFF_TOP:
-                // std::cout << "HSOT" << std::endl; 
                 handleSlideOffTop();
                 break;            
             case HANDLE_AIRBORNE:
-                // std::cout << "HA" << std::endl;
                 handleAirborne();
                 break;
             case HANDLE_FREEFALL:
-                // std::cout << "HF" << std::endl; 
                 handleFreefall();
                 break;
             case HANDLE_STOP:
-                // std::cout << "HS" << std::endl;
                 handleStop();
                 break;
             default:

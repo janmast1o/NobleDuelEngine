@@ -211,7 +211,7 @@ bool Hitbox::collidesWithTopAfterVectorTranslation(const Hitbox& otherHitbox, co
 
 
 float Hitbox::findMinDistanceAlongTheLine(const Hitbox& otherHitbox, const Point& translationVector) const {
-    const std::vector<Point> currentHull = otherHitbox.getCurrentHull();
+    const std::vector<Point> currentHull = getCurrentHull();
     const std::vector<Point> otherCurrentHull = otherHitbox.getCurrentHull();
     return calculateMinDistanceAlongTheLine(currentHull, otherCurrentHull, translationVector);
 }

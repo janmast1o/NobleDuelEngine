@@ -2,6 +2,7 @@
 #define CONSTANTS
 
 const float ERROR_EPS = 1e-4;
+const float CALC_ERROR_EPS = 1e-6;
 
 const float GRAVITATIONAL_PULL = 725;
 const float AIR_RES_ACC = 35;

@@ -10,6 +10,15 @@ class MobileObject : virtual public Object {
 
 protected:
 
+    static const float defaultMTPIgnoreCoeff;
+    static const float defaultMTPBeNudgedCoeff;
+    static const float defaultMTPBeVecTranslatedCoeff;
+
+    static const float defaultCanCarryWeightOnTopCoeff;
+    static const float defaultShouldIgnoreOtherSlidingOffTopCoeff;
+
+    static const float defaultParamSxVecMomentumTransferLoss;
+
     Point previousFrameCenter_;
     
     float mass_;
@@ -19,12 +28,13 @@ protected:
     float auxDistanceCoveredSoFar_;
     float auxDistanceToCover_;
 
-    Object* objectCurrentlyUnderneath_;
+    Object* objectCurrentlyUnderneath_; // potential null pointing pointer
 
-    std::function<bool(float, float, float)> shouldIgnoreOutsideMomentumFunction_;
-    std::function<bool(float, float, float)> shouldOnlyBeMovedSlightlyByOutsideMomentmFunction_;
-    std::function<bool(float, float)> canCarryWeightOnTop_;
-    std::function<bool(float, float)> shouldIgnoreOtherSlidingOffTop_;
+    MomentumTransferProtocol momentumTransferProtcol_;
+    float onlyParamSxMomentumTransferLoss_;
+
+    std::function<bool(float, float)> canCarryWeightOnTopFunction_;
+    std::function<bool(float, float)> shouldIgnoreOtherSlidingOffTopFunction_;
 
     Velocity velocity_;
     Acceleration acceleration_;
@@ -50,7 +60,7 @@ protected:
     void zeroAirborneGhostHorizontalVelocity();
 
     void applyFriction();
-    void fixReceivedVelocityIfNeccessary(float& receivedHVelocity, float& receivedHTranslation) const;
+    bool fixReceivedVelocityIfNeccessary(float& receivedHVelocity, float& receivedHTranslation) const;
 
     void prepareNextSlideOffTopScheduled();
     void prepareNextEscapeScheduled(float escapeDirection, MobileObject& escapingFrom);
@@ -82,6 +92,8 @@ protected:
     void setScheduled(ScheduledInstruction newInteractionScheduled);
     void clearScheduled();
 
+    friend MomentumTransferProtocol;
+
 public:
 
     MobileObject(SDL_Renderer* renderer, Point center, ModelCollection modelCollection, const EngineClock& sessionEngineClock, ObjectMap& objectMap, float mass);
@@ -93,7 +105,8 @@ public:
 
     float getCurrentHVelocity() const;
     float getMass() const;
-    
+    void setMass(float newMass, bool updateMomentumTransferProtocol = true); 
+
     float getMaxSRVerticalV() const;
     void setMaxSRVerticalV(float newMaxSRVerticalV);
 
@@ -104,13 +117,27 @@ public:
     void setTrueMaxVerticalV(float newTrueMaxVerticalV);
 
     float getTrueMaxHorizontalV() const;
-    void setTrueMaxHorizontalV(float newTrueMAxHorizontalV);
+    void setTrueMaxHorizontalV(float newTrueMAxHorizontalV, bool updateMomentumTransferProtocol = true);
 
     float getHorizontalAcc() const;
     void setHorizontalAcc(float newHorizontalAcc);
 
     int getMaxAirborneAccelerableFrames() const;
     void setMaxAirborneAccelerableFrames(int newMaxAirborneAccelerableFrames);
+
+    float getShouldMTPIgnoreUpperThreshold() const;
+    float getShouldMTPBeNudgedThreshold() const;
+    float getShouldMTPBeVecTranslatedThreshold() const;
+
+    void setShouldMTPIgnoreUpperThreshold(float newIgnoreUpperThreshold);
+    void setShouldMTPBeNudgedUpperThreshold(float newBeNudgedUpperThreshold);
+    void setShouldMTPBeVecTranslatedUpperThreshold(float newVecTranslatedUpperThreshold);
+
+    float getParamSxMomentumTransferLoss() const;
+    void setOnlyParamSxMomentumTransferLoss(float newOnlyVecMomentumTransferLoss);
+
+    void setCanCarryWeightOnTopFunction(std::function<bool(float, float)>& newCanCarryWeightOnTopFunction);
+    void setShouldIgnoreOtherSlidingOffTopFunction(std::function<bool(float, float)>& newShouldIgnoreOtherSlidingOffTopFunction);
 
     void newHorizontalAcceleration(Direction direction);
     void newVelocity();
@@ -137,7 +164,6 @@ public:
     void redrawObject(const Rectangle& currentlyObservedRectangle, bool smoothOut = true) override;
 
     virtual bool isAnythingScheduled() const;
-    void runScheduledForNonEmptyMomentum();
     virtual void runScheduled();
 
     virtual ~MobileObject() = default;

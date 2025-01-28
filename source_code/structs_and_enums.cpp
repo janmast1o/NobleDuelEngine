@@ -1,6 +1,7 @@
 #include "structs_and_enums.h"
 #include "constants.h"
 #include "utility_functions.h"
+#include "mobile_object.h"
 
 float Point::comparisonEps = 1e-5;
 
@@ -49,6 +50,13 @@ Point& Point::operator+=(const Point& otherPoint) {
 Point& Point::operator-=(const Point& otherPoint) {
     x -= otherPoint.x;
     y -= otherPoint.y;
+    return *this;
+}
+
+
+Point& Point::operator*=(float scalar) {
+    x *= scalar;
+    y *= scalar;
     return *this;
 }
 
@@ -252,7 +260,7 @@ PlayerActionReq PlayerSpecificKeyMapping::buildPlayerActionReq(const Uint8* keyb
 MomentumDictated::MomentumDictated() :
     receivedHVelocity(0),
     receivedExplicitHTranslation(0),
-    cumultativeReceivedMomentum(0),
+    cumulativeReceivedMomentum(0),
     maxReceivedPosExplicitHTranslation(0),
     maxReceivedNegExplicitHTranslation(0) {}
 
@@ -260,7 +268,7 @@ MomentumDictated::MomentumDictated() :
 void MomentumDictated::clear() {
     receivedHVelocity = 0;
     receivedExplicitHTranslation = 0;
-    cumultativeReceivedMomentum = 0;
+    cumulativeReceivedMomentum = 0;
     maxReceivedPosExplicitHTranslation = 0;
     maxReceivedNegExplicitHTranslation = 0;
 }    
@@ -269,7 +277,7 @@ void MomentumDictated::clear() {
 bool MomentumDictated::isEmpty() const {
     return std::abs(receivedHVelocity) < ERROR_EPS &&
            std::abs(receivedExplicitHTranslation) < ERROR_EPS && 
-           std::abs(cumultativeReceivedMomentum) < ERROR_EPS;
+           std::abs(cumulativeReceivedMomentum) < ERROR_EPS;
 }
 
 
@@ -455,4 +463,115 @@ ProjectileSpecs::ProjectileSpecs(int damage, float travelDistance, bool pierce, 
 
 
 GridOrganizerCreationArgs::GridOrganizerCreationArgs(Rectangle& celledRectangle, int numOfRows, int numOfCols) :
-                                                     celledRectangle(celledRectangle), numOfRows(numOfRows), numOfCols(numOfCols) {}                                                                  
+                                                     celledRectangle(celledRectangle), numOfRows(numOfRows), numOfCols(numOfCols) {}
+
+
+
+MomentumTransferProtocol::MomentumTransferProtocol(MobileObject& correspondingMobileObject) :
+    correspondingMobileObject(correspondingMobileObject),
+    shouldIgnoreUpperThreshold(INFINITY), shouldBeNudgedUpperThreshold(INFINITY), shouldBeVecTranslatedUpperThreshold(INFINITY) {}
+
+
+MomentumTransferProtocol::MomentumTransferProtocol(MobileObject& correspondingMobileObject, 
+    float shouldIgnoreUpperTheshold, float shouldBeNudgedUpperThreshold, float shouldBeVecTranslatedUpperThreshold) :
+    correspondingMobileObject(correspondingMobileObject),
+    shouldIgnoreUpperThreshold(shouldIgnoreUpperTheshold), 
+    shouldBeNudgedUpperThreshold(shouldBeNudgedUpperThreshold),
+    shouldBeVecTranslatedUpperThreshold(shouldBeVecTranslatedUpperThreshold) {}
+
+
+float MomentumTransferProtocol::getIgnoreUpperThreshold() const {
+    return shouldIgnoreUpperThreshold;
+}
+
+
+void MomentumTransferProtocol::setIgnoreUpperThreshold(float newIgnoreUpperThreshold) {
+    shouldIgnoreUpperThreshold = newIgnoreUpperThreshold;
+}
+
+
+float MomentumTransferProtocol::getBeNudgedUpperThreshold() const {
+    return shouldBeNudgedUpperThreshold;
+}
+
+
+void MomentumTransferProtocol::setBeNudgedUpperThreshold(float newBeNudgedUpperThreshold) {
+    shouldBeNudgedUpperThreshold = newBeNudgedUpperThreshold;
+}
+
+
+float MomentumTransferProtocol::getBeVecTranslatedUpperThreshold() const {
+    return shouldBeVecTranslatedUpperThreshold;
+}
+
+
+void MomentumTransferProtocol::setBeVecTranslatedUpperThreshold(float newBeVecTranslatedThreshold) {
+    shouldBeVecTranslatedUpperThreshold = newBeVecTranslatedThreshold;
+}
+
+
+bool MomentumTransferProtocol::shouldIgnoreOutsideMomentum() const {
+    return shouldIgnoreUpperThreshold >= std::abs(correspondingMobileObject.currentMomentumDictated_.cumulativeReceivedMomentum);
+}
+
+
+bool MomentumTransferProtocol::shouldOnlyBeNudged() const {
+    return shouldBeNudgedUpperThreshold >= std::abs(correspondingMobileObject.currentMomentumDictated_.cumulativeReceivedMomentum) &&
+           shouldIgnoreUpperThreshold < std::abs(correspondingMobileObject.currentMomentumDictated_.cumulativeReceivedMomentum);
+}
+
+
+bool MomentumTransferProtocol::shouldOnlyBeVecTranslated() const {
+    return shouldBeVecTranslatedUpperThreshold >= std::abs(correspondingMobileObject.currentMomentumDictated_.cumulativeReceivedMomentum) &&
+           shouldBeNudgedUpperThreshold < std::abs(correspondingMobileObject.currentMomentumDictated_.cumulativeReceivedMomentum);
+}
+
+
+bool MomentumTransferProtocol::shouldHaveOutsideMomentumTransferred() const {
+    return shouldBeVecTranslatedUpperThreshold < std::abs(correspondingMobileObject.currentMomentumDictated_.cumulativeReceivedMomentum);
+}
+
+
+float MomentumTransferProtocol::calculateSxCoeffForNudgingOnly() const {
+    return (std::abs(correspondingMobileObject.currentMomentumDictated_.cumulativeReceivedMomentum) - shouldIgnoreUpperThreshold) / (shouldBeNudgedUpperThreshold - shouldIgnoreUpperThreshold);
+}
+
+
+bool MomentumTransferProtocol::runScheduledCorrespondingToFoundInterval() {
+    if (correspondingMobileObject.currentMomentumDictated_.isEmpty() || shouldIgnoreOutsideMomentum()) {
+        correspondingMobileObject.currentMomentumDictated_.clear();
+        return false;
+    }
+
+    float paramSx = correspondingMobileObject.currentMomentumDictated_.receivedExplicitHTranslation;
+    if (paramSx < 0 || paramSx < correspondingMobileObject.currentMomentumDictated_.maxReceivedNegExplicitHTranslation) {
+        paramSx = correspondingMobileObject.currentMomentumDictated_.maxReceivedNegExplicitHTranslation;
+    } else if (paramSx > 0 && paramSx > correspondingMobileObject.currentMomentumDictated_.maxReceivedPosExplicitHTranslation) {
+        paramSx = correspondingMobileObject.currentMomentumDictated_.maxReceivedPosExplicitHTranslation;
+    }
+
+    if (shouldHaveOutsideMomentumTransferred()) {
+        correspondingMobileObject.velocity_.horizontalVelocity = correspondingMobileObject.currentMomentumDictated_.receivedHVelocity;
+    } else {
+        if (shouldOnlyBeNudged()) paramSx *= calculateSxCoeffForNudgingOnly();
+
+        if (getSign(paramSx*correspondingMobileObject.velocity_.horizontalVelocity) < 0) {
+            correspondingMobileObject.velocity_.horizontalVelocity = 0;
+        }
+    }
+
+    correspondingMobileObject.currentMomentumDictated_.clear();
+    switch (correspondingMobileObject.scheduled_) {
+        case HANDLE_FREEFALL:
+            correspondingMobileObject.handleAirborne({paramSx});
+            break;
+        case HANDLE_AIRBORNE:
+            correspondingMobileObject.handleAirborne({paramSx});
+            break;
+        default:
+            correspondingMobileObject.handleBePushedHorizontally({paramSx, true});
+            break;     
+    }
+
+    return true;    
+}

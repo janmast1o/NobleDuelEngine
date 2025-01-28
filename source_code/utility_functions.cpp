@@ -635,6 +635,8 @@ float calculateMinDistanceAlongTheLine(const std::vector<Point>& D, const std::v
 
     if (end < start) return INFINITY;
 
+    bool firstCase = false;
+
     for (int i=start; i<=end; ++i) {
         if (C[i].first.has_value() && !C[i].second.has_value()) {
             Point ep = C[lastInstanceOfOther[i]].second.value();
@@ -645,12 +647,11 @@ float calculateMinDistanceAlongTheLine(const std::vector<Point>& D, const std::v
             float gamma = getGamma(C[i].first.value(), v);
             
             if (alphaE == INFINITY) {
-                // std::cout << "A1" << std::endl;
-                epsilon = {ep.x, vy/vx*ep.x + gamma};
+                firstCase = true;
+                epsilon = {ep.x, (vy/vx)*ep.x + gamma};
             } else if (std::abs(alphaE - vy/vx) < errEps) {
-                // std::cout << "A2" << std::endl;
-                if (std::abs(betaE - gamma) < errEps) epsilon = C[i].first.value(); // might happen
-                else return 0; // uninteded, pretty much freezes movement for safety
+                if (std::abs(betaE - gamma) < errEps) epsilon = C[i].first.value();
+                else return 0;
             } else {
                 epsilon = getCommonPointBetweenTwoLines(alphaE, betaE, vy/vx, gamma);
             }
@@ -666,10 +667,9 @@ float calculateMinDistanceAlongTheLine(const std::vector<Point>& D, const std::v
             float gamma = getGamma(C[i].second.value(), v);
 
             if (alphaD == INFINITY) {
-                // std::cout << "B1" << std::endl;
-                delta = {dp.x, vy/vx*dp.x + gamma};
+                firstCase = true;
+                delta = {dp.x, (vy/vx)*dp.x + gamma};
             } else if (std::abs(alphaD - vy/vx) < errEps) {
-                // std::cout << "B2" << std::endl;
                 if (std::abs(betaD - gamma) < errEps) delta = C[i].second.value();
                 else return 0;
             } else {
@@ -683,10 +683,14 @@ float calculateMinDistanceAlongTheLine(const std::vector<Point>& D, const std::v
 
     float minDistanceAlongTheLine = INFINITY;
     for (int i=start; i<=end; ++i) {
+        float newlyCalculated;
+        if (dotProduct(C[i].second.value() - C[i].first.value(), v) < 0) newlyCalculated = 0;
+        else newlyCalculated = C[i].first.value().distanceFromOther(C[i].second.value());
+
         minDistanceAlongTheLine = std::min(
             minDistanceAlongTheLine, 
-            C[i].first.value().distanceFromOther(C[i].second.value())
-        );      
+            newlyCalculated
+        );
     }
 
     return minDistanceAlongTheLine;

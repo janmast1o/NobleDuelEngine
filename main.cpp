@@ -275,7 +275,7 @@ void prepareGame(int windowWidth, int windowHeight, OfflineEngine& engine) {
     simpleLightCrate2ModelCycle.addModelAndResetIterator(simpleLightCrate2Model, 1);
     ModelCollection simpleLightCrate2ModelCollection;
     simpleLightCrate2ModelCollection.addModelCycleForState(IDLE, simpleLightCrate2ModelCycle);
-    Point simpleLightCrate2Center = {550, 0};
+    Point simpleLightCrate2Center = {350, 0};
     MobileObject* simpleLightCrate2 = engine.makeMobileObject(simpleLightCrate2Center, simpleLightCrate2ModelCollection, 45);
 
     SDL_Texture* rapierUnowndedTexture = engine.createTexture("resources/golden_icon.png");
