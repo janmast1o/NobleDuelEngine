@@ -5,6 +5,7 @@
 #include <cmath>
 #include <vector>
 #include <unordered_set>
+#include <random>
 
 const EngineClock Object::dummyEngineClock_ = EngineClock();
 
@@ -149,6 +150,11 @@ Point& Object::getCenter() {
 }
 
 
+const Point& Object::getCenter() const {
+    return center_;
+}
+
+
 void Object::setCenter(const Point& newCenter) {
     center_.x = newCenter.x;
     center_.y = newCenter.y;
@@ -241,6 +247,21 @@ void Object::redrawObject(const Rectangle& currentlyObservedRectangle, bool smoo
         previousObservedRectangleUpperLeft_ = currentlyObservedRectangle.upperLeft;
         previousDisplayUpperLeft_ = calcUpperLeft;
 
+        // std::vector<Point> hull = modelCollection_.getCurrentCollisionMesh(state_).getCurrentHull();
+        // for (auto& p : hull) {
+        //     p -= currentlyObservedRectangle.upperLeft;
+        // }
+        // int n = hull.size();
+        // int a, b, c;
+        // a = std::rand() % 256;
+        // b = std::rand() % 256;
+        // c = std::rand() % 256;
+        // if (a >= 150 && b >= 150) c = 0;
+        // SDL_SetRenderDrawColor(renderer_, a, b, c, 255);
+        // for (int i=0; i<n; ++i) {
+        //     drawPoint(renderer_, hull[i].x, -hull[i].y, 8);
+        // } 
+
         SDL_RenderCopyF(renderer_, model->getTexture(), NULL, &destRect);
     } 
 }
@@ -293,8 +314,3 @@ bool Object::isParticipatingInMomentum() const {
 
 
 void Object::registerBeingAffectedByOutsideMomentum(float otherObjectMass, float otherObjectHVelocity, float hTranslation) {;}
-
-
-// void Object::replaceAllHitboxPtrsWithStaticCopies(std::list<Hitbox>& saveContainer) {
-//     modelCollection_.replaceAllHitboxPtrsWithStaticCopies(saveContainer, &center_);
-// }

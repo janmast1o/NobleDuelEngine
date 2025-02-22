@@ -79,6 +79,7 @@ public:
     void setAnchoredOnPlayerCenter();
 
     SDL_Texture* createTexture(const char* filepath);
+    SDL_Texture* createTexture(const std::string filepath);
 
     static std::pair<float, float> readTexturesWidthAndHeight(SDL_Texture* texture);
 
@@ -88,27 +89,27 @@ public:
     int registerNewProjectileArchetype(ModelCollection& newProjectileArchetypeModelCollection, 
                                        MobileHitbox& leftTravellingHitbox, MobileHitbox& rightTravellingHitbox);
 
-    Object* makeObject(Point& center, ModelCollection& modelCollection);
-    MobileObject* makeMobileObject(Point& center, ModelCollection& modelCollection, float mass);
+    Object* makeObject(const Point& center, ModelCollection& modelCollection, bool decorative = false);
+    MobileObject* makeMobileObject(const Point& center, ModelCollection& modelCollection, float mass, bool decorative = false);
     
-    FloatingPlatform* makeFloatingPlatform(Point& center, ModelCollection& modelCollection, float mass, 
-                                           const std::vector<Velocity>& movementModesVs, const std::vector<Point>& movementModesBorders);
-    Elevator* makeElevator(Point& center, ModelCollection& modelCollection, float mass, 
+    FloatingPlatform* makeFloatingPlatform(const Point& center, ModelCollection& modelCollection, float mass, 
+                                           const std::vector<Velocity>& movementModesVs, const std::vector<Point>& movementModesBorders, bool decorative = false);
+    Elevator* makeElevator(const Point& center, ModelCollection& modelCollection, float mass, 
                                            const std::vector<Velocity>& movementModesVs, const std::vector<Point>& movementModesBorders);
 
-    Button* makeButton(Point& center, ModelCollection& modelCollection, std::function<void()>& buttonCommand);
+    Button* makeButton(const Point& center, ModelCollection& modelCollection, std::function<void()>& buttonCommand);
 
-    ThrustingWeapon* makeThrustingWeapon(Point& center, ModelCollection& modelCollection, float mass, 
+    ThrustingWeapon* makeThrustingWeapon(const Point& center, ModelCollection& modelCollection, float mass, 
                                          int damage, int poiseDamage,
                                          unsigned short attackFrames, unsigned short recoveryFrames, 
                                          float attackExtendRange);
 
-    Firearm* makeFirearm(Point& center, ModelCollection& modelCollection, float mass, int usedAmmoTypeId,
+    Firearm* makeFirearm(const Point& center, ModelCollection& modelCollection, float mass, int usedAmmoTypeId,
                          std::optional<FirearmFireSpecs> fireSpecs, std::optional<FirearmFireSpecs> alternativeFireSpecs = std::nullopt);
 
-    Creature* makeCreature(Point& center, ModelCollection& modelCollection, float mass, int health);
-    Player* makePlayer(Point& center, ModelCollection& modelCollection, float mass, int health);
-    Player* makePlayer2(Point& center, ModelCollection& modelCollection, float mass, int health); // temp
+    Creature* makeCreature(const Point& center, ModelCollection& modelCollection, float mass, int health);
+    Player* makePlayer(const Point& center, ModelCollection& modelCollection, float mass, int health);
+    Player* makePlayer2(const Point& center, ModelCollection& modelCollection, float mass, int health); // temp
 
     void run();
 

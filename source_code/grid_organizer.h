@@ -26,7 +26,7 @@ private:
 
 public:    
 
-    GridOrganizer(Rectangle& celledRectangle, int numOfRows, int numOfCols) : 
+    GridOrganizer(const Rectangle& celledRectangle, int numOfRows, int numOfCols) : 
         celledRectangle_(celledRectangle), numOfRows_(numOfRows), numOfCols_(numOfCols),
         cellWidth_(celledRectangle.getWidth() / numOfRows),
         cellHeight_(celledRectangle.getHeight() / numOfCols) {

@@ -179,6 +179,8 @@ enum ScheduledInstruction {
     HANDLE_SWITCH_TO_NEXT_ITEM
 };
 
+std::ostream& operator<<(std::ostream& o, ScheduledInstruction scheduledInstruction);
+
 #endif
 
 #ifndef VELOCITY_H

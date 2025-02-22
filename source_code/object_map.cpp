@@ -1,15 +1,12 @@
 #include "object_map.h"
 
 
-ObjectMap::ObjectMap(Rectangle& celledRectangle, int numOfRows, int numOfCols) : objectGridOrganizer_(celledRectangle, numOfRows, numOfCols) {;}
-
-
-// ObjectMap::ObjectMap() {}
+ObjectMap::ObjectMap(const Rectangle& celledRectangle, int numOfRows, int numOfCols) : objectGridOrganizer_(celledRectangle, numOfRows, numOfCols) {;}
 
 
 void ObjectMap::addNewObject(Object& newObject) {
+    // allObjects_.emplace_back(&newObject);
     objectGridOrganizer_.emplaceInGrid(&newObject, newObject.getLargestRectangle());
-    // allObjects_.push_back(&newObject);
 }
 
 
@@ -19,20 +16,12 @@ void ObjectMap::updateObjectPosition(Object& object) {
 
 
 void ObjectMap::removeObject(Object& object) {
+    // allObjects_.erase(&object);
     objectGridOrganizer_.removeFromGrid(&object);
-    // allObjects_.remove(&object);
 }
 
 
 std::list<Object*> ObjectMap::getPotentiallyColliding(const Object& object) {
-    // std::list<Object*> allCollidingObjects;
-    // for (Object* p : allObjects_) {
-    //     if (object.collideableWith(*p)) {
-    //         allCollidingObjects.push_back(p);
-    //     }
-    // }
-    // return allCollidingObjects;
-
     std::list<Object*> allCollidingObjects = objectGridOrganizer_.getPotentiallyColliding(object.getLargestRectangle());
     for (auto it = allCollidingObjects.begin(); it != allCollidingObjects.end(); ) {
         if (!object.collideableWith(**it)) {
@@ -47,6 +36,7 @@ std::list<Object*> ObjectMap::getPotentiallyColliding(const Object& object) {
 
 std::list<Object*> ObjectMap::getPotentiallyColliding(const Object& object, const Point& translationVector) {
     std::list<Object*> allCollidingObjects = objectGridOrganizer_.getPotentiallyColliding(object.getLargestRectangle(), translationVector);
+    // std::list<Object*> allCollidingObjects = allObjects_;
     for (auto it = allCollidingObjects.begin(); it != allCollidingObjects.end(); ) {
         if (!object.collideableWith(**it)) {
             it = allCollidingObjects.erase(it);

@@ -37,8 +37,6 @@ protected:
     
     Model* getNextModelPtr();
 
-    // Hitbox& getCurrentCollisionMesh() const;
-
     virtual Point smoothOutForDisplay(Point currentObservedRectangleUpperLeft, Point calcDisplayUpperLeft);
 
     friend class MobileObject;
@@ -69,6 +67,7 @@ public:
     bool isAlive() const;
 
     Point& getCenter();
+    const Point& getCenter() const;
     virtual void setCenter(const Point& newCenter);
 
     Matter getMatter() const;
@@ -91,8 +90,6 @@ public:
 
     virtual bool isParticipatingInMomentum() const;
     virtual void registerBeingAffectedByOutsideMomentum(float otherObjectMass, float otherObjectHVelocity, float hTranslation); 
-
-    // void replaceAllHitboxPtrsWithStaticCopies(std::list<Hitbox>& saveContainer);
 
     virtual ~Object() = default;
 

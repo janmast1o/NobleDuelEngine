@@ -211,6 +211,36 @@ std::ostream& operator<<(std::ostream& os, State state) {
 }
 
 
+std::ostream& operator<<(std::ostream& os, ScheduledInstruction scheduledInstruction) {
+    switch (scheduledInstruction) {
+        case NOTHING: os << "NOTHING"; break;
+        case HANDLE_BE_PUSHED_HORIZONTALLY_WITH_RETRY: os << "HANDLE_BE_PUSHED_HORIZONTALLY_WITH_RETRY"; break;
+        case HANDLE_BE_PUSHED_HORIZONTALLY_NO_RETRY: os << "HANDLE_BE_PUSHED_HORIZONTALLY_NO_RETRY"; break;
+        case HANDLE_MOVE_HORIZONTALLY: os << "HANDLE_MOVE_HORIZONTALLY"; break;
+        case HANDLE_SLIDE_DOWN_WITH_RETRY: os << "HANDLE_SLIDE_DOWN_WITH_RETRY"; break;
+        case HANDLE_SLIDE_DOWN_NO_RETRY: os << "HANDLE_SLIDE_DOWN_NO_RETRY"; break;
+        case HANDLE_AIRBORNE: os << "HANDLE_AIRBORNE"; break;
+        case HANDLE_FREEFALL: os << "HANDLE_FREEFALL"; break;
+        case HANDLE_STOP: os << "HANDLE_STOP"; break;
+        case HANDLE_JUMP: os << "HANDLE_JUMP"; break;
+        case HANDLE_FOREVER_FREEFALL: os << "HANDLE_FOREVER_FREEFALL"; break;
+        case HANDLE_SLIDE_OFF_TOP: os << "HANDLE_SLIDE_OFF_TOP"; break;
+        case HANDLE_ESCAPE_WITH_RETRY: os << "HANDLE_ESCAPE_WITH_RETRY"; break;
+        case HANDLE_ESCAPE_NO_RETRY: os << "HANDLE_ESCAPE_NO_RETRY"; break;
+        case HANDLE_INTERACT: os << "HANDLE_INTERACT"; break;
+        case HANDLE_ATTACK: os << "HANDLE_ATTACK"; break;
+        case HANDLE_WIND_UP: os << "HANDLE_WIND_UP"; break;
+        case HANDLE_RECOVER: os << "HANDLE_RECOVER"; break;
+        case HANDLE_USE: os << "HANDLE_USE"; break;
+        case HANDLE_ALT_USE: os << "HANDLE_ALT_USE"; break;
+        case HANDLE_DROP_ITEM: os << "HANDLE_DROP_ITEM"; break;
+        case HANDLE_SWITCH_TO_NEXT_ITEM: os << "HANDLE_SWITCH_TO_NEXT_ITEM"; break;
+        default: os << "UNKNOWN_ACTION"; break;
+    }
+    return os;
+}
+
+
 ObjectSpecificPhysicsChar::ObjectSpecificPhysicsChar() :
     maxSRVerticalV(780),
     maxSRHorizontalV(225),

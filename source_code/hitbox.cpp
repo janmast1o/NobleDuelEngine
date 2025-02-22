@@ -16,10 +16,11 @@ Hitbox::Hitbox(int id, const std::vector<Point> relativeHull) :
         float leftmostX = relativeHull_[support(relativeHull_, Point(-1,0))].x;
         float rightmostX = relativeHull_[support(relativeHull_, Point(1,0))].x;
         float upmostY = relativeHull_[support(relativeHull_, Point(0,1))].y;
-        float downmostY = relativeHull_[support(relativeHull_, Point(-1,0))].y;
+        float downmostY = relativeHull_[support(relativeHull_, Point(0,-1))].y;
         Point lowerLeft(leftmostX, downmostY);
         Point upperRight(rightmostX, upmostY);
         relativeRectangle_ = Rectangle(lowerLeft, upperRight);
+        // std::cout << relativeRectangle_.lowerLeft << " " << relativeRectangle_.upperRight << "\n";
     }
 
 
@@ -168,10 +169,12 @@ bool Hitbox::isDirectlyAboveAfterVectorTranslation(const Hitbox& otherHitbox, co
     std::vector<Point> currentHitboxHull = getHullAfterVectorTranslation(slightRaiseVector+translationVector);
     const std::vector<Point> otherCurrentHitboxTop = otherHitbox.getCurrentHull();
     if (!gjk(currentHitboxHull, otherCurrentHitboxTop)) {
+        // std::cout << "1\n";
         for (int i = 0; i < currentHitboxHull.size(); ++i) {
             currentHitboxHull[i] = currentHitboxHull[i] - 2*slightRaiseVector;
         }
         if (gjk(currentHitboxHull, otherCurrentHitboxTop)) {
+            // std::cout << "2\n";
             return true;
         }
     }

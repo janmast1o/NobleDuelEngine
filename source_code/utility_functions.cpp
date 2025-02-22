@@ -176,6 +176,7 @@ std::vector<Point> findTop(const std::vector<Point>& polygon) {
     }
 
     std::vector<Point> top;
+    top.reserve(n-rightmostIndex+leftmostIndex+1);
     int i = rightmostIndex;
     while (true) {
         top.push_back(polygon[i%n]);
@@ -185,6 +186,8 @@ std::vector<Point> findTop(const std::vector<Point>& polygon) {
             ++i;
         }
     }
+    // std::cout << polygon[leftmostIndex] << " " << polygon[rightmostIndex] << "\n";
+
     return top;
 }
 
@@ -450,7 +453,8 @@ float calculateMinVertDistance(const std::vector<Point>& S, const std::vector<Po
         float minDistance = INFINITY;
         float currentMin;
         while (i <= endEl) {
-            if ((currentMin=start->sPoint.value().y - start->rPoint.value().y) < minDistance) {
+            if (start->sPoint.value().y <= start->rPoint.value().y) minDistance = 0;
+            else if ((currentMin=start->sPoint.value().y - start->rPoint.value().y) < minDistance) {
                 minDistance = currentMin;
             }
             ++start;

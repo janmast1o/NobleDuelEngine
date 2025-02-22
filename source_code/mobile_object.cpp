@@ -266,9 +266,9 @@ bool MobileObject::fixReceivedVelocityIfNeccessary(float& receivedHVelocity, flo
 }
 
 
-void MobileObject::prepareNextSlideOffTopScheduled() {
+void MobileObject::prepareNextSlideOffTopScheduled(const Object& objectUnderneath) {
     float slideDirAsFloat;
-    if (objectCurrentlyUnderneath_->getCenter().x < getCenter().x) {
+    if (objectUnderneath.getCenter().x < getCenter().x) {
         slideDirAsFloat = 1;
     } else {
         slideDirAsFloat = -1;
@@ -280,8 +280,8 @@ void MobileObject::prepareNextSlideOffTopScheduled() {
     zeroVelocity();
     velocity_.horizontalVelocity = slideDirAsFloat*objectSpecificPhysicsChar_.slideV;
     setScheduled(HANDLE_SLIDE_OFF_TOP);
-    if (objectCurrentlyUnderneath_->isMobile()) { // idk if it should actually set it this way, but it works for now
-        dynamic_cast<MobileObject*>(objectCurrentlyUnderneath_)->prepareNextEscapeScheduled(-slideDirAsFloat, *this);
+    if (objectUnderneath.isMobile()) {
+        dynamic_cast<MobileObject&>(const_cast<Object&>(objectUnderneath)).prepareNextEscapeScheduled(-slideDirAsFloat, *this);
     }
 }
 
@@ -357,21 +357,53 @@ void MobileObject::horizontalMovementMainBody(Point& svec, const std::list<Objec
                                               std::list<MobileObject*>* foundMobileDirectlyAbove, 
                                               Object*& alphaTempObjectCurrentlyUnderneath, Object*& gammaTempObjectCurrentlyUnderneath) {                                            
     
+    float localAlpha;
+    // Object* localAlphaTempObjectCurrentlyUnderneath;
+    // float auxLocalAlpha;
+    // bool check = false;
+    
     for (Object* p : potentiallyColliding) {
         if (p != this && collideableWith(*p)) {
             if (collidesWithAfterVectorTranslation(*p, svec)) {
                 if (isDirectlyAboveAfterVectorTranslation(*p, svec)) {
+                    // std::cout << sessionEngineClock_.getCurrentTimeInFrames() << " 3\n";
                     groundUnderneathFound = true;
                     changingSlopes = false;
 
-                } else {
-                    alpha = isCollisionAfterVectorTranslationCausedByGentleSlope(*p, svec);
-                    alphaTempObjectCurrentlyUnderneath = p;
+                    // localAlpha = isCollisionAfterVectorTranslationCausedByGentleSlope(*p, svec);
+                    // if (svec.x*localAlpha > svec.y) {
+                    //     alpha = localAlpha;
+                    //     alphaTempObjectCurrentlyUnderneath = p;
+                    //     svec.y = alpha*svec.x + MINISCULE_RAISE;
+                    //     groundUnderneathFound = true;
+                    //     changingSlopes = false;
+                    // }
 
-                    if (std::abs(alpha)-MAXIMUM_GENTLE_SLOPE_COEFFICIENT <= ERROR_EPS) {
-                        svec.y = alpha*svec.x;
+                } else {
+                    // auxLocalAlpha = isCollisionAfterVectorTranslationCausedByGentleSlope(*p, svec);
+                    // if (std::abs(auxLocalAlpha) > localAlpha) {
+                    //     localAlpha = auxLocalAlpha;
+                    //     localAlphaTempObjectCurrentlyUnderneath = p;
+                    //     check = true;
+                    // } else check = false;    
+
+
+                    // if (check && std::abs(localAlpha)-MAXIMUM_GENTLE_SLOPE_COEFFICIENT <= ERROR_EPS) {
+                    //     alpha = localAlpha;
+                    //     alphaTempObjectCurrentlyUnderneath = localAlphaTempObjectCurrentlyUnderneath;
+                    //     svec.y = alpha*svec.x + MINISCULE_RAISE;
+                    //     std::cout << svec << " " << alpha << " " << p << " " << slopeInclineDirectlyUnderneath_ << " " << sessionEngineClock_.getCurrentTimeInFrames() << "\n";
+                    //     groundUnderneathFound = true;
+                    //     changingSlopes = false;   
+
+                    localAlpha = isCollisionAfterVectorTranslationCausedByGentleSlope(*p, svec);
+                    if (std::abs(localAlpha)-MAXIMUM_GENTLE_SLOPE_COEFFICIENT <= ERROR_EPS) {
+                        alpha = localAlpha;
+                        alphaTempObjectCurrentlyUnderneath = p;
+                        svec.y = alpha*svec.x + MINISCULE_RAISE;
                         groundUnderneathFound = true;
                         changingSlopes = false;
+                        std::cout << "CS: " << p << " " << alpha << " " << sessionEngineClock_.getCurrentTimeInFrames() << "\n";
 
                     } else {
                         if (p->isMobile()) {
@@ -391,6 +423,7 @@ void MobileObject::horizontalMovementMainBody(Point& svec, const std::list<Objec
 
                             }
                         } else {
+                            std::cout << "CD: " << p << " " << slopeInclineDirectlyUnderneath_ << " " << sessionEngineClock_.getCurrentTimeInFrames() << "\n";
                             collisionDetected = true;
                             dis = std::min(dis, std::abs(findMinDistanceAlongTheLine(*p, svec)));
                         }
@@ -406,6 +439,7 @@ void MobileObject::horizontalMovementMainBody(Point& svec, const std::list<Objec
                     
                     if (delta > 0 && delta < 2*MAXIMUM_GENTLE_SLOPE_COEFFICIENT*std::abs(svec.x)) {
                         gamma = findSlopeCoefficientDirectlyBelowAfterVectorTranslation(*p, svec);
+                        svec.y = gamma*svec.x + MINISCULE_RAISE;
                         gammaTempObjectCurrentlyUnderneath = p;
                         groundUnderneathFound = true;
                         changingSlopes = true;
@@ -456,7 +490,7 @@ void MobileObject::adjustSVec(Point& svec) {
 }
 
 
-bool MobileObject::moveMobileDirectlyAbove(std::list<MobileObject*>& mobileDirectlyAbove, const Point& translationVector) { // this function should be optimized
+bool MobileObject::moveMobileDirectlyAbove(std::list<MobileObject*>& mobileDirectlyAbove, const Point& translationVector) {
     float sum = 0;
     for (MobileObject* m : mobileDirectlyAbove) {
         if (m->getScheduled() != HANDLE_SLIDE_OFF_TOP) {
@@ -532,8 +566,8 @@ void MobileObject::handleBePushedHorizontally(HandleParams handleParams) {
     float gamma = -INFINITY;
     float dis = INFINITY;
     std::list<MobileObject*> foundMobileDirectlyAbove;
-    Object* alphaTempObjectCurrentlyUnderneath;
-    Object* gammaTempObjectCurrentlyUnderneath;
+    Object* alphaTempObjectCurrentlyUnderneath = nullptr;
+    Object* gammaTempObjectCurrentlyUnderneath = nullptr;
 
     horizontalMovementMainBody(svec, potentiallyColliding, alpha, beta, gamma, dis,
                                collisionDetected, groundUnderneathFound, changingSlopes, 
@@ -554,12 +588,11 @@ void MobileObject::handleBePushedHorizontally(HandleParams handleParams) {
             setScheduled(HANDLE_FREEFALL);
         } else {
             if (std::abs(alpha)-MAXIMUM_GENTLE_SLOPE_COEFFICIENT <= ERROR_EPS) {
-                objectCurrentlyUnderneath_ = alphaTempObjectCurrentlyUnderneath;
                 slopeInclineDirectlyUnderneath_ = alpha;
             }
 
-            if (!objectCurrentlyUnderneath_->canHaveOtherOnTop()) {
-                prepareNextSlideOffTopScheduled();
+            if (alphaTempObjectCurrentlyUnderneath != nullptr && !(alphaTempObjectCurrentlyUnderneath->canHaveOtherOnTop())) {
+                prepareNextSlideOffTopScheduled(*alphaTempObjectCurrentlyUnderneath);
             }
             else {
                 setScheduled(HANDLE_BE_PUSHED_HORIZONTALLY_WITH_RETRY);
@@ -569,13 +602,12 @@ void MobileObject::handleBePushedHorizontally(HandleParams handleParams) {
 
     } else if (!collisionDetected && changingSlopes) {
         slopeInclineDirectlyUnderneath_ = gamma;
-        objectCurrentlyUnderneath_ = gammaTempObjectCurrentlyUnderneath;
 
         moveMobileDirectlyAbove(foundMobileDirectlyAbove, svec+Point(0,-beta));
         translateObjectByVector(svec+Point(0,-beta));
         
-        if (!objectCurrentlyUnderneath_->canHaveOtherOnTop()) {
-            prepareNextSlideOffTopScheduled();
+        if (!(gammaTempObjectCurrentlyUnderneath->canHaveOtherOnTop())) {
+            prepareNextSlideOffTopScheduled(*gammaTempObjectCurrentlyUnderneath);
         }
         else if (std::abs(gamma)-MAXIMUM_GENTLE_SLOPE_COEFFICIENT > -ERROR_EPS) {
             removeGroundReactionAcceleration();
@@ -627,8 +659,8 @@ void MobileObject::handleEscapeFromUnderneathObjectOnTop(HandleParams handlePara
     float gamma = -INFINITY;
     float dis = INFINITY;
     std::list<MobileObject*> foundMobileDirectlyAbove;
-    Object* alphaTempObjectCurrentlyUnderneath;
-    Object* gammaTempObjectCurrentlyUnderneath;
+    Object* alphaTempObjectCurrentlyUnderneath = nullptr;
+    Object* gammaTempObjectCurrentlyUnderneath = nullptr;
 
     horizontalMovementMainBody(svec, potentiallyColliding, alpha, beta, gamma, dis,
                                collisionDetected, groundUnderneathFound, changingSlopes, 
@@ -650,12 +682,11 @@ void MobileObject::handleEscapeFromUnderneathObjectOnTop(HandleParams handlePara
             setScheduled(HANDLE_FREEFALL);
         } else {
             if (std::abs(alpha)-MAXIMUM_GENTLE_SLOPE_COEFFICIENT <= ERROR_EPS) {
-                objectCurrentlyUnderneath_ = alphaTempObjectCurrentlyUnderneath;
                 slopeInclineDirectlyUnderneath_ = alpha;
             }
 
-            if (!objectCurrentlyUnderneath_->canHaveOtherOnTop()) {
-                prepareNextSlideOffTopScheduled();
+            if (alphaTempObjectCurrentlyUnderneath != nullptr && !(alphaTempObjectCurrentlyUnderneath->canHaveOtherOnTop())) {
+                prepareNextSlideOffTopScheduled(*alphaTempObjectCurrentlyUnderneath);
             }
             else {
                 setScheduled(HANDLE_ESCAPE_WITH_RETRY);
@@ -665,14 +696,13 @@ void MobileObject::handleEscapeFromUnderneathObjectOnTop(HandleParams handlePara
 
     } else if (!collisionDetected && changingSlopes) {
         slopeInclineDirectlyUnderneath_ = gamma;
-        objectCurrentlyUnderneath_ = gammaTempObjectCurrentlyUnderneath;
 
         moveMobileDirectlyAbove(foundMobileDirectlyAbove, svec+Point(0,-beta));
         translateObjectByVector(svec+Point(0,-beta));
         auxDistanceCoveredSoFar_ += svec.x;
         
-        if (!objectCurrentlyUnderneath_->canHaveOtherOnTop()) {
-            prepareNextSlideOffTopScheduled();
+        if (!(gammaTempObjectCurrentlyUnderneath->canHaveOtherOnTop())) {
+            prepareNextSlideOffTopScheduled(*gammaTempObjectCurrentlyUnderneath);
         }
         else if (std::abs(gamma)-MAXIMUM_GENTLE_SLOPE_COEFFICIENT > -ERROR_EPS) {
             removeGroundReactionAcceleration();
@@ -724,7 +754,7 @@ void MobileObject::handleSlideDown(HandleParams handleParams) {
     bool groundUnderneathFound = false;
     float alpha = -INFINITY;
     float dis = INFINITY;
-    Object* alphaTempObjectCurrentlyUnderneath;
+    Object* alphaTempObjectCurrentlyUnderneath = nullptr;
 
     for (Object* p : potentiallyCollding) {
         if (p != this && collideableWith(*p)) {
@@ -771,11 +801,11 @@ void MobileObject::handleSlideDown(HandleParams handleParams) {
         } else {
             if (std::abs(alpha)-MAXIMUM_GENTLE_SLOPE_COEFFICIENT <= ERROR_EPS) {
                 slopeInclineDirectlyUnderneath_ = alpha;
-                objectCurrentlyUnderneath_ = alphaTempObjectCurrentlyUnderneath;
+                // objectCurrentlyUnderneath_ = alphaTempObjectCurrentlyUnderneath;
                 translateObjectByVector({0, SLIGHT_RAISE});
                 
-                if (!objectCurrentlyUnderneath_->canHaveOtherOnTop()) {
-                    prepareNextSlideOffTopScheduled();
+                if (!alphaTempObjectCurrentlyUnderneath->canHaveOtherOnTop()) {
+                    prepareNextSlideOffTopScheduled(*alphaTempObjectCurrentlyUnderneath);
                 } else {
                     clearScheduled();
                 }
@@ -808,10 +838,25 @@ void MobileObject::handleSlideDown(HandleParams handleParams) {
 
 void MobileObject::handleSlideOffTop() {
     previouslyScheduled_ = scheduled_;
-    bool directlyAboveObjectToSlideOff = isDirectlyAbove(*objectCurrentlyUnderneath_);
-    if (!directlyAboveObjectToSlideOff) {
+
+    newVelocity();
+    float sx = velocity_.horizontalVelocity*(1.0/FPS);
+    float sy = -std::abs(slopeInclineDirectlyUnderneath_*sx);
+    Point svec(sx, sy);
+    adjustSVec(svec);
+    std::list<Object*> potentiallyColliding = objectMap_.getPotentiallyColliding(*this, svec);
+    bool keepSliding = false;
+    bool collisionDetected = false;
+    float dis = INFINITY;
+
+    for (Object* p : potentiallyColliding) {
+        if (p != this && collideableWith(*p) && isDirectlyAbove(*p) && !(p->canHaveOtherOnTop())) {
+            keepSliding = true;
+        }
+    }
+
+    if (!keepSliding) {
         participatingInMomentum_ = true;
-        objectCurrentlyUnderneath_ = nullptr;
         slopeInclineDirectlyUnderneath_ = 0;
         acceleration_.horizontalAcceleration = 0;
         removeGroundReactionAcceleration();
@@ -819,21 +864,11 @@ void MobileObject::handleSlideOffTop() {
         velocity_.horizontalVelocity = 0;
         setScheduled(HANDLE_FREEFALL);
         return;
-    } 
-
-    newVelocity();
-    float alpha = findSlopeCoefficientDirectlyBelow(*objectCurrentlyUnderneath_);
-    float sx = velocity_.horizontalVelocity*(1.0/FPS);
-    float sy = -std::abs(alpha*sx);
-    Point svec(sx, sy);
-    adjustSVec(svec);
-    std::list<Object*> potentiallyColliding = objectMap_.getPotentiallyColliding(*this, svec);
-    bool collisionDetected = false;
-    float dis = INFINITY;
+    }
 
     for (Object* p : potentiallyColliding) {
-        if (p != this && p != objectCurrentlyUnderneath_ && collideableWith(*p)) {
-            if (collidesWithAfterVectorTranslation(*p, svec)) {
+        if (p != this && collideableWith(*p)) {
+            if (collidesWithAfterVectorTranslation(*p, svec) && !isDirectlyAboveAfterVectorTranslation(*p, svec)) {
                 collisionDetected = true;
                 dis = std::min(dis, std::abs(findMinDistanceAlongTheLine(*p, svec)));
             }
@@ -956,7 +991,7 @@ void MobileObject::handleFreefall() {
     float alpha = -INFINITY;
     float tempDelta;
     float delta = -1;
-    Object* alphaTempObjectCurrentlyUnderneath;
+    Object* alphaTempObjectCurrentlyUnderneath = nullptr;
 
     freefallMainBody(svec, potentiallyUnderneath, 
                      alpha, delta, groundUnderneathFound,
@@ -968,10 +1003,10 @@ void MobileObject::handleFreefall() {
         zeroAirborneGhostHorizontalVelocity();
         addGroundReactionAcceleration();
         slopeInclineDirectlyUnderneath_ = alpha;
-        objectCurrentlyUnderneath_ = alphaTempObjectCurrentlyUnderneath;
+        // objectCurrentlyUnderneath_ = alphaTempObjectCurrentlyUnderneath;
 
-        if (!objectCurrentlyUnderneath_->canHaveOtherOnTop()) {
-            prepareNextSlideOffTopScheduled();
+        if (!(alphaTempObjectCurrentlyUnderneath->canHaveOtherOnTop())) {
+            prepareNextSlideOffTopScheduled(*alphaTempObjectCurrentlyUnderneath);
         } else if (std::abs(alpha)-MAXIMUM_GENTLE_SLOPE_COEFFICIENT >= -ERROR_EPS) {
             removeGroundReactionAcceleration();
             setScheduled(HANDLE_SLIDE_DOWN_WITH_RETRY);

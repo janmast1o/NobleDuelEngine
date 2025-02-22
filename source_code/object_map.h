@@ -9,11 +9,11 @@ class ObjectMap { // temporary implementation
 private:
 
     GridOrganizer<Object*> objectGridOrganizer_;
-    std::list<Object*> allObjects_;
+    // std::list<Object*> allObjects_;
 
 public:
 
-    ObjectMap(Rectangle& celledRectangle, int numOfRows, int numOfCols);
+    ObjectMap(const Rectangle& celledRectangle, int numOfRows, int numOfCols);
     // ObjectMap();
 
     void addNewObject(Object& newObject);

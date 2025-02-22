@@ -28,7 +28,7 @@ protected:
     float auxDistanceCoveredSoFar_;
     float auxDistanceToCover_;
 
-    Object* objectCurrentlyUnderneath_; // potential null pointing pointer
+    // Object* objectCurrentlyUnderneath_; // potential null pointing pointer
 
     MomentumTransferProtocol momentumTransferProtcol_;
     float onlyParamSxMomentumTransferLoss_;
@@ -62,7 +62,7 @@ protected:
     void applyFriction();
     bool fixReceivedVelocityIfNeccessary(float& receivedHVelocity, float& receivedHTranslation) const;
 
-    void prepareNextSlideOffTopScheduled();
+    void prepareNextSlideOffTopScheduled(const Object& objectUnderneath);
     void prepareNextEscapeScheduled(float escapeDirection, MobileObject& escapingFrom);
 
     void horizontalMovementMainBody(Point& svec, const std::list<Object*>& potentiallyColliding, 

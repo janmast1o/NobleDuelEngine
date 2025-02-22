@@ -8,7 +8,8 @@
 OfflineEngine::OfflineEngine(int windowWidth, int windowHeight, GridOrganizerCreationArgs gridCreationArgs) : 
     objectMap_(gridCreationArgs.celledRectangle, gridCreationArgs.numOfRows, gridCreationArgs.numOfCols),
     interactableManager_(gridCreationArgs.celledRectangle, gridCreationArgs.numOfRows, gridCreationArgs.numOfCols),
-    hitboxIdCounter_(0), projectileFactory_(projectileManager_), anchoredOnPlayerCenter_(false) {
+    hitboxIdCounter_(0), projectileFactory_(projectileManager_), anchoredOnPlayerCenter_(false),
+    playerPtr_(nullptr), player2Ptr_(nullptr) {
     if (SDL_Init(SDL_INIT_VIDEO)) {
         std::cerr << "SDL_Init failed" << std::endl;
         return;
@@ -78,6 +79,11 @@ SDL_Texture* OfflineEngine::createTexture(const char* filepath) {
 }
 
 
+SDL_Texture* OfflineEngine::createTexture(const std::string filepath) {
+    return createTexture(filepath.c_str());
+}
+
+
 std::pair<float, float> OfflineEngine::readTexturesWidthAndHeight(SDL_Texture* texture) {
     int iwidth, iheight;
     SDL_QueryTexture(texture, NULL, NULL, &iwidth, &iheight);
@@ -111,38 +117,39 @@ int OfflineEngine::registerNewProjectileArchetype(ModelCollection& newProjectile
 }
 
 
-Object* OfflineEngine::makeObject(Point& center, ModelCollection& modelCollection) {
+Object* OfflineEngine::makeObject(const Point& center, ModelCollection& modelCollection, bool decorative) {
     std::lock_guard<std::mutex> lock(objectCreationMutex_);
     Object* newObject = new Object(renderer_, center, modelCollection, sessionEngineClock_);
     allObjects_.emplace_back(newObject);
-    objectMap_.addNewObject(*newObject);
+    if (!decorative) objectMap_.addNewObject(*newObject);
     return newObject;
 }
 
 
-MobileObject* OfflineEngine::makeMobileObject(Point& center, ModelCollection& modelCollection, float mass) {
+MobileObject* OfflineEngine::makeMobileObject(const Point& center, ModelCollection& modelCollection, float mass, bool decorative) {
     std::lock_guard<std::mutex> lock(objectCreationMutex_);
     MobileObject* newMobileObject = new MobileObject(renderer_, center, modelCollection, sessionEngineClock_, objectMap_, mass);
     allObjects_.emplace_back(newMobileObject);
     mobileObjectPtrs_.push_back(newMobileObject);
-    objectMap_.addNewObject(*newMobileObject);
+    if (!decorative) objectMap_.addNewObject(*newMobileObject);
     return newMobileObject;
 }
 
 
-FloatingPlatform* OfflineEngine::makeFloatingPlatform(Point& center, ModelCollection& modelCollection, float mass,
-                                                      const std::vector<Velocity>& movementModesVs, const std::vector<Point>& movementModesBorders) {
+FloatingPlatform* OfflineEngine::makeFloatingPlatform(const Point& center, ModelCollection& modelCollection, float mass,
+                                                      const std::vector<Velocity>& movementModesVs, const std::vector<Point>& movementModesBorders,
+                                                      bool decorative) {
     std::lock_guard<std::mutex> lock(objectCreationMutex_);
     FloatingPlatform* newFloatingPlatform = new FloatingPlatform(renderer_, center, modelCollection, sessionEngineClock_, objectMap_, mass,
                                                                  movementModesVs, movementModesBorders);
     allObjects_.emplace_back(newFloatingPlatform);
     mobileObjectPtrs_.push_back(newFloatingPlatform);
-    objectMap_.addNewObject(*newFloatingPlatform);
+    if (!decorative) objectMap_.addNewObject(*newFloatingPlatform);
     return newFloatingPlatform; 
 }
 
 
-Elevator* OfflineEngine::makeElevator(Point& center, ModelCollection& modelCollection, float mass, 
+Elevator* OfflineEngine::makeElevator(const Point& center, ModelCollection& modelCollection, float mass, 
                                       const std::vector<Velocity>& movementModesVs, const std::vector<Point>& movementModesBorders) {
     std::lock_guard<std::mutex> lock(objectCreationMutex_);
     Elevator* newElevator = new Elevator(renderer_, center, modelCollection, sessionEngineClock_, objectMap_, mass,
@@ -154,7 +161,7 @@ Elevator* OfflineEngine::makeElevator(Point& center, ModelCollection& modelColle
 }
 
 
-Button* OfflineEngine::makeButton(Point& center, ModelCollection& modelCollection, std::function<void()>& buttonCommand) {
+Button* OfflineEngine::makeButton(const Point& center, ModelCollection& modelCollection, std::function<void()>& buttonCommand) {
     std::lock_guard<std::mutex> lock(objectCreationMutex_);
     Button* newButton = new Button(renderer_, center, modelCollection, sessionEngineClock_, buttonCommand);
     allObjects_.emplace_back(newButton);
@@ -164,7 +171,7 @@ Button* OfflineEngine::makeButton(Point& center, ModelCollection& modelCollectio
 }
 
 
-ThrustingWeapon* OfflineEngine::makeThrustingWeapon(Point& center, ModelCollection& modelCollection, float mass, 
+ThrustingWeapon* OfflineEngine::makeThrustingWeapon(const Point& center, ModelCollection& modelCollection, float mass, 
                                                     int damage, int poiseDamage,
                                                     unsigned short attackFrames, unsigned short recoveryFrames, 
                                                     float attackExtendRange) {
@@ -179,7 +186,7 @@ ThrustingWeapon* OfflineEngine::makeThrustingWeapon(Point& center, ModelCollecti
 }
 
 
-Firearm* OfflineEngine::makeFirearm(Point& center, ModelCollection& modelCollection, float mass, int usedAmmoTypeId,
+Firearm* OfflineEngine::makeFirearm(const Point& center, ModelCollection& modelCollection, float mass, int usedAmmoTypeId,
                                     std::optional<FirearmFireSpecs> fireSpecs, std::optional<FirearmFireSpecs> alternativeFireSpecs) {
     std::lock_guard<std::mutex> lock(objectCreationMutex_);
     Firearm* newFirearm = new Firearm(renderer_, center, modelCollection, sessionEngineClock_, objectMap_, mass,
@@ -192,7 +199,7 @@ Firearm* OfflineEngine::makeFirearm(Point& center, ModelCollection& modelCollect
 }
 
 
-Creature* OfflineEngine::makeCreature(Point& center, ModelCollection& modelCollection, float mass, int health) {
+Creature* OfflineEngine::makeCreature(const Point& center, ModelCollection& modelCollection, float mass, int health) {
     std::lock_guard<std::mutex> lock(objectCreationMutex_);
     Creature* newCreature = new Creature(renderer_, center, modelCollection, sessionEngineClock_, objectMap_, mass, health, interactableManager_);
     allObjects_.emplace_back(newCreature);
@@ -201,7 +208,7 @@ Creature* OfflineEngine::makeCreature(Point& center, ModelCollection& modelColle
 }
 
 
-Player* OfflineEngine::makePlayer(Point& center, ModelCollection& modelCollection, float mass, int health) {
+Player* OfflineEngine::makePlayer(const Point& center, ModelCollection& modelCollection, float mass, int health) {
     std::lock_guard<std::mutex> lock(objectCreationMutex_);
     Player* newPlayer = new Player(renderer_, center, modelCollection, sessionEngineClock_, objectMap_, mass, health, interactableManager_);
     allObjects_.emplace_back(newPlayer);
@@ -212,7 +219,7 @@ Player* OfflineEngine::makePlayer(Point& center, ModelCollection& modelCollectio
 }
 
 
-Player* OfflineEngine::makePlayer2(Point& center, ModelCollection& modelCollection, float mass, int health) {
+Player* OfflineEngine::makePlayer2(const Point& center, ModelCollection& modelCollection, float mass, int health) {
     std::lock_guard<std::mutex> lock(objectCreationMutex_);
     Player* newPlayer2 = new Player(renderer_, center, modelCollection, sessionEngineClock_, objectMap_, mass, health, interactableManager_);
     allObjects_.emplace_back(newPlayer2);
@@ -301,7 +308,6 @@ void OfflineEngine::run() {
                     it = allObjects_.erase(it);
                 }
             } else {
-                // (*it).object->redrawObject();
                 (*it).object->redrawObject(windowRectangle_);              
                 ++it;
             }
