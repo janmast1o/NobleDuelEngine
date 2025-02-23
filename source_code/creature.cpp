@@ -136,9 +136,13 @@ void Creature::handleBePushedHorizontally(HandleParams handleParams) {
             translateObjectByVector(svec+Point(0,-beta));
         }
 
+        if (moveMobileDirectlyAbove(foundMobileDirectlyAbove, svec)) {
+            translateObjectByVector(svec);
+        }
+
         if (!gammaTempObjectCurrentlyUnderneath->canHaveOtherOnTop()) {
             prepareNextSlideOffTopScheduled(*gammaTempObjectCurrentlyUnderneath);
-        } else if (std::abs(beta)-MAXIMUM_GENTLE_SLOPE_COEFFICIENT > -ERROR_EPS) {
+        } else if (std::abs(gamma)-MAXIMUM_GENTLE_SLOPE_COEFFICIENT > -ERROR_EPS) {
             removeGroundReactionAcceleration();
             setScheduled(HANDLE_SLIDE_DOWN_WITH_RETRY);
         } else {
@@ -225,14 +229,7 @@ void Creature::handleMoveHorizontally() {
                                alphaTempObjectCurrentlyUnderneath,
                                gammaTempObjectCurrentlyUnderneath);    
 
-    bool x = false;                           
-    if (alpha > -INFINITY) { 
-        std::cout << sessionEngineClock_.getCurrentTimeInFrames() << " " << alpha << " " << collisionDetected << changingSlopes << groundUnderneathFound << "\n";
-        x = true;
-    }
-
     if (!collisionDetected && !changingSlopes) {
-        // std::cout << "A " << sessionEngineClock_.getCurrentTimeInFrames() << "\n";
         if (moveMobileDirectlyAbove(foundMobileDirectlyAbove, svec)) {
             translateObjectByVector(svec);
         }
@@ -244,29 +241,25 @@ void Creature::handleMoveHorizontally() {
             removeGroundReactionAcceleration();
             setScheduled(HANDLE_FREEFALL);
         } else {
-            // std::cout << "B " << sessionEngineClock_.getCurrentTimeInFrames() << "\n";
             if (std::abs(alpha)-MAXIMUM_GENTLE_SLOPE_COEFFICIENT <= ERROR_EPS) {
                 this->MobileObject::slopeInclineDirectlyUnderneath_ = alpha;
-                // std::cout << slopeInclineDirectlyUnderneath_ << sessionEngineClock_.getCurrentTimeInFrames() << "\n";
             }
-            if (x) std::cout << slopeInclineDirectlyUnderneath_ << " " << sessionEngineClock_.getCurrentTimeInFrames() << std::endl;
 
-            // std::cout << "A " << alphaTempObjectCurrentlyUnderneath << " " << typeid(alphaTempObjectCurrentlyUnderneath).name() << std::endl;
             if (alphaTempObjectCurrentlyUnderneath != nullptr && !(alphaTempObjectCurrentlyUnderneath->canHaveOtherOnTop())) {
-                // std::cout << "C" << std::endl;
                 prepareNextSlideOffTopScheduled(*alphaTempObjectCurrentlyUnderneath);
             } else {
                 clearScheduled();
             }
-            // std::cout << "B" << std::endl;
         }
 
     } else if (!collisionDetected && changingSlopes) {
-        std::cout << sessionEngineClock_.getCurrentTimeInFrames() << " " << gamma << std::endl;
         slopeInclineDirectlyUnderneath_ = gamma;
-        // objectCurrentlyUnderneath_ = gammaTempObjectCurrentlyUnderneath;
         if (moveMobileDirectlyAbove(foundMobileDirectlyAbove, svec+Point(0,-beta))) {
             translateObjectByVector(svec+Point(0,-beta));
+        }
+
+        if (moveMobileDirectlyAbove(foundMobileDirectlyAbove, svec)) {
+            translateObjectByVector(svec);
         }
 
         if (!(gammaTempObjectCurrentlyUnderneath->canHaveOtherOnTop())) {
@@ -283,7 +276,6 @@ void Creature::handleMoveHorizontally() {
         if (moveMobileDirectlyAbove(foundMobileDirectlyAbove, svec)) {
             translateObjectByVector(svec);
         }
-        // std::cout << "!\n";
 
         clearScheduled();
     }
@@ -606,7 +598,7 @@ void Creature::runScheduled() {
     
     if (isAnythingScheduled()) {
         currentMomentumDictated_.clear();
-        std::cout << scheduled_ << std::endl;
+        // std::cout << scheduled_ << std::endl;
         switch (scheduled_) {
             case HANDLE_BE_PUSHED_HORIZONTALLY_WITH_RETRY:
                 handleBePushedHorizontally();

@@ -3,6 +3,7 @@
 #include "source_code/thrusting_weapon.h"
 #include <thread>
 #include <string>
+#include <random>
 
 
 void addGrounds(OfflineEngine& engine) {
@@ -56,14 +57,6 @@ void addGrounds(OfflineEngine& engine) {
     firstEBGNGModelCollection.addModelCycleForState(IDLE, firstEBGNGModelCycle);
     Object* firstEBGNG = engine.makeObject({1150, -2000}, firstEBGNGModelCollection);
 
-    // Model firstEBGModel(texturesForObjects["even_bottom_ground"], nullptr, {0,0});
-    // StaticHitbox* firstEBGCollisonMesh = engine.makeStaticHitbox(collisionMeshesForObjects["even_bottom_ground"]);
-    // ModelCycle firstEBGModelCycle(firstEBGCollisonMesh);
-    // firstEBGModelCycle.addModelAndResetIterator(firstEBGModel, 1);
-    // ModelCollection firstEBGModelCollection;
-    // firstEBGModelCollection.addModelCycleForState(IDLE, firstEBGModelCycle);
-    // Object* firstEBG = engine.makeObject({20, -2000}, firstEBGModelCollection);
-
     Model thirdEBGModel(texturesForObjects["even_bottom_ground"], nullptr, {0,0});
     StaticHitbox* thirdEBGCollisonMesh = engine.makeStaticHitbox(collisionMeshesForObjects["even_bottom_ground"]);
     ModelCycle thirdEBGModelCycle(thirdEBGCollisonMesh);
@@ -102,7 +95,7 @@ void addGrounds(OfflineEngine& engine) {
     firstUTGNoGrassModelCycle.addModelAndResetIterator(firstUTGNoGrassModel, 1);
     ModelCollection firstUTGNoGrassModelCollection;
     firstUTGNoGrassModelCollection.addModelCycleForState(IDLE, firstUTGNoGrassModelCycle);
-    Object* firstUTGNoGrass = engine.makeObject({1250, -1700}, firstUTGNoGrassModelCollection);
+    Object* firstUTGNoGrass = engine.makeObject({1250, -1670}, firstUTGNoGrassModelCollection);
 
     Model secondUTGNoGrassModel(texturesForObjects["uneven_top_ground_no_grass"], nullptr, {0,0});
     StaticHitbox* secondUTGNoGrassCollisonMesh = engine.makeStaticHitbox(collisionMeshesForObjects["uneven_top_ground_no_grass"]);
@@ -110,7 +103,7 @@ void addGrounds(OfflineEngine& engine) {
     secondUTGNoGrassModelCycle.addModelAndResetIterator(secondUTGNoGrassModel, 1);
     ModelCollection secondUTGNoGrassModelCollection;
     secondUTGNoGrassModelCollection.addModelCycleForState(IDLE, secondUTGNoGrassModelCycle);
-    Object* secondUTGNoGrass = engine.makeObject({655, -1320}, secondUTGNoGrassModelCollection);
+    Object* secondUTGNoGrass = engine.makeObject({655, -1450}, secondUTGNoGrassModelCollection);
 
     Model supportBeamsModel(texturesForObjects["platform_support"], nullptr, {0,0});
     StaticHitbox* supportBeamsCollisonMesh = engine.makeStaticHitbox(collisionMeshesForObjects["platform_support"]);
@@ -118,7 +111,7 @@ void addGrounds(OfflineEngine& engine) {
     supportBeamsModelCycle.addModelAndResetIterator(supportBeamsModel, 1);
     ModelCollection supportBeamsModelCollection;
     supportBeamsModelCollection.addModelCycleForState(IDLE, supportBeamsModelCycle);
-    Object* supportBeams = engine.makeObject({700, -1370}, supportBeamsModelCollection);
+    Object* supportBeams = engine.makeObject({700, -1500}, supportBeamsModelCollection);
 
     Model secondEBGModel(texturesForObjects["even_bottom_ground"], nullptr, {0,0});
     StaticHitbox* secondEBGCollisonMesh = engine.makeStaticHitbox(collisionMeshesForObjects["even_bottom_ground"]);
@@ -126,12 +119,141 @@ void addGrounds(OfflineEngine& engine) {
     secondEBGModelCycle.addModelAndResetIterator(secondEBGModel, 1);
     ModelCollection secondEBGModelCollection;
     secondEBGModelCollection.addModelCycleForState(IDLE, secondEBGModelCycle);
-    Object* secondEBG = engine.makeObject({120, -1750}, secondEBGModelCollection);
+    Object* secondEBG = engine.makeObject({120, -1710}, secondEBGModelCollection);
+
+    Model leftLogModel(texturesForObjects["left_log"], nullptr, {0,0});
+    StaticHitbox* leftLogCollisonMesh = engine.makeStaticHitbox(collisionMeshesForObjects["left_log"]);
+    ModelCycle leftLogModelCycle(leftLogCollisonMesh);
+    leftLogModelCycle.addModelAndResetIterator(leftLogModel, 1);
+    ModelCollection leftLogModelCollection;
+    leftLogModelCollection.addModelCycleForState(IDLE, leftLogModelCycle);
+    Object* leftLog = engine.makeObject({-100, -1570}, leftLogModelCollection);
+
+    Model secondUBGModel(texturesForObjects["uneven_bottom_ground"], nullptr, {0,0});
+    StaticHitbox* secondUBGCollisonMesh = engine.makeStaticHitbox(collisionMeshesForObjects["uneven_bottom_ground"]);
+    ModelCycle secondUBGModelCycle(secondUBGCollisonMesh);
+    secondUBGModelCycle.addModelAndResetIterator(secondUBGModel, 1);
+    ModelCollection secondUBGModelCollection;
+    secondUBGModelCollection.addModelCycleForState(IDLE, secondUBGModelCycle);
+    Object* secondUBG = engine.makeObject({-530, -1560}, secondUBGModelCollection);
+
+    Model fourthEBGModel(texturesForObjects["even_bottom_ground"], nullptr, {0,0});
+    StaticHitbox* fourthEBGCollisonMesh = engine.makeStaticHitbox(collisionMeshesForObjects["even_bottom_ground"]);
+    ModelCycle fourthEBGModelCycle(fourthEBGCollisonMesh);
+    fourthEBGModelCycle.addModelAndResetIterator(fourthEBGModel, 1);
+    ModelCollection fourthEBGModelCollection;
+    fourthEBGModelCollection.addModelCycleForState(IDLE, fourthEBGModelCycle);
+    Object* fourthEBG = engine.makeObject({-100, -1390}, fourthEBGModelCollection);
+
+    Model secondEBGNGModel(texturesForObjects["even_bottom_ground_no_grass"], nullptr, {0,0});
+    StaticHitbox* secondEBGNGCollisonMesh = engine.makeStaticHitbox(collisionMeshesForObjects["even_bottom_ground_no_grass"]);
+    ModelCycle secondEBGNGModelCycle(secondEBGNGCollisonMesh);
+    secondEBGNGModelCycle.addModelAndResetIterator(secondEBGNGModel, 1);
+    ModelCollection secondEBGNGModelCollection;
+    secondEBGNGModelCollection.addModelCycleForState(IDLE, secondEBGNGModelCycle);
+    Object* secondEBGNG = engine.makeObject({200, -1220}, secondEBGNGModelCollection);
+
+    Model rightLogModel(texturesForObjects["right_log"], nullptr, {0,0});
+    StaticHitbox* rightLogCollisonMesh = engine.makeStaticHitbox(collisionMeshesForObjects["right_log"]);
+    ModelCycle rightLogModelCycle(rightLogCollisonMesh);
+    rightLogModelCycle.addModelAndResetIterator(rightLogModel, 1);
+    ModelCollection rightLogModelCollection;
+    rightLogModelCollection.addModelCycleForState(IDLE, rightLogModelCycle);
+    Object* rightLog = engine.makeObject({-50, -1245}, rightLogModelCollection);
+
+}
+
+
+void addFlowers(OfflineEngine& engine) {
+    float flowerHeight = 40;
+    int numberOfFlowersInCluster = 25;
+    std::string resDir = "resources/new/";
+    std::vector<SDL_Texture*> flowerTextures = {
+        {engine.createTexture(resDir + "blue_bellflowers.png")},
+        {engine.createTexture(resDir + "orange_bellis.png")},
+        {engine.createTexture(resDir + "pink_bellflowers.png")},
+        {engine.createTexture(resDir + "pink_bellis.png")},
+        {engine.createTexture(resDir + "pink_rose.png")},
+        {engine.createTexture(resDir + "red_rose.png")}
+    };
+
+    std::vector<std::pair<std::pair<float, float>, float>> flowerAreas = {
+        {{40, 300}, -2015+flowerHeight},
+        {{500, 870}, -1995+flowerHeight},
+        {{1380, 1600}, -1670+flowerHeight}
+    };
+
+    std::random_device rd;
+    std::mt19937 gen(rd());
+
+    float start, end, height;
+    for (auto& fa : flowerAreas) {
+        std::tie(start, end) = fa.first;
+        height = fa.second; 
+        std::uniform_real_distribution<float> distrubtion(start, end);
+
+        for (int i=0; i<numberOfFlowersInCluster; ++i) {
+            Model flowerModel(flowerTextures[rand()%flowerTextures.size()], nullptr, {0, 0});
+            StaticHitbox* flowerMesh = engine.makeStaticHitbox({});
+            ModelCycle flowerModelCycle(flowerMesh);
+            flowerModelCycle.addModelAndResetIterator(flowerModel, 1);
+            ModelCollection flowerModelCollection;
+            flowerModelCollection.addModelCycleForState(IDLE, flowerModelCycle);
+            Object* flower = engine.makeObject({distrubtion(gen), height}, flowerModelCollection, true);
+        }
+
+    }
+
+}
+
+
+void createCrate(OfflineEngine& engine, SDL_Texture* crateTexture, const Point& startingCenterPoint, float mass) {
+    float width, height;
+    std::tie(width, height) = engine.readTexturesWidthAndHeight(crateTexture);
+    MobileHitbox* crateMesh = engine.makeMobileHitbox({{-width/2, -height/2}, {width/2, -height/2}, {width/2, height/2}, {-width/2, height/2}});
+    Model crateModel(crateTexture, nullptr);
+    ModelCycle crateModelCycle(crateMesh);
+    crateModelCycle.addModelAndResetIterator(crateModel, 1);
+    ModelCollection crateModelCollection;
+    crateModelCollection.addModelCycleForState(IDLE, crateModelCycle);
+    MobileObject* newCrate = engine.makeMobileObject(startingCenterPoint, crateModelCollection, mass);
+}
+
+
+
+void addCrates(OfflineEngine& engine) {
+    std::string resDir = "resources/new/";
+    std::unordered_map<std::string, SDL_Texture*> crateTextures = {
+        {"light_crate", engine.createTexture(resDir + "light_crate.png")},
+        {"heavy_crate", engine.createTexture(resDir + "heavy_crate.png")},
+        {"very_heavy_crate", engine.createTexture(resDir + "very_heavy_crate.png")}
+    };
+
+    createCrate(engine, crateTextures["light_crate"], {40, -1960}, 15);
+    createCrate(engine, crateTextures["light_crate"], {-490, -800}, 15);
+    createCrate(engine, crateTextures["light_crate"], {-380, -800}, 15);
+    createCrate(engine, crateTextures["light_crate"], {250, -700}, 15);
+    createCrate(engine, crateTextures["heavy_crate"], {-410, -800}, 40);
+    createCrate(engine, crateTextures["heavy_crate"], {-410, -600}, 40);
+    createCrate(engine, crateTextures["heavy_crate"], {570, -1960}, 40);
+    createCrate(engine, crateTextures["heavy_crate"], {160, -1960}, 40);
+    createCrate(engine, crateTextures["very_heavy_crate"], {1500, -1960}, 180);
+    createCrate(engine, crateTextures["very_heavy_crate"], {-55, -2200}, 180);
 
 }
 
 
 void prepareGame(int windowWidth, int windowHeight, OfflineEngine& engine) {
+    SDL_Texture* platformTexture = engine.createTexture("resources/new/platform.png");
+    MobileHitbox* platformMesh = engine.makeMobileHitbox({{0, -252}, {0, -270}, {180, -270}, {180, -252}});
+    Model platformModel(platformTexture, nullptr, {0, 0});
+    ModelCycle platformModelCycle(platformMesh);
+    platformModelCycle.addModelAndResetIterator(platformModel, 1);
+    ModelCollection platformModelCollection;
+    platformModelCollection.addModelCycleForState(IDLE, platformModelCycle);
+    FloatingPlatform* platform = engine.makeFloatingPlatform({730, -1460}, platformModelCollection, 1000, 
+                                                             {{-65, 0}, {65, 0}}, {{700, -1460}, {940, -1460}});
+
     addGrounds(engine);
 
     SDL_Texture* playerTexture = engine.createTexture("resources/new/yellow_sprite.png");
@@ -144,8 +266,12 @@ void prepareGame(int windowWidth, int windowHeight, OfflineEngine& engine) {
     playerModelCycle.addModelAndResetIterator(playerModel, 1);
     ModelCollection playerModelCollection;
     playerModelCollection.addModelCycleForState(IDLE, playerModelCycle);
-    Point playerCenter(1000, -800);
+    Point playerCenter(180, -1930);
     Player* player = engine.makePlayer(playerCenter, playerModelCollection, 50, 100);
+
+    addFlowers(engine);
+    addCrates(engine);
+
 }
 
 

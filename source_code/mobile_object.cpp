@@ -358,52 +358,22 @@ void MobileObject::horizontalMovementMainBody(Point& svec, const std::list<Objec
                                               Object*& alphaTempObjectCurrentlyUnderneath, Object*& gammaTempObjectCurrentlyUnderneath) {                                            
     
     float localAlpha;
-    // Object* localAlphaTempObjectCurrentlyUnderneath;
-    // float auxLocalAlpha;
-    // bool check = false;
     
     for (Object* p : potentiallyColliding) {
         if (p != this && collideableWith(*p)) {
-            if (collidesWithAfterVectorTranslation(*p, svec)) {
+            if (collidesWithAfterVectorTranslation(*p, svec)) {;
                 if (isDirectlyAboveAfterVectorTranslation(*p, svec)) {
-                    // std::cout << sessionEngineClock_.getCurrentTimeInFrames() << " 3\n";
                     groundUnderneathFound = true;
                     changingSlopes = false;
 
-                    // localAlpha = isCollisionAfterVectorTranslationCausedByGentleSlope(*p, svec);
-                    // if (svec.x*localAlpha > svec.y) {
-                    //     alpha = localAlpha;
-                    //     alphaTempObjectCurrentlyUnderneath = p;
-                    //     svec.y = alpha*svec.x + MINISCULE_RAISE;
-                    //     groundUnderneathFound = true;
-                    //     changingSlopes = false;
-                    // }
-
                 } else {
-                    // auxLocalAlpha = isCollisionAfterVectorTranslationCausedByGentleSlope(*p, svec);
-                    // if (std::abs(auxLocalAlpha) > localAlpha) {
-                    //     localAlpha = auxLocalAlpha;
-                    //     localAlphaTempObjectCurrentlyUnderneath = p;
-                    //     check = true;
-                    // } else check = false;    
-
-
-                    // if (check && std::abs(localAlpha)-MAXIMUM_GENTLE_SLOPE_COEFFICIENT <= ERROR_EPS) {
-                    //     alpha = localAlpha;
-                    //     alphaTempObjectCurrentlyUnderneath = localAlphaTempObjectCurrentlyUnderneath;
-                    //     svec.y = alpha*svec.x + MINISCULE_RAISE;
-                    //     std::cout << svec << " " << alpha << " " << p << " " << slopeInclineDirectlyUnderneath_ << " " << sessionEngineClock_.getCurrentTimeInFrames() << "\n";
-                    //     groundUnderneathFound = true;
-                    //     changingSlopes = false;   
-
                     localAlpha = isCollisionAfterVectorTranslationCausedByGentleSlope(*p, svec);
                     if (std::abs(localAlpha)-MAXIMUM_GENTLE_SLOPE_COEFFICIENT <= ERROR_EPS) {
                         alpha = localAlpha;
                         alphaTempObjectCurrentlyUnderneath = p;
-                        svec.y = alpha*svec.x + MINISCULE_RAISE;
+                        svec.y = alpha*svec.x;
                         groundUnderneathFound = true;
                         changingSlopes = false;
-                        std::cout << "CS: " << p << " " << alpha << " " << sessionEngineClock_.getCurrentTimeInFrames() << "\n";
 
                     } else {
                         if (p->isMobile()) {
@@ -420,31 +390,28 @@ void MobileObject::horizontalMovementMainBody(Point& svec, const std::list<Objec
                                         registerBeingAffectedByOutsideMomentum(mop->getMass(), mop->getCurrentHVelocity(), 0);
                                     }
                                 }
-
                             }
                         } else {
-                            std::cout << "CD: " << p << " " << slopeInclineDirectlyUnderneath_ << " " << sessionEngineClock_.getCurrentTimeInFrames() << "\n";
                             collisionDetected = true;
                             dis = std::min(dis, std::abs(findMinDistanceAlongTheLine(*p, svec)));
                         }
                     }
                 }
 
-            } else if (!groundUnderneathFound) {
-                float delta;
+            } else if (!groundUnderneathFound || changingSlopes) {
                 if (isDirectlyAboveAfterVectorTranslation(*p, svec)) {
+                    changingSlopes = false;
                     groundUnderneathFound = true;
-                } else {
-                    delta = findMinVertDistanceFromTopAfterVectorTranslation(*p, svec);
+                } else if (couldBeChangingSlopesAfterVectorTranslation(*p, svec)) { // add checking if it even makes sense to calculate delta
+                    float delta = findMinVertDistanceFromTopAfterVectorTranslation(*p, svec);
                     
                     if (delta > 0 && delta < 2*MAXIMUM_GENTLE_SLOPE_COEFFICIENT*std::abs(svec.x)) {
                         gamma = findSlopeCoefficientDirectlyBelowAfterVectorTranslation(*p, svec);
-                        svec.y = gamma*svec.x + MINISCULE_RAISE;
                         gammaTempObjectCurrentlyUnderneath = p;
                         groundUnderneathFound = true;
                         changingSlopes = true;
                         beta = delta;
-                    }
+                    }    
                 }
             }
         }
@@ -605,7 +572,9 @@ void MobileObject::handleBePushedHorizontally(HandleParams handleParams) {
 
         moveMobileDirectlyAbove(foundMobileDirectlyAbove, svec+Point(0,-beta));
         translateObjectByVector(svec+Point(0,-beta));
-        
+        // moveMobileDirectlyAbove(foundMobileDirectlyAbove, svec);
+        // translateObjectByVector(svec);
+
         if (!(gammaTempObjectCurrentlyUnderneath->canHaveOtherOnTop())) {
             prepareNextSlideOffTopScheduled(*gammaTempObjectCurrentlyUnderneath);
         }
@@ -699,6 +668,8 @@ void MobileObject::handleEscapeFromUnderneathObjectOnTop(HandleParams handlePara
 
         moveMobileDirectlyAbove(foundMobileDirectlyAbove, svec+Point(0,-beta));
         translateObjectByVector(svec+Point(0,-beta));
+        moveMobileDirectlyAbove(foundMobileDirectlyAbove, svec);
+        translateObjectByVector(svec);
         auxDistanceCoveredSoFar_ += svec.x;
         
         if (!(gammaTempObjectCurrentlyUnderneath->canHaveOtherOnTop())) {
@@ -1101,6 +1072,11 @@ float MobileObject::findSlopeCoefficientDirectlyBelow(Object& otherObject) const
 
 float MobileObject::findEscapeDisAlongXAxis(Object& otherObject, float escapeDirection) const {
     return getCurrentCollisionMesh().findEscapeDisAlongXAxis(otherObject.getCurrentCollisionMesh(), escapeDirection);
+}
+
+
+bool MobileObject::couldBeChangingSlopesAfterVectorTranslation(Object& otherObject, const Point& translationVector) const {
+    return getCurrentCollisionMesh().couldBeChangingSlopesAfterVectorTranslation(otherObject.getCurrentCollisionMesh(), translationVector);
 }
 
 

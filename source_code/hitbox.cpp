@@ -8,19 +8,18 @@ Hitbox::Hitbox(int id, const std::vector<Point> relativeHull) :
     relativeHull_(relativeHull),
     relativeGentleSlopeTop_(findGentleSlopeTop(relativeHull)),
     relativeTop_(findTop(relativeHull)),
-    // relativeLeftTop_(findLeftTop(relativeHull)),
-    // relativeRightTop_(findRightTop(relativeHull)),
     relativeBottom_(findBottom(relativeHull)) {
         ownerCenterPtr_ = nullptr;
         active_ = false;
-        float leftmostX = relativeHull_[support(relativeHull_, Point(-1,0))].x;
-        float rightmostX = relativeHull_[support(relativeHull_, Point(1,0))].x;
-        float upmostY = relativeHull_[support(relativeHull_, Point(0,1))].y;
-        float downmostY = relativeHull_[support(relativeHull_, Point(0,-1))].y;
-        Point lowerLeft(leftmostX, downmostY);
-        Point upperRight(rightmostX, upmostY);
-        relativeRectangle_ = Rectangle(lowerLeft, upperRight);
-        // std::cout << relativeRectangle_.lowerLeft << " " << relativeRectangle_.upperRight << "\n";
+        if (relativeHull_.size() > 0) {
+            float leftmostX = relativeHull_[support(relativeHull_, Point(-1,0))].x;
+            float rightmostX = relativeHull_[support(relativeHull_, Point(1,0))].x;
+            float upmostY = relativeHull_[support(relativeHull_, Point(0,1))].y;
+            float downmostY = relativeHull_[support(relativeHull_, Point(0,-1))].y;
+            Point lowerLeft(leftmostX, downmostY);
+            Point upperRight(rightmostX, upmostY);
+            relativeRectangle_ = Rectangle(lowerLeft, upperRight);
+        }
     }
 
 
@@ -29,8 +28,6 @@ Hitbox::Hitbox(int id, const Hitbox& otherHitbox) :
     relativeHull_(otherHitbox.relativeHull_),
     relativeGentleSlopeTop_(otherHitbox.relativeGentleSlopeTop_),
     relativeTop_(otherHitbox.relativeTop_),
-    // relativeLeftTop_(otherHitbox.relativeLeftTop_),
-    // relativeRightTop_(otherHitbox.relativeRightTop_),
     relativeBottom_(otherHitbox.relativeBottom_),
     ownerCenterPtr_(otherHitbox.ownerCenterPtr_),
     active_(otherHitbox.active_),
@@ -169,15 +166,14 @@ bool Hitbox::isDirectlyAboveAfterVectorTranslation(const Hitbox& otherHitbox, co
     std::vector<Point> currentHitboxHull = getHullAfterVectorTranslation(slightRaiseVector+translationVector);
     const std::vector<Point> otherCurrentHitboxTop = otherHitbox.getCurrentHull();
     if (!gjk(currentHitboxHull, otherCurrentHitboxTop)) {
-        // std::cout << "1\n";
         for (int i = 0; i < currentHitboxHull.size(); ++i) {
             currentHitboxHull[i] = currentHitboxHull[i] - 2*slightRaiseVector;
         }
         if (gjk(currentHitboxHull, otherCurrentHitboxTop)) {
-            // std::cout << "2\n";
             return true;
         }
     }
+
     return false;
 }
 
@@ -271,6 +267,15 @@ float Hitbox::isCollisionAfterVectorTranslationCausedByGentleSlope(const Hitbox&
     }
     return alpha;
 }
+
+
+bool Hitbox::couldBeChangingSlopesAfterVectorTranslation(const Hitbox& otherHitbox, const Point& translationVector) const {
+    float drop = 2*MAXIMUM_GENTLE_SLOPE_COEFFICIENT*std::abs(translationVector.x) + SLIGHT_RAISE;
+    const Rectangle currentRectangle = getRectangleAfterVectorTranslation(translationVector).getSmallestRectContainingBoth(getRectangleAfterVectorTranslation(translationVector + Point(0, -drop)));
+    const Rectangle otherCurrentRectangle = otherHitbox.getCurrentRectangle();
+    return currentRectangle.collidesWith(otherCurrentRectangle);
+}
+
 
 
 float Hitbox::findSlopeCoefficientDirectlyBelowAfterVectorTranslation(const Hitbox& otherHitbox, const Point& translationVector) const {

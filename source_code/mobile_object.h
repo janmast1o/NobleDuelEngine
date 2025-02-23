@@ -155,6 +155,7 @@ public:
     float findSlopeCoefficientDirectlyBelowAfterVectorTranslation(Object& otherObject, const Point& translationVector) const;
     float findSlopeCoefficientDirectlyBelow(Object& otherObject) const;
     float findEscapeDisAlongXAxis(Object& otherObject, float escapeDirection) const;
+    bool couldBeChangingSlopesAfterVectorTranslation(Object& otherObject, const Point& translationVector) const;
 
     bool collidesWithHitboxAfterVectorTranslation(Object& otherObject, const Point& translationVector) const;
 

@@ -9,7 +9,7 @@ class ObjectMap { // temporary implementation
 private:
 
     GridOrganizer<Object*> objectGridOrganizer_;
-    // std::list<Object*> allObjects_;
+    std::list<Object*> allObjects_;
 
 public:
 

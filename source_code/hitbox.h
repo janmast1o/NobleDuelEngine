@@ -68,6 +68,7 @@ public:
     float findMinVertDistanceFromTop(const Hitbox& otherHitbox) const;
     float findMinVertDistanceFromTopAfterVectorTranslation(const Hitbox& otherHitbox, const Point& translationVector) const;
     float isCollisionAfterVectorTranslationCausedByGentleSlope(const Hitbox& otherHitbox, const Point& translationVector) const;
+    bool couldBeChangingSlopesAfterVectorTranslation(const Hitbox& otherHitbox, const Point& translationVector) const;
 
     float findSlopeCoefficientDirectlyBelowAfterVectorTranslation(const Hitbox& otherHitbox, const Point& translationVector) const;
     float findSlopeCoefficientDirectlyBelow(const Hitbox& otherHitbox) const; 

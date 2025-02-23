@@ -247,21 +247,6 @@ void Object::redrawObject(const Rectangle& currentlyObservedRectangle, bool smoo
         previousObservedRectangleUpperLeft_ = currentlyObservedRectangle.upperLeft;
         previousDisplayUpperLeft_ = calcUpperLeft;
 
-        // std::vector<Point> hull = modelCollection_.getCurrentCollisionMesh(state_).getCurrentHull();
-        // for (auto& p : hull) {
-        //     p -= currentlyObservedRectangle.upperLeft;
-        // }
-        // int n = hull.size();
-        // int a, b, c;
-        // a = std::rand() % 256;
-        // b = std::rand() % 256;
-        // c = std::rand() % 256;
-        // if (a >= 150 && b >= 150) c = 0;
-        // SDL_SetRenderDrawColor(renderer_, a, b, c, 255);
-        // for (int i=0; i<n; ++i) {
-        //     drawPoint(renderer_, hull[i].x, -hull[i].y, 8);
-        // } 
-
         SDL_RenderCopyF(renderer_, model->getTexture(), NULL, &destRect);
     } 
 }

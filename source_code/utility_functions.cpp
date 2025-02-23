@@ -108,6 +108,7 @@ float calculateVelocityAfterCollision(float mass, float hVelocity, float otherMa
 
 
 std::vector<Point> findGentleSlopeTop(const std::vector<Point>& polygon) {
+    if (polygon.size() == 0) return {};
     float maxSlopeCoefficient = MAXIMUM_GENTLE_SLOPE_COEFFICIENT;
     int n = polygon.size();
     int leftmostIndex = support(polygon, Point(-1, 0));
@@ -158,6 +159,7 @@ std::vector<Point> findGentleSlopeTop(const std::vector<Point>& polygon) {
 
 
 std::vector<Point> findTop(const std::vector<Point>& polygon) {
+    if (polygon.size() == 0) return {};
     int n = polygon.size();
     int leftmostIndex = 0;
     int rightmostIndex = 0;
@@ -231,6 +233,7 @@ std::vector<Point> findRightTop(const std::vector<Point>& polygon) {
 
 
 std::vector<Point> findBottom(const std::vector<Point>& polygon) {
+    if (polygon.size() == 0) return {};
     int n = polygon.size();
     int lowest = support(polygon, Point(0, -1));
     float lowestY = polygon[lowest].y;

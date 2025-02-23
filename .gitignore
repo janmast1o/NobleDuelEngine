@@ -33,5 +33,9 @@
 
 # VSCode
 
-*.vscode
+**/*.vscode
 **/compiled
+compiled/
+compiled/main
+resources/old/
+**/to_remove/

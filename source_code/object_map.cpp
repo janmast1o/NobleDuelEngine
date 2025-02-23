@@ -5,7 +5,7 @@ ObjectMap::ObjectMap(const Rectangle& celledRectangle, int numOfRows, int numOfC
 
 
 void ObjectMap::addNewObject(Object& newObject) {
-    // allObjects_.emplace_back(&newObject);
+    allObjects_.emplace_back(&newObject);
     objectGridOrganizer_.emplaceInGrid(&newObject, newObject.getLargestRectangle());
 }
 
