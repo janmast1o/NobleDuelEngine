@@ -1,6 +1,6 @@
 # NobleDuelEngine
 
-### (Still in development)
+### (Still in development, current version on 'refactored' branch)
 
 A simple 2D physics engine written in C++ (C++17), using SDL2 as the only external library. Developed on WSL Ubuntu.
 
@@ -10,9 +10,15 @@ A simple 2D physics engine written in C++ (C++17), using SDL2 as the only extern
 
 `git clone <this website's address>`
 
-2. Create a directory within the repo directory and name it 'compiled':
+2. Make sure that the refactored branch is pulled, then create a directory within the repo directory and name it 'compiled':
 
 `cd NobleDuelEngine`
+
+
+`git checkout -b refactored`
+
+
+`git pull origin refactored`
 
 
 `mkdir compiled`
