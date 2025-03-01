@@ -544,3 +544,95 @@ public:
 };
 
 #endif
+
+#ifndef CREATURE_GRAPH_VERTICE_H
+#define CREATURE_GRAPH_VERTICE_H
+
+// struct CreatureGraphVertice {
+//     Rectangle verticeRectangle;
+
+// };
+
+// #endif
+
+using CreatureGraphVertice = Rectangle;
+
+#endif
+
+#ifndef CREATURE_GRAPH_EDGE_H
+#define CREATURE_GRAPH_EDGE_H
+
+struct CreatureGraphEdge {
+    unsigned int assignedWeight;
+    const CreatureGraphVertice& sourceVertice;
+    const CreatureGraphVertice& destVertice;
+
+    CreatureGraphEdge(unsigned int assignedWeight, 
+                      const CreatureGraphVertice& sourceVertice, const CreatureGraphVertice& destVertice);
+
+    virtual ~CreatureGraphEdge() = 0;                  
+
+};
+
+#endif 
+
+#ifndef CREATURE_GRAPH_WALK_EDGE_H
+#define CREATURE_GRAPH_WALK_EDGE_H
+
+struct CreatureGraphWalkEdge : public CreatureGraphEdge {
+    Direction walkDirection;
+    float startX;
+    float endX;
+
+    CreatureGraphWalkEdge(unsigned int assignedWeight,
+                          const CreatureGraphVertice& sourceVertice, const CreatureGraphVertice& destVertice,
+                          Direction walkDirection, float startX, float endX);
+
+};
+
+#endif
+
+#ifndef CREATURE_GRAPH_JUMP_EDGE_H
+#define CREATURE_GRAPH_JUMP_EDGE_H
+
+struct CreatureGraphJumpEdge : public CreatureGraphEdge {
+
+    struct Layer {
+        float lowerBound;
+        float upperBound;
+        Velocity jumpVelocity;
+
+        Layer(float lowerBound, float upperBound, Velocity jumpVelocity);
+    };
+
+    Rectangle jumpRectangle;
+    std::list<Layer> layers;
+
+    CreatureGraphJumpEdge(unsigned int assignedWeight,
+                          const CreatureGraphVertice& sourceVertice, const CreatureGraphVertice& destVertice,
+                          Rectangle jumpRectangle, const std::list<Layer>& layers = {});
+
+    void addLayer(Layer newLayer);
+    void addLayers(const std::list<Layer>& newLayers);
+
+};
+
+#endif
+
+#ifndef CREATURE_GRAPH_H
+#define CREATURE_GRAPH_H
+
+struct CreatureGraph {
+    std::vector<CreatureGraphVertice> vertices;
+    std::vector<std::list<CreatureGraphEdge>> adjacencyList;
+
+    CreatureGraph();
+    CreatureGraph(size_t numberOfVertices);
+    CreatureGraph(const std::vector<CreatureGraphVertice>& verticeVector);
+    CreatureGraph(size_t numberOfVertices, const std::vector<CreatureGraphVertice>& verticeVector);
+
+    void addVertice(const CreatureGraphVertice& newVertice); 
+    void addWalkEdge(unsigned int assignedWeight, unsigned int sourceVerticeIndex, unsigned int destVerticeIndex, Direction direction, float startX, float endX);
+};
+
+#endif

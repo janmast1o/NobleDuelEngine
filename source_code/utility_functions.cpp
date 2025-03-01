@@ -456,8 +456,8 @@ float calculateMinVertDistance(const std::vector<Point>& S, const std::vector<Po
         float minDistance = INFINITY;
         float currentMin;
         while (i <= endEl) {
-            if (start->sPoint.value().y <= start->rPoint.value().y) minDistance = 0;
-            else if ((currentMin=start->sPoint.value().y - start->rPoint.value().y) < minDistance) {
+            // if (start->sPoint.value().y <= start->rPoint.value().y) minDistance = 0;
+            if ((currentMin=start->sPoint.value().y - start->rPoint.value().y) < minDistance) {
                 minDistance = currentMin;
             }
             ++start;
@@ -626,7 +626,7 @@ Point getCommonPointBetweenTwoLines(float a1, float b1, float a2, float b2) {
 
 
 float calculateMinDistanceAlongTheLine(const std::vector<Point>& D, const std::vector<Point>& E, Point v) {
-    if (v.x == 0) return calculateMinVertDistance(D, E);
+    if (v.x == 0) return std::max(calculateMinVertDistance(D, E), 0.F);
     float vx, vy;
     vx = v.x;
     vy = v.y;

@@ -1,7 +1,7 @@
 #ifndef CONSTANTS
 #define CONSTANTS
 
-const float ERROR_EPS = 1e-4;
+const float ERROR_EPS = 1e-6;
 const float CALC_ERROR_EPS = 1e-6;
 
 const float GRAVITATIONAL_PULL = 785;

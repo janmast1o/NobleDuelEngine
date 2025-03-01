@@ -605,3 +605,100 @@ bool MomentumTransferProtocol::runScheduledCorrespondingToFoundInterval() {
 
     return true;    
 }
+
+
+CreatureGraphEdge::CreatureGraphEdge(unsigned int assignedWeight, 
+                                     const CreatureGraphVertice& sourceVertice, const CreatureGraphVertice& destVertice) :
+                                     assignedWeight(assignedWeight),
+                                     sourceVertice(sourceVertice),
+                                     destVertice(destVertice) {}
+
+
+// CreatureGraphEdge::~CreatureGraphEdge() {;}
+
+
+CreatureGraphWalkEdge::CreatureGraphWalkEdge(unsigned int assignedWeight,
+                                             const CreatureGraphVertice& sourceVertice, const CreatureGraphVertice& destVertice,
+                                             Direction direction, float startX, float endX) :
+                                             CreatureGraphEdge(assignedWeight, sourceVertice, destVertice),
+                                             walkDirection(direction), startX(startX), endX(endX) {}
+
+
+CreatureGraphJumpEdge::Layer::Layer(float lowerBound, float upperBound, Velocity jumpVelocity) :
+                          lowerBound(lowerBound), upperBound(upperBound), jumpVelocity(jumpVelocity) {}                                     
+
+
+CreatureGraphJumpEdge::CreatureGraphJumpEdge(unsigned int assignedWeight,
+                                             const CreatureGraphVertice& sourceVertice, const CreatureGraphVertice& destVertice,
+                                             Rectangle jumpRectangle, const std::list<Layer>& layers) :
+                                             CreatureGraphEdge(assignedWeight, sourceVertice, destVertice),
+                                             jumpRectangle(jumpRectangle), 
+                                             layers(layers) {}               
+
+
+void CreatureGraphJumpEdge::addLayer(Layer newLayer) {
+    if (layers.empty()) layers.emplace_back(newLayer);
+    for (auto it = layers.begin(); it != layers.end(); ++it) {
+        if (it->lowerBound > newLayer.lowerBound) {
+            it = layers.emplace(it, newLayer);
+            return;
+        }
+    }
+
+    layers.emplace(layers.end(), newLayer);
+}
+
+
+void CreatureGraphJumpEdge::addLayers(const std::list<Layer>& newLayers) {
+    for (Layer l : newLayers) addLayer(l);
+}
+
+
+
+CreatureGraph::CreatureGraph() {}
+
+
+CreatureGraph::CreatureGraph(size_t numberOfVertices) {
+    vertices.reserve(numberOfVertices);
+}
+
+
+CreatureGraph::CreatureGraph(const std::vector<CreatureGraphVertice>& verticeVector) :
+    vertices(verticeVector) {
+
+    adjacencyList.reserve(vertices.size());
+    for (int i=0; i<vertices.size(); ++i) {
+        adjacencyList.emplace_back();
+    }
+}
+
+
+CreatureGraph::CreatureGraph(size_t numberOfVertices, const std::vector<CreatureGraphVertice>& verticeVector) :
+    vertices(verticeVector) {
+
+    adjacencyList.reserve(numberOfVertices);
+    for (int i=0; i<vertices.size(); ++i) {
+        adjacencyList.emplace_back();
+    }
+
+    vertices.reserve(std::max((size_t) 0, numberOfVertices-vertices.size()));
+}
+
+
+void CreatureGraph::addVertice(const CreatureGraphVertice& newVertice) {
+    vertices.emplace_back(newVertice);    
+    adjacencyList.emplace_back();
+}
+
+
+void CreatureGraph::addWalkEdge(unsigned int assignedWeight, unsigned int sourceVerticeIndex, unsigned int destVerticeIndex, Direction direction, float startX, float endX) {
+    if (sourceVerticeIndex >= vertices.size() || destVerticeIndex >= vertices.size()) {
+        throw std::runtime_error("Src or dest vertice index is larger than the number of vertices");
+        return;
+    }
+
+    adjacencyList[sourceVerticeIndex].emplace_back(
+        assignedWeight, vertices[sourceVerticeIndex], vertices[destVerticeIndex],
+        direction, startX, endX
+    );
+}

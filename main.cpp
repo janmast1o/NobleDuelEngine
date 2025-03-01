@@ -159,7 +159,7 @@ void addGrounds(OfflineEngine& engine) {
     rightLogModelCycle.addModelAndResetIterator(rightLogModel, 1);
     ModelCollection rightLogModelCollection;
     rightLogModelCollection.addModelCycleForState(IDLE, rightLogModelCycle);
-    Object* rightLog = engine.makeObject({-50, -1245}, rightLogModelCollection);
+    Object* rightLog = engine.makeObject({-50, -1220}, rightLogModelCollection);
 
 }
 

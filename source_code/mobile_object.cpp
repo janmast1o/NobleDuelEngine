@@ -358,10 +358,12 @@ void MobileObject::horizontalMovementMainBody(Point& svec, const std::list<Objec
                                               Object*& alphaTempObjectCurrentlyUnderneath, Object*& gammaTempObjectCurrentlyUnderneath) {                                            
     
     float localAlpha;
+    float localGamma;
+    float delta;
     
     for (Object* p : potentiallyColliding) {
         if (p != this && collideableWith(*p)) {
-            if (collidesWithAfterVectorTranslation(*p, svec)) {;
+            if (collidesWithAfterVectorTranslation(*p, svec)) {
                 if (isDirectlyAboveAfterVectorTranslation(*p, svec)) {
                     groundUnderneathFound = true;
                     changingSlopes = false;
@@ -402,15 +404,19 @@ void MobileObject::horizontalMovementMainBody(Point& svec, const std::list<Objec
                 if (isDirectlyAboveAfterVectorTranslation(*p, svec)) {
                     changingSlopes = false;
                     groundUnderneathFound = true;
-                } else if (couldBeChangingSlopesAfterVectorTranslation(*p, svec)) { // add checking if it even makes sense to calculate delta
-                    float delta = findMinVertDistanceFromTopAfterVectorTranslation(*p, svec);
                     
-                    if (delta > 0 && delta < 2*MAXIMUM_GENTLE_SLOPE_COEFFICIENT*std::abs(svec.x)) {
-                        gamma = findSlopeCoefficientDirectlyBelowAfterVectorTranslation(*p, svec);
-                        gammaTempObjectCurrentlyUnderneath = p;
-                        groundUnderneathFound = true;
-                        changingSlopes = true;
-                        beta = delta;
+                } else if (couldBeChangingSlopesAfterVectorTranslation(*p, svec)) {
+                    delta = findMinVertDistanceFromTopAfterVectorTranslation(*p, svec);
+                    
+                    if (delta > 0 && delta < 2*MAXIMUM_GENTLE_SLOPE_COEFFICIENT*std::abs(svec.x) && delta < beta) {
+                        localGamma = findSlopeCoefficientDirectlyBelowAfterVectorTranslation(*p, svec);
+                        if (localGamma*svec.x - slopeInclineDirectlyUnderneath_*svec.x < ERROR_EPS) {
+                            gamma = localGamma;
+                            gammaTempObjectCurrentlyUnderneath = p;
+                            groundUnderneathFound = true;
+                            changingSlopes = true;
+                            beta = delta;
+                        }
                     }    
                 }
             }
