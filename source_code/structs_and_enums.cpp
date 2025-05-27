@@ -614,7 +614,7 @@ CreatureGraphEdge::CreatureGraphEdge(unsigned int assignedWeight,
                                      destVertice(destVertice) {}
 
 
-// CreatureGraphEdge::~CreatureGraphEdge() {;}
+CreatureGraphEdge::~CreatureGraphEdge() {;}
 
 
 CreatureGraphWalkEdge::CreatureGraphWalkEdge(unsigned int assignedWeight,
@@ -697,8 +697,17 @@ void CreatureGraph::addWalkEdge(unsigned int assignedWeight, unsigned int source
         return;
     }
 
-    adjacencyList[sourceVerticeIndex].emplace_back(
+    adjacencyList[sourceVerticeIndex].emplace_back(new CreatureGraphWalkEdge(
         assignedWeight, vertices[sourceVerticeIndex], vertices[destVerticeIndex],
         direction, startX, endX
-    );
+    ));
+}
+
+
+CreatureGraph::~CreatureGraph() {
+    for (size_t i=0; i<adjacencyList.size(); ++i) {
+        for (auto& e : adjacencyList[i]) {
+            delete e;
+        }
+    }
 }

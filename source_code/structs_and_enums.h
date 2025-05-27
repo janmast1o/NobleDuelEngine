@@ -624,15 +624,21 @@ struct CreatureGraphJumpEdge : public CreatureGraphEdge {
 
 struct CreatureGraph {
     std::vector<CreatureGraphVertice> vertices;
-    std::vector<std::list<CreatureGraphEdge>> adjacencyList;
+    std::vector<std::list<CreatureGraphEdge*>> adjacencyList;
 
     CreatureGraph();
     CreatureGraph(size_t numberOfVertices);
     CreatureGraph(const std::vector<CreatureGraphVertice>& verticeVector);
     CreatureGraph(size_t numberOfVertices, const std::vector<CreatureGraphVertice>& verticeVector);
 
+    CreatureGraph(const CreatureGraph& otherCreatureGraph) = delete;
+
     void addVertice(const CreatureGraphVertice& newVertice); 
     void addWalkEdge(unsigned int assignedWeight, unsigned int sourceVerticeIndex, unsigned int destVerticeIndex, Direction direction, float startX, float endX);
+
+    CreatureGraph& operator=(const CreatureGraph& otherCreatureGraph) = delete;
+
+    ~CreatureGraph();
 };
 
 #endif
